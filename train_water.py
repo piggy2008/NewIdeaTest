@@ -52,7 +52,7 @@ args = {
     'L2': False,
     'KL': True,
     'structure': True,
-    'iter_num': 80000,
+    'iter_num': 120000,
     'iter_save': 4000,
     'iter_start_seq': 0,
     'train_batch_size': 6,
