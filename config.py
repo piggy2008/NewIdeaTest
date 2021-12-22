@@ -2,8 +2,8 @@
 import os
 
 # szu 169 sever
-datasets_root = '/mnt/hdd/data/ty'
-save_root = '/mnt/hdd/code'
+datasets_root = '/home/ty/data'
+save_root = '/home/ty/code'
 # local pc
 # datasets_root = '/home/qub/data/saliency'
 
