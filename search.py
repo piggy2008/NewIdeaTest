@@ -39,7 +39,7 @@ torch.cuda.set_device(device_id)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = saving_path
 
-exp_name = 'WaterEnhance_2021-12-18 23:12:03'
+exp_name = 'WaterEnhance_2021-12-20 15:31:00'
 
 args = {
     'gnn': True,
