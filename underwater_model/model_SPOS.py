@@ -95,7 +95,7 @@ class Water(nn.Module):
         # elif select[2] == 3:
         #     third = self.align3_hsv_lab(torch.cat([third_hsv, third_lab], dim=1))
         # if select[2] in [0, 1, 2, 3, 4]:
-        print(select[:6])
+        # print(select[:6])
         final = self.search(third, second, first, select[6:])
         final = self.de_predict(final)
         # final2 = self.de_predict2(final2)
