@@ -44,10 +44,10 @@ exp_name = 'WaterEnhance' + '_' + time_str
 
 args = {
     'gnn': True,
-    'choice': 10,
-    'choice2': 4,
-    'layers': 4,
-    'layers2': 3,
+    'choice': 9,
+    # 'choice2': 4,
+    'layers': 10,
+    # 'layers2': 3,
     'distillation': False,
     'L2': False,
     'KL': True,
@@ -244,11 +244,11 @@ def train_single2(net, vgg, rgb, hsv, lab, target, depth, optimizer, curr_iter):
     labels = Variable(target).cuda(device_id)
 
     get_random_cand = lambda: tuple(np.random.randint(args['choice']) for i in range(args['layers']))
-    get_random_cand2 = lambda: tuple(np.random.randint(args['choice2']) for i in range(args['layers2']))
+    # get_random_cand2 = lambda: tuple(np.random.randint(args['choice2']) for i in range(args['layers2']))
     # print(get_random_cand2() + get_random_cand())
     optimizer.zero_grad()
 
-    final, inter_rgb, inter_hsv, inter_lab = net(rgb, hsv, lab, depth, get_random_cand2() + get_random_cand())
+    final, inter_rgb, inter_hsv, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
 
     loss0 = criterion(final, labels)
     loss1 = criterion_l1(final, labels)
@@ -262,6 +262,10 @@ def train_single2(net, vgg, rgb, hsv, lab, target, depth, optimizer, curr_iter):
     loss3 = criterion(inter_hsv, labels)
     loss4 = criterion(inter_lab, labels)
 
+    loss2_1 = criterion_l1(inter_rgb, labels)
+    loss3_1 = criterion_l1(inter_hsv, labels)
+    loss4_1 = criterion_l1(inter_lab, labels)
+
     loss8 = criterion_perceptual(inter_rgb, labels)
     loss9 = criterion_perceptual(inter_hsv, labels)
     loss10 = criterion_perceptual(inter_lab, labels)
@@ -270,7 +274,8 @@ def train_single2(net, vgg, rgb, hsv, lab, target, depth, optimizer, curr_iter):
     # content_loss = torch.mean((texture_features['relu5_4'] - target_features['relu5_4']) ** 2)
 
     total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss3 + loss4 \
-                 + 0.5 * loss7 + 0.5 * loss8 + 0.5 * loss9 + 0.5 * loss10
+                 + 0.5 * loss7 + 0.5 * loss8 + 0.5 * loss9 + 0.5 * loss10 \
+                 + 0.25 * loss2_1 + 0.25 * loss3_1 + 0.25 * loss4_1
     # distill_loss = loss6_k + loss7_k + loss8_k
 
     # total_loss = total_loss + 0.1 * distill_loss
