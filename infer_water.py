@@ -28,16 +28,19 @@ torch.cuda.set_device(device_id)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = saving_path
 
-exp_name = 'WaterEnhance_2021-12-20 15:31:00'
+exp_name = 'WaterEnhance_2021-12-22 17:50:16'
 args = {
     'gnn': True,
     'snapshot': '64000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
     # 'input_size': (380, 380),
-    'image_path': '/mnt/hdd/data/ty2/input_test',
-    'depth_path': '/mnt/hdd/data/ty2/depth_test',
-    'gt_path': '/mnt/hdd/data/ty2/gt_test',
+    # 'image_path': '/mnt/hdd/data/ty2/input_test',
+    # 'depth_path': '/mnt/hdd/data/ty2/depth_test',
+    # 'gt_path': '/mnt/hdd/data/ty2/gt_test',
+    'image_path': '/home/ty/data/uw/input_test',
+    'depth_path': '/home/ty/data/uw/depth_test',
+    'gt_path': '/home/ty/data/uw/gt_test',
     'dataset': 'UIEB',
     'start': 20000
 }
@@ -103,7 +106,7 @@ def main(snapshot):
             hsv_var = Variable(img_transform(hsv).unsqueeze(0), volatile=True).cuda()
             lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
             depth_var = Variable(img_transform(depth).unsqueeze(0), volatile=True).cuda()
-            prediction, rgb_side, hsv_side, lab_side = net(img_var, hsv_var, lab_var, depth_var, [0, 0, 0, 5, 5, 5, 5])
+            prediction, rgb_side, hsv_side, lab_side = net(img_var, hsv_var, lab_var, depth_var, [3, 3, 3, 3, 3, 3, 3, 3, 3, 3])
             # prediction = torch.unsqueeze(prediction, 0)
             # print(torch.unique(prediction))
             # precision = to_pil(prediction.data.squeeze(0).cpu())
