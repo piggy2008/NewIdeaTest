@@ -44,8 +44,8 @@ exp_name = 'WaterEnhance_2021-12-22 17:50:16'
 args = {
     'gnn': True,
     'snapshot': '120000',  # your snapshot filename (exclude extension name)
-    'choice': 10,
-    'layers': 9,
+    'choice': 9,
+    'layers': 10,
     'log_dir': 'log',
     'max_epochs': 3,
     'select_num': 10,
