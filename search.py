@@ -39,13 +39,13 @@ torch.cuda.set_device(device_id)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = saving_path
 
-exp_name = 'WaterEnhance_2021-12-20 15:31:00'
+exp_name = 'WaterEnhance_2021-12-22 17:50:16'
 
 args = {
     'gnn': True,
-    'snapshot': '80000',  # your snapshot filename (exclude extension name)
+    'snapshot': '120000',  # your snapshot filename (exclude extension name)
     'choice': 10,
-    'layers': 4,
+    'layers': 9,
     'log_dir': 'log',
     'max_epochs': 3,
     'select_num': 10,
