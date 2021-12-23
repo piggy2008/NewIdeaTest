@@ -60,9 +60,12 @@ args = {
     'imgs_file': 'Pre-train/pretrain_all_seq_DAFB2_DAVSOD_flow.txt',
     'image_size': 430,
     'crop_size': 380,
-    'image_path': '/mnt/hdd/data/ty2/input_test',
-    'depth_path': '/mnt/hdd/data/ty2/depth_test',
-    'gt_path': '/mnt/hdd/data/ty2/gt_test',
+    # 'image_path': '/mnt/hdd/data/ty2/input_test',
+    # 'depth_path': '/mnt/hdd/data/ty2/depth_test',
+    # 'gt_path': '/mnt/hdd/data/ty2/gt_test',
+    'image_path': '/home/ty/data/uw/input_test',
+    'depth_path': '/home/ty/data/uw/depth_test',
+    'gt_path': '/home/ty/data/uw/gt_test',
     'dataset': 'UIEB',
 }
 
