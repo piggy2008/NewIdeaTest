@@ -72,11 +72,11 @@ class Water(nn.Module):
         # if select[2] in [0, 1, 2, 3, 4]:
         # print(select[:6])
         final = self.search(third, second, first, select[6:])
-        final = self.de_predict(final)
+        final_rgb = self.de_predict(final)
         final_lab = self.de_predict_lab_final(final)
         # final2 = self.de_predict2(final2)
 
-        return final, final_lab, inter_rgb, inter_hsv, inter_lab
+        return final_rgb, final_lab, inter_rgb, inter_hsv, inter_lab
 
 if __name__ == '__main__':
     a = torch.zeros(2, 3, 128, 128)
