@@ -24,7 +24,7 @@ class Water(nn.Module):
         self.search = Search(channel=128)
 
         self.de_predict = nn.Sequential(nn.Conv2d(128, 3, kernel_size=1, stride=1))
-        self.de_predict_lab = nn.Sequential(nn.Conv2d(128, 2, kernel_size=1, stride=1))
+        self.de_predict_lab_final = nn.Sequential(nn.Conv2d(128, 2, kernel_size=1, stride=1))
         # self.de_predict2 = nn.Sequential(nn.Conv2d(128, 3, kernel_size=1, stride=1))
         self.de_predict_rgb = nn.Sequential(nn.Conv2d(512, 3, kernel_size=1, stride=1))
         self.de_predict_hsv = nn.Sequential(nn.Conv2d(512, 3, kernel_size=1, stride=1))
@@ -73,7 +73,7 @@ class Water(nn.Module):
         # print(select[:6])
         final = self.search(third, second, first, select[6:])
         final = self.de_predict(final)
-        final_lab = self.de_predict_lab(final)
+        final_lab = self.de_predict_lab_final(final)
         # final2 = self.de_predict2(final2)
 
         return final, final_lab, inter_rgb, inter_hsv, inter_lab
