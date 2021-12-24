@@ -19,7 +19,7 @@ class Water(nn.Module):
 
         self.align3 = nn.Sequential(nn.Conv2d(512 * 3, 128, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(inplace=True))
-
+        #
         self.align1_rgb_hsv = nn.Sequential(nn.Conv2d(128 * 2, 128, kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
 

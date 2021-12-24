@@ -28,7 +28,7 @@ torch.cuda.set_device(device_id)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = saving_path
 
-exp_name = 'WaterEnhance_2021-12-22 17:50:16'
+exp_name = 'WaterEnhance_2021-12-23 12:38:02'
 args = {
     'gnn': True,
     'snapshot': '64000',  # your snapshot filename (exclude extension name)
@@ -42,7 +42,7 @@ args = {
     'depth_path': '/home/ty/data/uw/depth_test',
     'gt_path': '/home/ty/data/uw/gt_test',
     'dataset': 'UIEB',
-    'start': 20000
+    'start': 100000
 }
 
 img_transform = transforms.Compose([
