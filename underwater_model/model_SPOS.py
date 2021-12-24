@@ -20,36 +20,11 @@ class Water(nn.Module):
         self.align3 = nn.Sequential(nn.Conv2d(512 * 3, 128, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(inplace=True))
         #
-        self.align1_rgb_hsv = nn.Sequential(nn.Conv2d(128 * 2, 128, kernel_size=3, stride=1, padding=1),
-                                       nn.ReLU(inplace=True))
 
-        self.align1_rgb_lab = nn.Sequential(nn.Conv2d(128 * 2, 128, kernel_size=3, stride=1, padding=1),
-                                            nn.ReLU(inplace=True))
-
-        self.align1_hsv_lab = nn.Sequential(nn.Conv2d(128 * 2, 128, kernel_size=3, stride=1, padding=1),
-                                            nn.ReLU(inplace=True))
-
-        self.align2_rgb_hsv = nn.Sequential(nn.Conv2d(256 * 2, 128, kernel_size=3, stride=1, padding=1),
-                                            nn.ReLU(inplace=True))
-
-        self.align2_rgb_lab = nn.Sequential(nn.Conv2d(256 * 2, 128, kernel_size=3, stride=1, padding=1),
-                                            nn.ReLU(inplace=True))
-
-        self.align2_hsv_lab = nn.Sequential(nn.Conv2d(256 * 2, 128, kernel_size=3, stride=1, padding=1),
-                                            nn.ReLU(inplace=True))
-
-        self.align3_rgb_hsv = nn.Sequential(nn.Conv2d(512 * 2, 128, kernel_size=3, stride=1, padding=1),
-                                            nn.ReLU(inplace=True))
-
-        self.align3_rgb_lab = nn.Sequential(nn.Conv2d(512 * 2, 128, kernel_size=3, stride=1, padding=1),
-                                            nn.ReLU(inplace=True))
-
-        self.align3_hsv_lab = nn.Sequential(nn.Conv2d(512 * 2, 128, kernel_size=3, stride=1, padding=1),
-                                            nn.ReLU(inplace=True))
-
-        self.search = Search()
+        self.search = Search(channel=128)
 
         self.de_predict = nn.Sequential(nn.Conv2d(128, 3, kernel_size=1, stride=1))
+        self.de_predict_lab = nn.Sequential(nn.Conv2d(128, 2, kernel_size=1, stride=1))
         # self.de_predict2 = nn.Sequential(nn.Conv2d(128, 3, kernel_size=1, stride=1))
         self.de_predict_rgb = nn.Sequential(nn.Conv2d(512, 3, kernel_size=1, stride=1))
         self.de_predict_hsv = nn.Sequential(nn.Conv2d(512, 3, kernel_size=1, stride=1))
@@ -98,9 +73,10 @@ class Water(nn.Module):
         # print(select[:6])
         final = self.search(third, second, first, select[6:])
         final = self.de_predict(final)
+        final_lab = self.de_predict_lab(final)
         # final2 = self.de_predict2(final2)
 
-        return final, inter_rgb, inter_hsv, inter_lab
+        return final, final_lab, inter_rgb, inter_hsv, inter_lab
 
 if __name__ == '__main__':
     a = torch.zeros(2, 3, 128, 128)
