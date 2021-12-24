@@ -45,15 +45,17 @@ class WaterImageFolder(data.Dataset):
 
         rgb2lab_transform = ImageCms.buildTransformFromOpenProfiles(srgb_profile, lab_profile, "RGB", "LAB")
         lab = ImageCms.applyTransform(img_list[0], rgb2lab_transform)
+        lab_target = ImageCms.applyTransform(img_list[1], rgb2lab_transform)
         if self.transform is not None:
             img = self.transform(img_list[0])
             hsv = self.transform(hsv)
             lab = self.transform(lab)
             target = self.transform(img_list[1])
+            lab_target = self.transform(lab_target)
         if self.target_transform is not None:
             depth = self.target_transform(gt_list[0])
 
-        return img, hsv, lab, target, depth
+        return img, hsv, lab, target, lab_target, depth
 
     def __len__(self):
         return len(self.imgs)

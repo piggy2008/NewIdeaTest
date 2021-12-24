@@ -15,7 +15,7 @@ from config import msra10k_path, video_train_path, datasets_root, video_seq_gt_p
 from water_dataset import WaterImageFolder
 from underwater_model.model_SPOS import Water
 
-from misc import AvgMeter, check_mkdir, VGGPerceptualLoss
+from misc import AvgMeter, check_mkdir, VGGPerceptualLoss, TVLoss
 from torch.backends import cudnn
 import time
 from utils.utils_mine import load_part_of_model, load_part_of_model2, load_MGA
@@ -46,16 +46,16 @@ args = {
     'gnn': True,
     'choice': 9,
     # 'choice2': 4,
-    'layers': 10,
+    'layers': 4,
     # 'layers2': 3,
     'distillation': False,
     'L2': False,
     'KL': True,
     'structure': True,
-    'iter_num': 200000,
+    'iter_num': 80000,
     'iter_save': 4000,
     'iter_start_seq': 0,
-    'train_batch_size': 6,
+    'train_batch_size': 10,
     'last_iter': 0,
     'lr': 1e-4,
     'lr_decay': 0.9,
@@ -65,8 +65,8 @@ args = {
     # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2021-04-06 11:56:00', '92000.pth'),
     'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
-    # 'imgs_file': '/mnt/hdd/data/ty2',
-    'imgs_file': '/home/ty/data/uw',
+    'imgs_file': '/mnt/hdd/data/ty2',
+    # 'imgs_file': '/home/ty/data/uw',
     # 'imgs_file': 'Pre-train/pretrain_all_seq_DAFB2_DAVSOD_flow.txt',
     # 'imgs_file2': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB2_DAVSOD_5f.txt',
@@ -105,6 +105,7 @@ train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_wo
 criterion = nn.MSELoss()
 criterion_l1 = nn.L1Loss()
 criterion_perceptual = VGGPerceptualLoss(resize=False).cuda()
+criterion_tv = TVLoss(TVLoss_weight=10).cuda()
 # erosion = Erosion2d(1, 1, 5, soft_max=False).cuda()
 
 log_path = os.path.join(ckpt_path, exp_name, str(datetime.datetime.now()) + '.txt')
@@ -215,13 +216,13 @@ def train(net, vgg, optimizer):
             #                                                 ) ** args['lr_decay']
             #
             # inputs, flows, labels, pre_img, pre_lab, cur_img, cur_lab, next_img, next_lab = data
-            rgb, hsv, lab, target, depth = data
+            rgb, hsv, lab, target, lab_target, depth = data
             # data2 = next(dataloader_iterator)
             # inputs2, labels2 = data2
             # train_single(net, inputs, flows, labels, optimizer, curr_iter, teacher)
 
 
-            train_single2(net, vgg, rgb, hsv, lab, target, depth, optimizer, curr_iter)
+            train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer, curr_iter)
             curr_iter += 1
 
             if curr_iter % args['iter_save'] == 0:
@@ -237,24 +238,29 @@ def train(net, vgg, optimizer):
                 return
 
 
-def train_single2(net, vgg, rgb, hsv, lab, target, depth, optimizer, curr_iter):
+def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer, curr_iter):
     rgb = Variable(rgb).cuda(device_id)
     hsv = Variable(hsv).cuda(device_id)
     lab = Variable(lab).cuda(device_id)
     depth = Variable(depth).cuda(device_id)
     labels = Variable(target).cuda(device_id)
+    labels_lab = Variable(lab_target[:, 1:, :, :]).cuda(device_id)
 
     get_random_cand = lambda: tuple(np.random.randint(args['choice']) for i in range(args['layers']))
     # get_random_cand2 = lambda: tuple(np.random.randint(args['choice2']) for i in range(args['layers2']))
     # print(get_random_cand2() + get_random_cand())
     optimizer.zero_grad()
 
-    final, inter_rgb, inter_hsv, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
+    final, final_lab, inter_rgb, inter_hsv, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
 
     loss0 = criterion(final, labels)
     loss1 = criterion_l1(final, labels)
 
+    loss0_lab = criterion(final_lab, labels_lab)
+    loss1_lab = criterion_l1(final_lab, labels_lab)
+
     loss7 = criterion_perceptual(final, labels)
+    loss11 = criterion_tv(final)
 
     # loss5 = criterion(final2, labels)
     # loss6 = criterion_l1(final2, labels)
@@ -276,14 +282,14 @@ def train_single2(net, vgg, rgb, hsv, lab, target, depth, optimizer, curr_iter):
 
     total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss3 + loss4 \
                  + 0.5 * loss7 + 0.5 * loss8 + 0.5 * loss9 + 0.5 * loss10 \
-                 + 0.25 * loss2_1 + 0.25 * loss3_1 + 0.25 * loss4_1
+                 + 0.25 * loss2_1 + 0.25 * loss3_1 + 0.25 * loss4_1 + loss11 + loss0_lab + 0.25 * loss1_lab
     # distill_loss = loss6_k + loss7_k + loss8_k
 
     # total_loss = total_loss + 0.1 * distill_loss
     total_loss.backward()
     optimizer.step()
 
-    print_log(total_loss, loss0, loss1, loss7, args['train_batch_size'], curr_iter, optimizer)
+    print_log(total_loss, loss0, loss1, loss11, args['train_batch_size'], curr_iter, optimizer)
 
     return
 
