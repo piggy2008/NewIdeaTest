@@ -46,16 +46,16 @@ args = {
     'gnn': True,
     'choice': 9,
     # 'choice2': 4,
-    'layers': 4,
+    'layers': 10,
     # 'layers2': 3,
     'distillation': False,
     'L2': False,
     'KL': True,
     'structure': True,
-    'iter_num': 80000,
+    'iter_num': 200000,
     'iter_save': 4000,
     'iter_start_seq': 0,
-    'train_batch_size': 10,
+    'train_batch_size': 6,
     'last_iter': 0,
     'lr': 1e-4,
     'lr_decay': 0.9,
@@ -65,8 +65,8 @@ args = {
     # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2021-04-06 11:56:00', '92000.pth'),
     'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
-    'imgs_file': '/mnt/hdd/data/ty2',
-    # 'imgs_file': '/home/ty/data/uw',
+    # 'imgs_file': '/mnt/hdd/data/ty2',
+    'imgs_file': '/home/ty/data/uw',
     # 'imgs_file': 'Pre-train/pretrain_all_seq_DAFB2_DAVSOD_flow.txt',
     # 'imgs_file2': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB2_DAVSOD_5f.txt',
@@ -260,7 +260,7 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     loss1_lab = criterion_l1(final_lab, labels_lab)
 
     loss7 = criterion_perceptual(final, labels)
-    loss11 = criterion_tv(final)
+    # loss11 = criterion_tv(final)
 
     # loss5 = criterion(final2, labels)
     # loss6 = criterion_l1(final2, labels)
