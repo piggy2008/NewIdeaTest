@@ -105,7 +105,7 @@ train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_wo
 criterion = nn.MSELoss()
 criterion_l1 = nn.L1Loss()
 criterion_perceptual = VGGPerceptualLoss(resize=False).cuda()
-criterion_tv = TVLoss(TVLoss_weight=10).cuda()
+# criterion_tv = TVLoss(TVLoss_weight=10).cuda()
 # erosion = Erosion2d(1, 1, 5, soft_max=False).cuda()
 
 log_path = os.path.join(ckpt_path, exp_name, str(datetime.datetime.now()) + '.txt')
@@ -269,9 +269,9 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     loss3 = criterion(inter_hsv, labels)
     loss4 = criterion(inter_lab, labels)
 
-    loss2_1 = criterion_l1(inter_rgb, labels)
-    loss3_1 = criterion_l1(inter_hsv, labels)
-    loss4_1 = criterion_l1(inter_lab, labels)
+    # loss2_1 = criterion_l1(inter_rgb, labels)
+    # loss3_1 = criterion_l1(inter_hsv, labels)
+    # loss4_1 = criterion_l1(inter_lab, labels)
 
     loss8 = criterion_perceptual(inter_rgb, labels)
     loss9 = criterion_perceptual(inter_hsv, labels)
@@ -282,14 +282,14 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
 
     total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss3 + loss4 \
                  + 0.5 * loss7 + 0.5 * loss8 + 0.5 * loss9 + 0.5 * loss10 \
-                 + 0.25 * loss2_1 + 0.25 * loss3_1 + 0.25 * loss4_1 + loss11 + loss0_lab + 0.25 * loss1_lab
+                 + loss0_lab + 0.25 * loss1_lab
     # distill_loss = loss6_k + loss7_k + loss8_k
 
     # total_loss = total_loss + 0.1 * distill_loss
     total_loss.backward()
     optimizer.step()
 
-    print_log(total_loss, loss0, loss1, loss11, args['train_batch_size'], curr_iter, optimizer)
+    print_log(total_loss, loss0, loss1, loss1_lab, args['train_batch_size'], curr_iter, optimizer)
 
     return
 
