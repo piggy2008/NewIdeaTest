@@ -46,13 +46,13 @@ args = {
     'gnn': True,
     'choice': 9,
     # 'choice2': 4,
-    'layers': 4,
+    'layers': 10,
     # 'layers2': 3,
     'distillation': False,
     'L2': False,
     'KL': True,
     'structure': True,
-    'iter_num': 80000,
+    'iter_num': 200000,
     'iter_save': 4000,
     'iter_start_seq': 0,
     'train_batch_size': 10,
@@ -65,8 +65,8 @@ args = {
     # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2021-04-06 11:56:00', '92000.pth'),
     'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
-    'imgs_file': '/mnt/hdd/data/ty2',
-    # 'imgs_file': '/home/ty/data/uw',
+    # 'imgs_file': '/mnt/hdd/data/ty2',
+    'imgs_file': '/home/ty/data/uw',
     # 'imgs_file': 'Pre-train/pretrain_all_seq_DAFB2_DAVSOD_flow.txt',
     # 'imgs_file2': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB2_DAVSOD_5f.txt',
@@ -105,7 +105,7 @@ train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_wo
 criterion = nn.MSELoss()
 criterion_l1 = nn.L1Loss()
 criterion_perceptual = VGGPerceptualLoss(resize=False).cuda()
-criterion_tv = TVLoss(TVLoss_weight=10).cuda()
+# criterion_tv = TVLoss(TVLoss_weight=10).cuda()
 # erosion = Erosion2d(1, 1, 5, soft_max=False).cuda()
 
 log_path = os.path.join(ckpt_path, exp_name, str(datetime.datetime.now()) + '.txt')
@@ -260,7 +260,7 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     loss1_lab = criterion_l1(final_lab, labels_lab)
 
     loss7 = criterion_perceptual(final, labels)
-    loss11 = criterion_tv(final)
+    # loss11 = criterion_tv(final)
 
     # loss5 = criterion(final2, labels)
     # loss6 = criterion_l1(final2, labels)
@@ -269,9 +269,9 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     loss3 = criterion(inter_hsv, labels)
     loss4 = criterion(inter_lab, labels)
 
-    loss2_1 = criterion_l1(inter_rgb, labels)
-    loss3_1 = criterion_l1(inter_hsv, labels)
-    loss4_1 = criterion_l1(inter_lab, labels)
+    # loss2_1 = criterion_l1(inter_rgb, labels)
+    # loss3_1 = criterion_l1(inter_hsv, labels)
+    # loss4_1 = criterion_l1(inter_lab, labels)
 
     loss8 = criterion_perceptual(inter_rgb, labels)
     loss9 = criterion_perceptual(inter_hsv, labels)
@@ -282,14 +282,14 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
 
     total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss3 + loss4 \
                  + 0.5 * loss7 + 0.5 * loss8 + 0.5 * loss9 + 0.5 * loss10 \
-                 + 0.25 * loss2_1 + 0.25 * loss3_1 + 0.25 * loss4_1 + loss11 + loss0_lab + 0.25 * loss1_lab
+                 + loss0_lab + 0.25 * loss1_lab
     # distill_loss = loss6_k + loss7_k + loss8_k
 
     # total_loss = total_loss + 0.1 * distill_loss
     total_loss.backward()
     optimizer.step()
 
-    print_log(total_loss, loss0, loss1, loss11, args['train_batch_size'], curr_iter, optimizer)
+    print_log(total_loss, loss0, loss1, loss1_lab, args['train_batch_size'], curr_iter, optimizer)
 
     return
 
