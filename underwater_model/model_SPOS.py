@@ -35,6 +35,8 @@ class Water(nn.Module):
         # x_lab3 = F.max_pool2d(x_lab3, kernel_size=3, stride=2, padding=1)
         first_rgb, first_hsv, first_lab, second_rgb, second_hsv, second_lab, third_rgb, \
         third_hsv, third_lab = self.base(rgb, hsv, lab, select[:6])
+        # first_rgb, first_hsv, first_lab, second_rgb, second_hsv, second_lab, third_rgb, \
+        # third_hsv, third_lab = self.base(rgb, hsv, lab)
         # first = first + first * (1 - trans_map)
         inter_rgb = F.interpolate(self.de_predict_rgb(third_rgb), rgb.size()[2:], mode='bilinear')
         inter_hsv = F.interpolate(self.de_predict_hsv(third_hsv), hsv.size()[2:], mode='bilinear')
@@ -71,6 +73,7 @@ class Water(nn.Module):
         #     third = self.align3_hsv_lab(torch.cat([third_hsv, third_lab], dim=1))
         # if select[2] in [0, 1, 2, 3, 4]:
         # print(select[:6])
+        # final = self.search(third, second, first, select)
         final = self.search(third, second, first, select[6:])
         final_rgb = self.de_predict(final)
         final_lab = self.de_predict_lab_final(final)

@@ -82,22 +82,22 @@ class Base(nn.Module):
         self.block2_hsv = resblock(n_channels=128)
         self.block3_hsv = resblock(n_channels=256)
         self.block4_hsv = resblock(n_channels=256)
-        self.block5_hsv = resblock_choice(n_channels=512)
-        self.block6_hsv = resblock_choice(n_channels=512)
+        self.block5 = resblock_choice(n_channels=512)
+        self.block6 = resblock_choice(n_channels=512)
 
         self.block1_rgb = resblock(n_channels=128)
         self.block2_rgb = resblock(n_channels=128)
         self.block3_rgb = resblock(n_channels=256)
         self.block4_rgb = resblock(n_channels=256)
-        self.block5_rgb = resblock_choice(n_channels=512)
-        self.block6_rgb = resblock_choice(n_channels=512)
+        # self.block5_rgb = resblock_choice(n_channels=512)
+        # self.block6_rgb = resblock_choice(n_channels=512)
 
         self.block1_lab = resblock(n_channels=128)
         self.block2_lab = resblock(n_channels=128)
         self.block3_lab = resblock(n_channels=256)
         self.block4_lab = resblock(n_channels=256)
-        self.block5_lab = resblock_choice(n_channels=512)
-        self.block6_lab = resblock_choice(n_channels=512)
+        # self.block5_lab = resblock_choice(n_channels=512)
+        # self.block6_lab = resblock_choice(n_channels=512)
 
     def forward(self, rgb, hsv, lab, select):
         x_rgb = self.conv1_rgb(rgb)
@@ -112,8 +112,8 @@ class Base(nn.Module):
         x_rgb2 = self.block4_rgb(x_rgb2)
         x_rgb3 = F.max_pool2d(x_rgb2, kernel_size=3, stride=2, padding=1)
         x_rgb3 = self.conv3_rgb(x_rgb3)
-        x_rgb3 = self.block5_rgb(x_rgb3, select[0])
-        x_rgb3 = self.block6_rgb(x_rgb3, select[1])
+        x_rgb3 = self.block5(x_rgb3, select[0])
+        x_rgb3 = self.block6(x_rgb3, select[1])
         # x_rgb3 = F.max_pool2d(x_rgb3, kernel_size=3, stride=2, padding=1)
 
         # 64 * 64
@@ -125,8 +125,8 @@ class Base(nn.Module):
         x_hsv2 = self.block4_hsv(x_hsv2)
         x_hsv3 = F.max_pool2d(x_hsv2, kernel_size=3, stride=2, padding=1)
         x_hsv3 = self.conv3_hsv(x_hsv3)
-        x_hsv3 = self.block5_hsv(x_hsv3, select[2])
-        x_hsv3 = self.block6_hsv(x_hsv3, select[3])
+        x_hsv3 = self.block5(x_hsv3, select[2])
+        x_hsv3 = self.block6(x_hsv3, select[3])
         # x_hsv3 = F.max_pool2d(x_hsv3, kernel_size=3, stride=2, padding=1)
 
         # 64 * 64
@@ -138,7 +138,7 @@ class Base(nn.Module):
         x_lab2 = self.block4_lab(x_lab2)
         x_lab3 = F.max_pool2d(x_lab2, kernel_size=3, stride=2, padding=1)
         x_lab3 = self.conv3_lab(x_lab3)
-        x_lab3 = self.block5_lab(x_lab3, select[4])
-        x_lab3 = self.block6_lab(x_lab3, select[5])
+        x_lab3 = self.block5(x_lab3, select[4])
+        x_lab3 = self.block6(x_lab3, select[5])
         return x_rgb, x_hsv, x_lab, x_rgb2, x_hsv2, x_lab2, \
                x_rgb3, x_hsv3, x_lab3
