@@ -127,6 +127,7 @@ class EvolutionSearcher(object):
         self.epoch = info['epoch']
 
         print('load checkpoint from', self.checkpoint_name)
+        print('infor message:', info)
         return True
 
     def is_legal(self, cand):
