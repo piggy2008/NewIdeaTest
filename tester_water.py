@@ -92,7 +92,7 @@ def get_cand_err(model, cand, args):
         lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
         depth_var = Variable(img_transform(depth).unsqueeze(0), volatile=True).cuda()
         # temp = (1, 1, 0)
-        prediction, _, _, _ = model(img_var, hsv_var, lab_var, depth_var, cand)
+        prediction, _, _, _, _ = model(img_var, hsv_var, lab_var, depth_var, cand)
         # prediction = torch.unsqueeze(prediction, 0)
         # print(torch.unique(prediction))
         # precision = to_pil(prediction.data.squeeze(0).cpu())
