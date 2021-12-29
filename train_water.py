@@ -48,7 +48,7 @@ args = {
     'gnn': True,
     'choice': 9,
     # 'choice2': 4,
-    'layers': 4,
+    'layers': 16,
     # 'layers2': 3,
     'distillation': False,
     'L2': False,
