@@ -15,20 +15,6 @@ class resblock(nn.Module):
         out = self.conv3(out)
         return out + x
 
-class resblock_choice(nn.Module):
-    def __init__(self, n_channels=128):
-        super(resblock_choice, self).__init__()
-        self.conv1 = nn.Sequential(nn.Conv2d(n_channels, n_channels, kernel_size=3, stride=1, padding=1), nn.ReLU(inplace=True))
-        self.conv2 = nn.Sequential(nn.Conv2d(n_channels, n_channels, kernel_size=3, stride=1, padding=1), nn.ReLU(inplace=True))
-        self.conv3 = nn.Conv2d(n_channels, n_channels, kernel_size=3, stride=1, padding=1)
-
-    def forward(self, x):
-        out = self.conv1(x)
-        out = self.conv2(out)
-        out = self.conv3(out)
-        return out + x
-
-
 class Base(nn.Module):
     def __init__(self):
         super(Base, self).__init__()
