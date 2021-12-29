@@ -34,7 +34,7 @@ class Water(nn.Module):
         trans_map3 = F.max_pool2d(trans_map2, kernel_size=3, stride=2, padding=1)
         # x_lab3 = F.max_pool2d(x_lab3, kernel_size=3, stride=2, padding=1)
         first_rgb, first_hsv, first_lab, second_rgb, second_hsv, second_lab, third_rgb, \
-        third_hsv, third_lab = self.base(rgb, hsv, lab, select[:6])
+        third_hsv, third_lab = self.base(rgb, hsv, lab, select[:12])
         # first_rgb, first_hsv, first_lab, second_rgb, second_hsv, second_lab, third_rgb, \
         # third_hsv, third_lab = self.base(rgb, hsv, lab)
         # first = first + first * (1 - trans_map)
@@ -74,7 +74,7 @@ class Water(nn.Module):
         # if select[2] in [0, 1, 2, 3, 4]:
         # print(select[:6])
         # final = self.search(third, second, first, select)
-        final = self.search(third, second, first, select[6:])
+        final = self.search(third, second, first, select[12:])
         final_rgb = self.de_predict(final)
         final_lab = self.de_predict_lab_final(final)
         # final2 = self.de_predict2(final2)

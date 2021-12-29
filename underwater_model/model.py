@@ -211,7 +211,8 @@ if __name__ == '__main__':
     model = Water()
     r = model(a, a, a, b)
     print(r.shape)
-
+    from torchstat import stat
+    stat(model, (3, 128, 128), (3, 128, 128), (3, 128, 128), (3, 128, 128))
 
 
 
