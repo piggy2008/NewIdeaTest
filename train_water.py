@@ -10,6 +10,8 @@ from torchvision import transforms, models
 from torch.nn import functional as F
 from matplotlib import pyplot as plt
 
+import contextual_loss as cl
+
 import joint_transforms
 from config import msra10k_path, video_train_path, datasets_root, video_seq_gt_path, video_seq_path, saving_path
 from water_dataset import WaterImageFolder
@@ -46,16 +48,16 @@ args = {
     'gnn': True,
     'choice': 9,
     # 'choice2': 4,
-    'layers': 10,
+    'layers': 4,
     # 'layers2': 3,
     'distillation': False,
     'L2': False,
     'KL': True,
     'structure': True,
-    'iter_num': 200000,
+    'iter_num': 100000,
     'iter_save': 4000,
     'iter_start_seq': 0,
-    'train_batch_size': 8,
+    'train_batch_size': 10,
     'last_iter': 0,
     'lr': 1e-4,
     'lr_decay': 0.9,
@@ -65,8 +67,8 @@ args = {
     # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2021-04-06 11:56:00', '92000.pth'),
     'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
-    # 'imgs_file': '/mnt/hdd/data/ty2',
-    'imgs_file': '/home/ty/data/uw',
+    'imgs_file': '/mnt/hdd/data/ty2',
+    # 'imgs_file': '/home/ty/data/uw',
     # 'imgs_file': 'Pre-train/pretrain_all_seq_DAFB2_DAVSOD_flow.txt',
     # 'imgs_file2': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB2_DAVSOD_5f.txt',
@@ -105,6 +107,7 @@ train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_wo
 criterion = nn.MSELoss()
 criterion_l1 = nn.L1Loss()
 criterion_perceptual = VGGPerceptualLoss(resize=False).cuda()
+# criterion_context = cl.ContextualLoss(use_vgg=True, vgg_layer='relu5_4').cuda()
 # criterion_tv = TVLoss(TVLoss_weight=10).cuda()
 # erosion = Erosion2d(1, 1, 5, soft_max=False).cuda()
 
@@ -120,28 +123,6 @@ def fix_parameters(parameters):
         else:
             print(name, 'is fixed')
             parameter.requires_grad = False
-
-
-def get_features(image, model, layers=None):
-    if layers is None:
-        layers = {'0': 'conv1_1',
-                  '5': 'conv2_1',
-                  '10': 'conv3_1',
-                  '19': 'conv4_1',
-                  '21': 'conv4_2',  ## content representation
-                  '28': 'conv5_1',
-                  '35': 'relu5_4'}
-
-    features = {}
-    x = image
-
-    # model._modules is a dictionary holding each module in the model
-    for name, layer in model._modules.items():
-        x = layer(x)
-        if name in layers:
-            features[layers[name]] = x
-
-    return features
 
 def main():
 
@@ -289,7 +270,7 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     total_loss.backward()
     optimizer.step()
 
-    print_log(total_loss, loss0, loss1, loss1_lab, args['train_batch_size'], curr_iter, optimizer)
+    print_log(total_loss, loss0, loss7, loss1_lab, args['train_batch_size'], curr_iter, optimizer)
 
     return
 
