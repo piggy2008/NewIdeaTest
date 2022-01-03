@@ -11,13 +11,13 @@ class Water(nn.Module):
 
         self.base = Base()
 
-        self.align1 = nn.Sequential(nn.Conv2d(128 * 3, 128, kernel_size=3, stride=1, padding=1),
+        self.align1 = nn.Sequential(nn.Conv2d(64 * 3, 128, kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
 
-        self.align2 = nn.Sequential(nn.Conv2d(256 * 3, 128, kernel_size=3, stride=1, padding=1),
+        self.align2 = nn.Sequential(nn.Conv2d(128 * 3, 128, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(inplace=True))
 
-        self.align3 = nn.Sequential(nn.Conv2d(512 * 3, 128, kernel_size=3, stride=1, padding=1),
+        self.align3 = nn.Sequential(nn.Conv2d(256 * 3, 128, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(inplace=True))
         #
 
@@ -26,9 +26,9 @@ class Water(nn.Module):
         self.de_predict = nn.Sequential(nn.Conv2d(128, 3, kernel_size=1, stride=1))
         self.de_predict_lab_final = nn.Sequential(nn.Conv2d(128, 2, kernel_size=1, stride=1))
         # self.de_predict2 = nn.Sequential(nn.Conv2d(128, 3, kernel_size=1, stride=1))
-        self.de_predict_rgb = nn.Sequential(nn.Conv2d(512, 3, kernel_size=1, stride=1))
-        self.de_predict_hsv = nn.Sequential(nn.Conv2d(512, 3, kernel_size=1, stride=1))
-        self.de_predict_lab = nn.Sequential(nn.Conv2d(512, 3, kernel_size=1, stride=1))
+        self.de_predict_rgb = nn.Sequential(nn.Conv2d(256, 3, kernel_size=1, stride=1))
+        self.de_predict_hsv = nn.Sequential(nn.Conv2d(256, 3, kernel_size=1, stride=1))
+        self.de_predict_lab = nn.Sequential(nn.Conv2d(256, 3, kernel_size=1, stride=1))
     def forward(self, rgb, hsv, lab, trans_map, select):
         trans_map2 = F.max_pool2d(1 - trans_map, kernel_size=3, stride=2, padding=1)
         trans_map3 = F.max_pool2d(trans_map2, kernel_size=3, stride=2, padding=1)
