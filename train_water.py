@@ -46,7 +46,7 @@ exp_name = 'WaterEnhance' + '_' + time_str
 
 args = {
     'gnn': True,
-    'choice': 9,
+    'choice': 7,
     # 'choice2': 4,
     'layers': 22,
     # 'layers2': 3,
