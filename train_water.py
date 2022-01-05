@@ -54,7 +54,7 @@ args = {
     'L2': False,
     'KL': True,
     'structure': True,
-    'iter_num': 240000,
+    'iter_num': 200000,
     'iter_save': 4000,
     'iter_start_seq': 0,
     'train_batch_size': 12,
@@ -250,9 +250,9 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     loss3 = criterion(inter_hsv, labels)
     loss4 = criterion(inter_lab, labels)
 
-    # loss2_1 = criterion_l1(inter_rgb, labels)
-    # loss3_1 = criterion_l1(inter_hsv, labels)
-    # loss4_1 = criterion_l1(inter_lab, labels)
+    loss2_1 = criterion_l1(inter_rgb, labels)
+    loss3_1 = criterion_l1(inter_hsv, labels)
+    loss4_1 = criterion_l1(inter_lab, labels)
 
     loss8 = criterion_perceptual(inter_rgb, labels)
     loss9 = criterion_perceptual(inter_hsv, labels)
@@ -263,7 +263,8 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
 
     total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss3 + loss4 \
                  + 0.5 * loss7 + 0.5 * loss8 + 0.5 * loss9 + 0.5 * loss10 \
-                 + 0.1 * (loss0_lab + 0.25 * loss1_lab)
+                 + 0.1 * (loss0_lab + 0.25 * loss1_lab) \
+                    + 0.1 * (loss2_1 + loss3_1 + loss4_1)
     # distill_loss = loss6_k + loss7_k + loss8_k
 
     # total_loss = total_loss + 0.1 * distill_loss
