@@ -262,7 +262,7 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     # content_loss = torch.mean((texture_features['relu5_4'] - target_features['relu5_4']) ** 2)
 
     total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss3 + loss4 \
-                 + 0.5 * loss7 + 0.5 * loss8 + 0.5 * loss9 + 0.5 * loss10 \
+                 + 0.25 * loss7 + 0.25 * loss8 + 0.25 * loss9 + 0.25 * loss10 \
                  + 0.1 * (loss0_lab + 0.25 * loss1_lab) \
                     + 0.1 * (loss2_1 + loss3_1 + loss4_1)
     # distill_loss = loss6_k + loss7_k + loss8_k
