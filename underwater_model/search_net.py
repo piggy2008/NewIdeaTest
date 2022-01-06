@@ -16,6 +16,7 @@ class Round1(nn.Module):
         self.r1_l1_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=True)
         self.r1_l1_convdouble = ConvDouble(channel, channel, 3, 1, 1, affine=True, upsample=True)
         self.r1_l1_se = SELayer(channel)
+        self.r1_l1_sa = sa_layer(channel, groups=16)
 
         # self.r1_l13_zero = Zero(1, True)
         self.r1_l13_skipconnect = Identity(True)
@@ -27,6 +28,7 @@ class Round1(nn.Module):
         self.r1_l13_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=True)
         self.r1_l13_convdouble = ConvDouble(channel, channel, 3, 1, 1, affine=True, upsample=True)
         self.r1_l13_se = SELayer(channel)
+        self.r1_l13_sa = sa_layer(channel, groups=16)
 
         # self.r1_l2_zero = Zero(1, True)
         self.r1_l2_skipconnect = Identity(True)
@@ -38,6 +40,7 @@ class Round1(nn.Module):
         self.r1_l2_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=True)
         self.r1_l2_convdouble = ConvDouble(channel, channel, 3, 1, 1, affine=True, upsample=True)
         self.r1_l2_se = SELayer(channel)
+        self.r1_l2_sa = sa_layer(channel, groups=16)
 
         # self.r1_l3_zero = Zero(1, False)
         self.r1_l3_skipconnect = Identity(False)
@@ -49,6 +52,7 @@ class Round1(nn.Module):
         self.r1_l3_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=False)
         self.r1_l3_convdouble = ConvDouble(channel, channel, 3, 1, 1, affine=True, upsample=False)
         self.r1_l3_se = SELayer(channel)
+        self.r1_l3_sa = sa_layer(channel, groups=16)
 
     def forward(self, x, y, z, select):
         # if select[0] == 0:
@@ -71,6 +75,8 @@ class Round1(nn.Module):
             xy = self.r1_l1_convdouble(x)
         elif select[0] == 6:
             xy = self.r1_l1_se(x)
+        elif select[0] == 7:
+            xy = self.r1_l1_sa(x)
         # else:
         #     x = self.r1_l1_ca(x)
         if xy.size()[2:] != y.size()[2:]:
@@ -97,6 +103,8 @@ class Round1(nn.Module):
             yz = self.r1_l2_convdouble(y)
         elif select[1] == 6:
             yz = self.r1_l2_se(y)
+        elif select[1] == 7:
+            yz = self.r1_l2_sa(y)
         # else:
         #     y = self.r1_l2_ca(y)
 
@@ -123,6 +131,8 @@ class Round1(nn.Module):
             xz = self.r1_l13_convdouble(x)
         elif select[3] == 6:
             xz = self.r1_l13_se(x)
+        elif select[3] == 7:
+            xz = self.r1_l13_sa(x)
         # else:
         #     x = self.r1_l1_ca(x)
         if xz.size()[2:] != z.size()[2:]:
@@ -150,6 +160,8 @@ class Round1(nn.Module):
             z = self.r1_l3_convdouble(z)
         elif select[2] == 6:
             z = self.r1_l3_se(z)
+        elif select[2] == 7:
+            z = self.r1_l3_sa(z)
         # else:
         #     z = self.r1_l3_ca(z)
         fuse = z + xz + yz

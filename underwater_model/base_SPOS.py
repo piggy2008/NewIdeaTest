@@ -28,6 +28,7 @@ class resblock_choice(nn.Module):
         self.resblock_conv = Conv(n_channels, n_channels, 3, 1, 1, affine=True, upsample=False)
         self.resblock_convdouble = ConvDouble(n_channels, n_channels, 3, 1, 1, affine=True, upsample=False)
         self.resblock_se = SELayer(n_channels)
+        self.resblock_sa = sa_layer(n_channels, 16)
 
         # self.conv3 = nn.Conv2d(n_channels, n_channels, kernel_size=3, stride=1, padding=1)
 
@@ -50,6 +51,8 @@ class resblock_choice(nn.Module):
             out = self.resblock_convdouble(x)
         elif select == 6:
             out = self.resblock_se(x)
+        elif select == 7:
+            out = self.resblock_sa(x)
         # out = self.conv3(out)
         return out + x
 
