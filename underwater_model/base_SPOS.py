@@ -22,13 +22,15 @@ class resblock_choice(nn.Module):
         self.resblock_skipconnect = Identity(False)
         # self.resblock_sepconv = SepConv(n_channels, n_channels, 3, 1, 1, affine=True, upsample=False)
         # self.resblock_sepconvdouble = SepConvDouble(n_channels, n_channels, 3, 1, 1, affine=True, upsample=False)
-        self.resblock_dilconv = DilConv(n_channels, n_channels, 3, 1, 2, 2, affine=True, upsample=False)
+        # self.resblock_dilconv = DilConv(n_channels, n_channels, 3, 1, 2, 2, affine=True, upsample=False)
+        self.resblock_sge = sge_layer(16)
         self.resblock_dilconvdouble = DilConvDouble(n_channels, n_channels, 3, 1, 2, 2, affine=True, upsample=False)
         self.resblock_dil4Conv = DilConv(n_channels, n_channels, 3, 1, 4, 4, affine=True, upsample=False)
         self.resblock_conv = Conv(n_channels, n_channels, 3, 1, 1, affine=True, upsample=False)
         self.resblock_convdouble = ConvDouble(n_channels, n_channels, 3, 1, 1, affine=True, upsample=False)
         self.resblock_se = SELayer(n_channels)
         self.resblock_sa = sa_layer(n_channels, 16)
+
 
         # self.conv3 = nn.Conv2d(n_channels, n_channels, kernel_size=3, stride=1, padding=1)
 
@@ -40,7 +42,7 @@ class resblock_choice(nn.Module):
         # elif select == 2:
         #     out = self.resblock_sepconvdouble(x)
         elif select == 1:
-            out = self.resblock_dilconv(x)
+            out = self.sge_layer(x)
         elif select == 2:
             out = self.resblock_dilconvdouble(x)
         elif select == 3:
@@ -58,35 +60,35 @@ class resblock_choice(nn.Module):
 
 
 class Base(nn.Module):
-    def __init__(self):
+    def __init__(self, channels):
         super(Base, self).__init__()
-        self.conv1_hsv = nn.Sequential(nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1),
+        self.conv1_hsv = nn.Sequential(nn.Conv2d(3, channels[0], kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
-        self.conv1_lab = nn.Sequential(nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1),
+        self.conv1_lab = nn.Sequential(nn.Conv2d(3, channels[0], kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
-        self.conv1_rgb = nn.Sequential(nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1),
-                                       nn.ReLU(inplace=True))
-
-        self.conv2_hsv = nn.Sequential(nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-                                       nn.ReLU(inplace=True))
-        self.conv2_lab = nn.Sequential(nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-                                       nn.ReLU(inplace=True))
-        self.conv2_rgb = nn.Sequential(nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+        self.conv1_rgb = nn.Sequential(nn.Conv2d(3, channels[0], kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
 
-        self.conv3_hsv = nn.Sequential(nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+        self.conv2_hsv = nn.Sequential(nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
-        self.conv3_lab = nn.Sequential(nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+        self.conv2_lab = nn.Sequential(nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
-        self.conv3_rgb = nn.Sequential(nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+        self.conv2_rgb = nn.Sequential(nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
 
-        self.block1 = resblock_choice(n_channels=64)
-        self.block2 = resblock_choice(n_channels=64)
-        self.block3 = resblock_choice(n_channels=128)
-        self.block4 = resblock_choice(n_channels=128)
-        self.block5 = resblock_choice(n_channels=256)
-        self.block6 = resblock_choice(n_channels=256)
+        self.conv3_hsv = nn.Sequential(nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
+                                       nn.ReLU(inplace=True))
+        self.conv3_lab = nn.Sequential(nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
+                                       nn.ReLU(inplace=True))
+        self.conv3_rgb = nn.Sequential(nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
+                                       nn.ReLU(inplace=True))
+
+        self.block1 = resblock_choice(n_channels=channels[0])
+        self.block2 = resblock_choice(n_channels=channels[0])
+        self.block3 = resblock_choice(n_channels=channels[1])
+        self.block4 = resblock_choice(n_channels=channels[1])
+        self.block5 = resblock_choice(n_channels=channels[2])
+        self.block6 = resblock_choice(n_channels=channels[2])
 
         # self.block1_rgb = resblock(n_channels=128)
         # self.block2_rgb = resblock(n_channels=128)

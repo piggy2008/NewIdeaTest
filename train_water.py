@@ -46,10 +46,12 @@ exp_name = 'WaterEnhance' + '_' + time_str
 
 args = {
     'gnn': True,
-    'choice': 7,
+    'choice': 8,
     # 'choice2': 4,
     'layers': 22,
     # 'layers2': 3,
+    'en_channels': [64, 128, 256],
+    'de_channels': 128,
     'distillation': False,
     'L2': False,
     'KL': True,
@@ -67,8 +69,8 @@ args = {
     # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2021-04-06 11:56:00', '92000.pth'),
     'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
-    # 'imgs_file': '/mnt/hdd/data/ty2',
-    'imgs_file': '/home/ty/data/uw',
+    'imgs_file': '/mnt/hdd/data/ty2',
+    # 'imgs_file': '/home/ty/data/uw',
     # 'imgs_file': 'Pre-train/pretrain_all_seq_DAFB2_DAVSOD_flow.txt',
     # 'imgs_file2': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB2_DAVSOD_5f.txt',
@@ -126,8 +128,7 @@ def fix_parameters(parameters):
 
 def main():
 
-
-    net = Water().cuda(device_id).train()
+    net = Water(en_channels=args['en_channels'], de_channels=args['de_channels']).cuda(device_id).train()
     # vgg = models.vgg19(pretrained=True).features
     # for param in vgg.parameters():
     #     param.requires_grad_(False)
