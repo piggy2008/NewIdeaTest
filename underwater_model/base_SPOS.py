@@ -42,7 +42,7 @@ class resblock_choice(nn.Module):
         # elif select == 2:
         #     out = self.resblock_sepconvdouble(x)
         elif select == 1:
-            out = self.sge_layer(x)
+            out = self.resblock_sge(x)
         elif select == 2:
             out = self.resblock_dilconvdouble(x)
         elif select == 3:
