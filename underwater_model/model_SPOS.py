@@ -6,29 +6,29 @@ from underwater_model.base_SPOS import Base
 from underwater_model.search_net import Search
 
 class Water(nn.Module):
-    def __init__(self):
+    def __init__(self, en_channels, de_channels):
         super(Water, self).__init__()
 
-        self.base = Base()
+        self.base = Base(en_channels)
 
-        self.align1 = nn.Sequential(nn.Conv2d(64 * 3, 128, kernel_size=3, stride=1, padding=1),
+        self.align1 = nn.Sequential(nn.Conv2d(en_channels[0] * 3, de_channels, kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
 
-        self.align2 = nn.Sequential(nn.Conv2d(128 * 3, 128, kernel_size=3, stride=1, padding=1),
+        self.align2 = nn.Sequential(nn.Conv2d(en_channels[1] * 3, de_channels, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(inplace=True))
 
-        self.align3 = nn.Sequential(nn.Conv2d(256 * 3, 128, kernel_size=3, stride=1, padding=1),
+        self.align3 = nn.Sequential(nn.Conv2d(en_channels[2] * 3, de_channels, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(inplace=True))
         #
 
-        self.search = Search(channel=128)
+        self.search = Search(channel=de_channels)
 
-        self.de_predict = nn.Sequential(nn.Conv2d(128, 3, kernel_size=1, stride=1))
-        self.de_predict_lab_final = nn.Sequential(nn.Conv2d(128, 2, kernel_size=1, stride=1))
+        self.de_predict = nn.Sequential(nn.Conv2d(de_channels, 3, kernel_size=1, stride=1))
+        self.de_predict_lab_final = nn.Sequential(nn.Conv2d(de_channels, 2, kernel_size=1, stride=1))
         # self.de_predict2 = nn.Sequential(nn.Conv2d(128, 3, kernel_size=1, stride=1))
-        self.de_predict_rgb = nn.Sequential(nn.Conv2d(256, 3, kernel_size=1, stride=1))
-        self.de_predict_hsv = nn.Sequential(nn.Conv2d(256, 3, kernel_size=1, stride=1))
-        self.de_predict_lab = nn.Sequential(nn.Conv2d(256, 3, kernel_size=1, stride=1))
+        self.de_predict_rgb = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
+        self.de_predict_hsv = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
+        self.de_predict_lab = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
     def forward(self, rgb, hsv, lab, trans_map, select):
         trans_map2 = F.max_pool2d(1 - trans_map, kernel_size=3, stride=2, padding=1)
         trans_map3 = F.max_pool2d(trans_map2, kernel_size=3, stride=2, padding=1)

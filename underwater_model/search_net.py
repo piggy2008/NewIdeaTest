@@ -10,7 +10,8 @@ class Round1(nn.Module):
         self.r1_l1_skipconnect = Identity(True)
         # self.r1_l1_sepconv = SepConv(channel, channel, 3, 1, 1, affine=True, upsample=True)
         # self.r1_l1_sepconvdouble = SepConvDouble(channel, channel, 3, 1, 1, affine=True, upsample=True)
-        self.r1_l1_dilconv = DilConv(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
+        # self.r1_l1_dilconv = DilConv(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
+        self.r1_l1_sge = sge_layer(16)
         self.r1_l1_dilconvdouble = DilConvDouble(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
         self.r1_l1_dil4Conv = DilConv(channel, channel, 3, 1, 4, 4, affine=True, upsample=True)
         self.r1_l1_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=True)
@@ -22,7 +23,8 @@ class Round1(nn.Module):
         self.r1_l13_skipconnect = Identity(True)
         # self.r1_l13_sepconv = SepConv(channel, channel, 3, 1, 1, affine=True, upsample=True)
         # self.r1_l13_sepconvdouble = SepConvDouble(channel, channel, 3, 1, 1, affine=True, upsample=True)
-        self.r1_l13_dilconv = DilConv(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
+        # self.r1_l13_dilconv = DilConv(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
+        self.r1_l13_sge = sge_layer(16)
         self.r1_l13_dilconvdouble = DilConvDouble(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
         self.r1_l13_dil4Conv = DilConv(channel, channel, 3, 1, 4, 4, affine=True, upsample=True)
         self.r1_l13_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=True)
@@ -34,7 +36,8 @@ class Round1(nn.Module):
         self.r1_l2_skipconnect = Identity(True)
         # self.r1_l2_sepconv = SepConv(channel, channel, 3, 1, 1, affine=True, upsample=True)
         # self.r1_l2_sepconvdouble = SepConvDouble(channel, channel, 3, 1, 1, affine=True, upsample=True)
-        self.r1_l2_dilconv = DilConv(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
+        # self.r1_l2_dilconv = DilConv(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
+        self.r1_l2_sge = sge_layer(16)
         self.r1_l2_dilconvdouble = DilConvDouble(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
         self.r1_l2_dil4Conv = DilConv(channel, channel, 3, 1, 4, 4, affine=True, upsample=True)
         self.r1_l2_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=True)
@@ -46,7 +49,8 @@ class Round1(nn.Module):
         self.r1_l3_skipconnect = Identity(False)
         # self.r1_l3_sepconv = SepConv(channel, channel, 3, 1, 1, affine=True, upsample=False)
         # self.r1_l3_sepconvdouble = SepConvDouble(channel, channel, 3, 1, 1, affine=True, upsample=False)
-        self.r1_l3_dilconv = DilConv(channel, channel, 3, 1, 2, 2, affine=True, upsample=False)
+        # self.r1_l3_dilconv = DilConv(channel, channel, 3, 1, 2, 2, affine=True, upsample=False)
+        self.r1_l3_sge = sge_layer(16)
         self.r1_l3_dilconvdouble = DilConvDouble(channel, channel, 3, 1, 2, 2, affine=True, upsample=False)
         self.r1_l3_dil4Conv = DilConv(channel, channel, 3, 1, 4, 4, affine=True, upsample=False)
         self.r1_l3_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=False)
@@ -64,7 +68,7 @@ class Round1(nn.Module):
         # elif select[0] == 2:
         #     xy = self.r1_l1_sepconvdouble(x)
         elif select[0] == 1:
-            xy = self.r1_l1_dilconv(x)
+            xy = self.r1_l1_sge(x)
         elif select[0] == 2:
             xy = self.r1_l1_dilconvdouble(x)
         elif select[0] == 3:
@@ -92,7 +96,7 @@ class Round1(nn.Module):
         # elif select[1] == 2:
         #     yz = self.r1_l2_sepconvdouble(y)
         elif select[1] == 1:
-            yz = self.r1_l2_dilconv(y)
+            yz = self.r1_l2_sge(y)
         elif select[1] == 2:
             yz = self.r1_l2_dilconvdouble(y)
         elif select[1] == 3:
@@ -120,7 +124,7 @@ class Round1(nn.Module):
         # elif select[3] == 2:
         #     xz = self.r1_l13_sepconvdouble(x)
         elif select[3] == 1:
-            xz = self.r1_l13_dilconv(x)
+            xz = self.r1_l13_sge(x)
         elif select[3] == 2:
             xz = self.r1_l13_dilconvdouble(x)
         elif select[3] == 3:
@@ -149,7 +153,7 @@ class Round1(nn.Module):
         # elif select[2] == 2:
         #     z = self.r1_l3_sepconvdouble(z)
         elif select[2] == 1:
-            z = self.r1_l3_dilconv(z)
+            z = self.r1_l3_sge(z)
         elif select[2] == 2:
             z = self.r1_l3_dilconvdouble(z)
         elif select[2] == 3:
