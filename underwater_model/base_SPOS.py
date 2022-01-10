@@ -27,7 +27,8 @@ class resblock_choice(nn.Module):
         self.resblock_dilconvdouble = DilConvDouble(n_channels, n_channels, 3, 1, 2, 2, affine=True, upsample=False)
         self.resblock_dil4Conv = DilConv(n_channels, n_channels, 3, 1, 4, 4, affine=True, upsample=False)
         self.resblock_conv = Conv(n_channels, n_channels, 3, 1, 1, affine=True, upsample=False)
-        self.resblock_convdouble = ConvDouble(n_channels, n_channels, 3, 1, 1, affine=True, upsample=False)
+        # self.resblock_convdouble = ConvDouble(n_channels, n_channels, 3, 1, 1, affine=True, upsample=False)
+        self.resblock_da = DoubleAttentionLayer(n_channels, n_channels, n_channels)
         self.resblock_se = SELayer(n_channels)
         self.resblock_sa = sa_layer(n_channels, 16)
 
@@ -50,7 +51,7 @@ class resblock_choice(nn.Module):
         elif select == 4:
             out = self.resblock_conv(x)
         elif select == 5:
-            out = self.resblock_convdouble(x)
+            out = self.resblock_da(x)
         elif select == 6:
             out = self.resblock_se(x)
         elif select == 7:
