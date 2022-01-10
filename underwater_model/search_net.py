@@ -15,7 +15,7 @@ class Round1(nn.Module):
         self.r1_l1_dilconvdouble = DilConvDouble(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
         self.r1_l1_dil4Conv = DilConv(channel, channel, 3, 1, 4, 4, affine=True, upsample=True)
         self.r1_l1_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=True)
-        self.r1_l1_convdouble = ConvDouble(channel, channel, 3, 1, 1, affine=True, upsample=True)
+        self.r1_l1_da = DoubleAttentionLayer(channel, channel, channel)
         self.r1_l1_se = SELayer(channel)
         self.r1_l1_sa = sa_layer(channel, groups=16)
 
@@ -28,7 +28,7 @@ class Round1(nn.Module):
         self.r1_l13_dilconvdouble = DilConvDouble(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
         self.r1_l13_dil4Conv = DilConv(channel, channel, 3, 1, 4, 4, affine=True, upsample=True)
         self.r1_l13_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=True)
-        self.r1_l13_convdouble = ConvDouble(channel, channel, 3, 1, 1, affine=True, upsample=True)
+        self.r1_l13_da = DoubleAttentionLayer(channel, channel, channel)
         self.r1_l13_se = SELayer(channel)
         self.r1_l13_sa = sa_layer(channel, groups=16)
 
@@ -41,7 +41,7 @@ class Round1(nn.Module):
         self.r1_l2_dilconvdouble = DilConvDouble(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
         self.r1_l2_dil4Conv = DilConv(channel, channel, 3, 1, 4, 4, affine=True, upsample=True)
         self.r1_l2_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=True)
-        self.r1_l2_convdouble = ConvDouble(channel, channel, 3, 1, 1, affine=True, upsample=True)
+        self.r1_l2_da = DoubleAttentionLayer(channel, channel, channel)
         self.r1_l2_se = SELayer(channel)
         self.r1_l2_sa = sa_layer(channel, groups=16)
 
@@ -54,7 +54,7 @@ class Round1(nn.Module):
         self.r1_l3_dilconvdouble = DilConvDouble(channel, channel, 3, 1, 2, 2, affine=True, upsample=False)
         self.r1_l3_dil4Conv = DilConv(channel, channel, 3, 1, 4, 4, affine=True, upsample=False)
         self.r1_l3_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=False)
-        self.r1_l3_convdouble = ConvDouble(channel, channel, 3, 1, 1, affine=True, upsample=False)
+        self.r1_l3_da = DoubleAttentionLayer(channel, channel, channel)
         self.r1_l3_se = SELayer(channel)
         self.r1_l3_sa = sa_layer(channel, groups=16)
 
@@ -76,7 +76,7 @@ class Round1(nn.Module):
         elif select[0] == 4:
             xy = self.r1_l1_conv(x)
         elif select[0] == 5:
-            xy = self.r1_l1_convdouble(x)
+            xy = self.r1_l1_da(x)
         elif select[0] == 6:
             xy = self.r1_l1_se(x)
         elif select[0] == 7:
@@ -104,7 +104,7 @@ class Round1(nn.Module):
         elif select[1] == 4:
             yz = self.r1_l2_conv(y)
         elif select[1] == 5:
-            yz = self.r1_l2_convdouble(y)
+            yz = self.r1_l2_da(y)
         elif select[1] == 6:
             yz = self.r1_l2_se(y)
         elif select[1] == 7:
@@ -132,7 +132,7 @@ class Round1(nn.Module):
         elif select[3] == 4:
             xz = self.r1_l13_conv(x)
         elif select[3] == 5:
-            xz = self.r1_l13_convdouble(x)
+            xz = self.r1_l13_da(x)
         elif select[3] == 6:
             xz = self.r1_l13_se(x)
         elif select[3] == 7:
@@ -161,7 +161,7 @@ class Round1(nn.Module):
         elif select[2] == 4:
             z = self.r1_l3_conv(z)
         elif select[2] == 5:
-            z = self.r1_l3_convdouble(z)
+            z = self.r1_l3_da(z)
         elif select[2] == 6:
             z = self.r1_l3_se(z)
         elif select[2] == 7:
