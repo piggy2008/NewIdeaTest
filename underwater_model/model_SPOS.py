@@ -4,6 +4,7 @@ import torch.nn.functional as F
 # from underwater_model.base import Base
 from underwater_model.base_SPOS import Base
 from underwater_model.search_net import Search
+from underwater_model.vit import ViT
 
 class Water(nn.Module):
     def __init__(self, en_channels, de_channels):
@@ -19,7 +20,10 @@ class Water(nn.Module):
 
         self.align3 = nn.Sequential(nn.Conv2d(en_channels[2] * 3, de_channels, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(inplace=True))
-        #
+        # vit
+        # self.vit1 = ViT(image_size=128, patch_size=16, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
+        # self.vit2 = ViT(image_size=64, patch_size=8, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
+        # self.vit3 = ViT(image_size=32, patch_size=4, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
 
         self.search = Search(channel=de_channels)
 
@@ -44,36 +48,11 @@ class Water(nn.Module):
 
         # if select[0] == 0:
         first = self.align1(torch.cat([first_rgb, first_hsv, first_lab], dim=1))
-        # elif select[0] == 1:
-        #     first = self.align1_rgb_hsv(torch.cat([first_rgb, first_hsv], dim=1))
-        # elif select[0] == 2:
-        #     first = self.align1_rgb_lab(torch.cat([first_rgb, first_lab], dim=1))
-        # elif select[0] == 3:
-        #     first = self.align1_hsv_lab(torch.cat([first_hsv, first_lab], dim=1))
-        # if select[0] in [0, 1, 2, 3, 4]:
-        # second = second + second * trans_map2
-        # if select[1] == 0:
-        second = self.align2(torch.cat([second_rgb, second_hsv, second_lab], dim=1))
-        # elif select[1] == 1:
-        #     second = self.align2_rgb_hsv(torch.cat([second_rgb, second_hsv], dim=1))
-        # elif select[1] == 2:
-        #     second = self.align2_rgb_lab(torch.cat([second_rgb, second_lab], dim=1))
-        # elif select[1] == 3:
-        #     second = self.align2_hsv_lab(torch.cat([second_hsv, second_lab], dim=1))
-        # if select[1] in [0, 1, 2, 3, 4]:
 
-        # third = third + third * trans_map3
-        # if select[2] == 0:
+        second = self.align2(torch.cat([second_rgb, second_hsv, second_lab], dim=1))
+
         third = self.align3(torch.cat([third_rgb, third_hsv, third_lab], dim=1))
-        # elif select[2] == 1:
-        #     third = self.align3_rgb_hsv(torch.cat([third_rgb, third_hsv], dim=1))
-        # elif select[2] == 2:
-        #     third = self.align3_rgb_lab(torch.cat([third_rgb, third_lab], dim=1))
-        # elif select[2] == 3:
-        #     third = self.align3_hsv_lab(torch.cat([third_hsv, third_lab], dim=1))
-        # if select[2] in [0, 1, 2, 3, 4]:
-        # print(select[:6])
-        # final = self.search(third, second, first, select)
+
         final = self.search(third, second, first, select[18:])
         final_rgb = self.de_predict(final)
         final_lab = self.de_predict_lab_final(final)
