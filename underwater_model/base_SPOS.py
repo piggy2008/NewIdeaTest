@@ -64,22 +64,22 @@ class resblock_choice(nn.Module):
 class Base(nn.Module):
     def __init__(self, channels):
         super(Base, self).__init__()
-        self.conv1_hsv = nn.Sequential(nn.Conv2d(3, channels[0], kernel_size=3, stride=1, padding=1),
-                                       nn.ReLU(inplace=True))
+        # self.conv1_hsv = nn.Sequential(nn.Conv2d(3, channels[0], kernel_size=3, stride=1, padding=1),
+        #                                nn.ReLU(inplace=True))
         self.conv1_lab = nn.Sequential(nn.Conv2d(3, channels[0], kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
         self.conv1_rgb = nn.Sequential(nn.Conv2d(3, channels[0], kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
 
-        self.conv2_hsv = nn.Sequential(nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
-                                       nn.ReLU(inplace=True))
+        # self.conv2_hsv = nn.Sequential(nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
+        #                                nn.ReLU(inplace=True))
         self.conv2_lab = nn.Sequential(nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
         self.conv2_rgb = nn.Sequential(nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
 
-        self.conv3_hsv = nn.Sequential(nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
-                                       nn.ReLU(inplace=True))
+        # self.conv3_hsv = nn.Sequential(nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
+        #                                nn.ReLU(inplace=True))
         self.conv3_lab = nn.Sequential(nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
         self.conv3_rgb = nn.Sequential(nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
@@ -108,7 +108,7 @@ class Base(nn.Module):
 
     def forward(self, rgb, hsv, lab, select):
         x_rgb = self.conv1_rgb(rgb)
-        x_hsv = self.conv1_hsv(hsv)
+        # x_hsv = self.conv1_hsv(hsv)
         x_lab = self.conv1_lab(lab)
         # 128 * 128
         x_rgb = self.block1(x_rgb, select[0])
@@ -124,16 +124,16 @@ class Base(nn.Module):
         # x_rgb3 = F.max_pool2d(x_rgb3, kernel_size=3, stride=2, padding=1)
 
         # 64 * 64
-        x_hsv = self.block1(x_hsv, select[6])
-        x_hsv = self.block2(x_hsv, select[7])
-        x_hsv2 = F.max_pool2d(x_hsv, kernel_size=3, stride=2, padding=1)
-        x_hsv2 = self.conv2_hsv(x_hsv2)
-        x_hsv2 = self.block3(x_hsv2, select[8])
-        x_hsv2 = self.block4(x_hsv2, select[9])
-        x_hsv3 = F.max_pool2d(x_hsv2, kernel_size=3, stride=2, padding=1)
-        x_hsv3 = self.conv3_hsv(x_hsv3)
-        x_hsv3 = self.block5(x_hsv3, select[10])
-        x_hsv3 = self.block6(x_hsv3, select[11])
+        # x_hsv = self.block1(x_hsv, select[6])
+        # x_hsv = self.block2(x_hsv, select[7])
+        # x_hsv2 = F.max_pool2d(x_hsv, kernel_size=3, stride=2, padding=1)
+        # x_hsv2 = self.conv2_hsv(x_hsv2)
+        # x_hsv2 = self.block3(x_hsv2, select[8])
+        # x_hsv2 = self.block4(x_hsv2, select[9])
+        # x_hsv3 = F.max_pool2d(x_hsv2, kernel_size=3, stride=2, padding=1)
+        # x_hsv3 = self.conv3_hsv(x_hsv3)
+        # x_hsv3 = self.block5(x_hsv3, select[10])
+        # x_hsv3 = self.block6(x_hsv3, select[11])
         # x_hsv3 = F.max_pool2d(x_hsv3, kernel_size=3, stride=2, padding=1)
 
         # 64 * 64
@@ -147,5 +147,5 @@ class Base(nn.Module):
         x_lab3 = self.conv3_lab(x_lab3)
         x_lab3 = self.block5(x_lab3, select[16])
         x_lab3 = self.block6(x_lab3, select[17])
-        return x_rgb, x_hsv, x_lab, x_rgb2, x_hsv2, x_lab2, \
-               x_rgb3, x_hsv3, x_lab3
+        return x_rgb, x_lab, x_rgb2, x_lab2, \
+               x_rgb3, x_lab3
