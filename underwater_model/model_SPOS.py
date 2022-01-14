@@ -12,13 +12,13 @@ class Water(nn.Module):
 
         self.base = Base(en_channels)
 
-        self.align1 = nn.Sequential(nn.Conv2d(en_channels[0] * 3, de_channels, kernel_size=3, stride=1, padding=1),
+        self.align1 = nn.Sequential(nn.Conv2d(en_channels[0] * 2, de_channels, kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
 
-        self.align2 = nn.Sequential(nn.Conv2d(en_channels[1] * 3, de_channels, kernel_size=3, stride=1, padding=1),
+        self.align2 = nn.Sequential(nn.Conv2d(en_channels[1] * 2, de_channels, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(inplace=True))
 
-        self.align3 = nn.Sequential(nn.Conv2d(en_channels[2] * 3, de_channels, kernel_size=3, stride=1, padding=1),
+        self.align3 = nn.Sequential(nn.Conv2d(en_channels[2] * 2, de_channels, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(inplace=True))
         # vit
         # self.vit1 = ViT(image_size=128, patch_size=16, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
@@ -31,34 +31,36 @@ class Water(nn.Module):
         self.de_predict_lab_final = nn.Sequential(nn.Conv2d(de_channels, 2, kernel_size=1, stride=1))
         # self.de_predict2 = nn.Sequential(nn.Conv2d(128, 3, kernel_size=1, stride=1))
         self.de_predict_rgb = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
-        self.de_predict_hsv = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
+        # self.de_predict_hsv = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
         self.de_predict_lab = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
     def forward(self, rgb, hsv, lab, trans_map, select):
         trans_map2 = F.max_pool2d(1 - trans_map, kernel_size=3, stride=2, padding=1)
         trans_map3 = F.max_pool2d(trans_map2, kernel_size=3, stride=2, padding=1)
         # x_lab3 = F.max_pool2d(x_lab3, kernel_size=3, stride=2, padding=1)
-        first_rgb, first_hsv, first_lab, second_rgb, second_hsv, second_lab, third_rgb, \
-        third_hsv, third_lab = self.base(rgb, hsv, lab, select[:18])
+        # first_rgb, first_hsv, first_lab, second_rgb, second_hsv, second_lab, third_rgb, \
+        # third_hsv, third_lab = self.base(rgb, hsv, lab, select[:18])
+        first_rgb, first_lab, second_rgb, second_lab, third_rgb, \
+        third_lab = self.base(rgb, hsv, lab, select[:12])
         # first_rgb, first_hsv, first_lab, second_rgb, second_hsv, second_lab, third_rgb, \
         # third_hsv, third_lab = self.base(rgb, hsv, lab)
         # first = first + first * (1 - trans_map)
         inter_rgb = F.interpolate(self.de_predict_rgb(third_rgb), rgb.size()[2:], mode='bilinear')
-        inter_hsv = F.interpolate(self.de_predict_hsv(third_hsv), hsv.size()[2:], mode='bilinear')
+        # inter_hsv = F.interpolate(self.de_predict_hsv(third_hsv), hsv.size()[2:], mode='bilinear')
         inter_lab = F.interpolate(self.de_predict_lab(third_lab), lab.size()[2:], mode='bilinear')
 
         # if select[0] == 0:
-        first = self.align1(torch.cat([first_rgb, first_hsv, first_lab], dim=1))
+        first = self.align1(torch.cat([first_rgb, first_lab], dim=1))
 
-        second = self.align2(torch.cat([second_rgb, second_hsv, second_lab], dim=1))
+        second = self.align2(torch.cat([second_rgb, second_lab], dim=1))
 
-        third = self.align3(torch.cat([third_rgb, third_hsv, third_lab], dim=1))
+        third = self.align3(torch.cat([third_rgb, third_lab], dim=1))
 
-        final = self.search(third, second, first, select[18:])
+        final = self.search(third, second, first, select[12:])
         final_rgb = self.de_predict(final)
         final_lab = self.de_predict_lab_final(final)
         # final2 = self.de_predict2(final2)
 
-        return final_rgb, final_lab, inter_rgb, inter_hsv, inter_lab
+        return final_rgb, final_lab, inter_rgb, inter_lab
 
 if __name__ == '__main__':
     a = torch.zeros(2, 3, 128, 128)

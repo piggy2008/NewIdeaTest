@@ -48,7 +48,7 @@ args = {
     'gnn': True,
     'choice': 8,
     # 'choice2': 4,
-    'layers': 22,
+    'layers': 16,
     # 'layers2': 3,
     'en_channels': [64, 128, 256],
     'de_channels': 128,
@@ -233,7 +233,7 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     # print(get_random_cand2() + get_random_cand())
     optimizer.zero_grad()
 
-    final, final_lab, inter_rgb, inter_hsv, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
+    final, final_lab, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
 
     loss0 = criterion(final, labels)
     loss1 = criterion_l1(final, labels)
@@ -248,7 +248,7 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     # loss6 = criterion_l1(final2, labels)
 
     loss2 = criterion(inter_rgb, labels)
-    loss3 = criterion(inter_hsv, labels)
+    # loss3 = criterion(inter_hsv, labels)
     loss4 = criterion(inter_lab, labels)
 
     loss2_1 = criterion_l1(inter_rgb, labels)
@@ -256,14 +256,14 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     # loss4_1 = criterion_l1(inter_lab, labels)
 
     loss8 = criterion_perceptual(inter_rgb, labels)
-    loss9 = criterion_perceptual(inter_hsv, labels)
+    # loss9 = criterion_perceptual(inter_hsv, labels)
     loss10 = criterion_perceptual(inter_lab, labels)
     # texture_features = get_features(rgb, vgg)
     # target_features = get_features(labels, vgg)
     # content_loss = torch.mean((texture_features['relu5_4'] - target_features['relu5_4']) ** 2)
 
-    total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss3 + loss4 \
-                 + 0.25 * loss7 + 0.25 * loss8 + 0.25 * loss9 + 0.25 * loss10 \
+    total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss4 \
+                 + 0.25 * loss7 + 0.25 * loss8 + 0.25 * loss10 \
                  + 0.1 * (loss0_lab + 0.25 * loss1_lab) \
                     + 0.1 * (loss2_1)
     # distill_loss = loss6_k + loss7_k + loss8_k
