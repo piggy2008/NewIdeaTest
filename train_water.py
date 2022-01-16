@@ -48,7 +48,7 @@ args = {
     'gnn': True,
     'choice': 8,
     # 'choice2': 4,
-    'layers': 16,
+    'layers': 10,
     # 'layers2': 3,
     'en_channels': [64, 128, 256],
     'de_channels': 128,
@@ -56,10 +56,10 @@ args = {
     'L2': False,
     'KL': True,
     'structure': True,
-    'iter_num': 240000,
+    'iter_num': 200000,
     'iter_save': 4000,
     'iter_start_seq': 0,
-    'train_batch_size': 14,
+    'train_batch_size': 18,
     'last_iter': 0,
     'lr': 1e-4,
     'lr_decay': 0.9,
@@ -69,8 +69,8 @@ args = {
     # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2021-04-06 11:56:00', '92000.pth'),
     'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
-    'imgs_file': '/mnt/hdd/data/ty2',
-    # 'imgs_file': '/home/ty/data/uw',
+    # 'imgs_file': '/mnt/hdd/data/ty2',
+    'imgs_file': '/home/ty/data/uw',
     # 'imgs_file': 'Pre-train/pretrain_all_seq_DAFB2_DAVSOD_flow.txt',
     # 'imgs_file2': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB2_DAVSOD_5f.txt',
@@ -233,7 +233,7 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     # print(get_random_cand2() + get_random_cand())
     optimizer.zero_grad()
 
-    final, final_lab, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
+    final, final_lab, inter_rgb = net(rgb, hsv, lab, depth, get_random_cand())
 
     loss0 = criterion(final, labels)
     loss1 = criterion_l1(final, labels)
@@ -249,7 +249,7 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
 
     loss2 = criterion(inter_rgb, labels)
     # loss3 = criterion(inter_hsv, labels)
-    loss4 = criterion(inter_lab, labels)
+    # loss4 = criterion(inter_lab, labels)
 
     loss2_1 = criterion_l1(inter_rgb, labels)
     # loss3_1 = criterion_l1(inter_hsv, labels)
@@ -257,13 +257,13 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
 
     loss8 = criterion_perceptual(inter_rgb, labels)
     # loss9 = criterion_perceptual(inter_hsv, labels)
-    loss10 = criterion_perceptual(inter_lab, labels)
+    # loss10 = criterion_perceptual(inter_lab, labels)
     # texture_features = get_features(rgb, vgg)
     # target_features = get_features(labels, vgg)
     # content_loss = torch.mean((texture_features['relu5_4'] - target_features['relu5_4']) ** 2)
 
-    total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss4 \
-                 + 0.25 * loss7 + 0.25 * loss8 + 0.25 * loss10 \
+    total_loss = 1 * loss0 + 0.25 * loss1 + loss2 \
+                 + 0.25 * loss7 + 0.25 * loss8 \
                  + 0.1 * (loss0_lab + 0.25 * loss1_lab) \
                     + 0.1 * (loss2_1)
     # distill_loss = loss6_k + loss7_k + loss8_k
