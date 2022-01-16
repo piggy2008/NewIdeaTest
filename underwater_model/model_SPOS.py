@@ -39,8 +39,8 @@ class Water(nn.Module):
         # x_lab3 = F.max_pool2d(x_lab3, kernel_size=3, stride=2, padding=1)
         # first_rgb, first_hsv, first_lab, second_rgb, second_hsv, second_lab, third_rgb, \
         # third_hsv, third_lab = self.base(rgb, hsv, lab, select[:18])
-        first_rgb, first_lab, second_rgb, second_lab, third_rgb, \
-        third_lab = self.base(rgb, hsv, lab, select[:12])
+        # first_rgb, first_lab, second_rgb, second_lab, third_rgb, \
+        # third_lab = self.base(rgb, hsv, lab, select[:12])
 
         first_rgb, second_rgb, third_rgb = self.base(rgb, hsv, lab, select[:6])
 
