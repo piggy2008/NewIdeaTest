@@ -35,7 +35,7 @@ class Water(nn.Module):
         # self.de_predict2 = nn.Sequential(nn.Conv2d(128, 3, kernel_size=1, stride=1))
         self.de_predict_rgb = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
         # self.de_predict_hsv = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
-        # self.de_predict_lab = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
+        self.de_predict_lab = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
     def forward(self, rgb, hsv, lab, trans_map, select):
         trans_map2 = F.max_pool2d(1 - trans_map, kernel_size=3, stride=2, padding=1)
         trans_map3 = F.max_pool2d(trans_map2, kernel_size=3, stride=2, padding=1)
