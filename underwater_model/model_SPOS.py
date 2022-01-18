@@ -76,6 +76,7 @@ class Water(nn.Module):
         # lab_color = self.de_predict_color(temp_gray)
         lab_color = self.color(temp_gray, select[16:])
         final_lab = self.de_predict_color_final(lab_color)
+        print(temp_gray.shape, '---', final_lab.shape)
         final_lab3 = self.de_predict_final(torch.cat([temp_gray, final_lab], dim=1))
         # final2 = self.de_predict2(final2)
 
