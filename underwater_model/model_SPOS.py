@@ -31,7 +31,7 @@ class Water(nn.Module):
 
         # self.de_predict_color = nn.Sequential(nn.Conv2d(de_channels, 1, kernel_size=1, stride=1))
         self.de_predict_color_final = nn.Sequential(nn.Conv2d(de_channels, 2, kernel_size=1, stride=1))
-        self.de_predict_final = nn.Sequential(nn.Conv2d(de_channels, 3, kernel_size=1, stride=1))
+        # self.de_predict_final = nn.Sequential(nn.Conv2d(de_channels, 3, kernel_size=1, stride=1))
         self.de_predict = nn.Sequential(nn.Conv2d(de_channels, 3, kernel_size=1, stride=1))
         # self.de_predict_lab_final = nn.Sequential(nn.Conv2d(de_channels, 1, kernel_size=1, stride=1))
         # self.de_predict2 = nn.Sequential(nn.Conv2d(128, 3, kernel_size=1, stride=1))
@@ -76,8 +76,7 @@ class Water(nn.Module):
         # lab_color = self.de_predict_color(temp_gray)
         lab_color = self.color(temp_gray, select[16:])
         final_lab = self.de_predict_color_final(lab_color)
-        print(temp_gray.shape, '---', final_lab.shape)
-        final_lab3 = self.de_predict_final(torch.cat([temp_gray, final_lab], dim=1))
+        final_lab3 = torch.cat([temp_gray, final_lab], dim=1)
         # final2 = self.de_predict2(final2)
 
         return final_rgb, final_lab, final_lab3, inter_rgb, inter_lab
