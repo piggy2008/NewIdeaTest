@@ -276,7 +276,7 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     total_loss.backward()
     optimizer.step()
 
-    print_log(total_loss, loss0, loss7, loss1_lab, args['train_batch_size'], curr_iter, optimizer)
+    print_log(total_loss, loss0, loss7, loss0_lab3, args['train_batch_size'], curr_iter, optimizer)
 
     return
 
