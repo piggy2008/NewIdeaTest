@@ -5,11 +5,20 @@ import torch
 import torch.utils.data as data
 from PIL import Image, ImageCms
 from matplotlib import pyplot as plt
+import cv2
 import random
 import torchvision
 import numpy as np
 from joint_transforms import crop, scale, flip, rotate
 
+def convert_from_image_to_cv2(img):
+    return cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+
+def convert_from_image_to_hsv(img):
+    return cv2.cvtColor(np.array(img), cv2.COLOR_RGB2HSV)
+
+def convert_from_image_to_lab(img):
+    return cv2.cvtColor(np.array(img), cv2.COLOR_RGB2LAB)
 
 class WaterImageFolder(data.Dataset):
     # image and gt should be in the same folder and have same filename except extended name (jpg and png respectively)
@@ -38,19 +47,18 @@ class WaterImageFolder(data.Dataset):
         if self.joint_transform is not None:
             img_list, gt_list = self.joint_transform(img_list, gt_list)
 
-        hsv = img_list[0].convert('HSV')
+        img = convert_from_image_to_cv2(img_list[0])
+        # hsv = img_list[0].convert('HSV')
+        hsv = convert_from_image_to_hsv(img_list[0])
         # lab = img_list[0].convert('HSV')
-        srgb_profile = ImageCms.createProfile("sRGB")
-        lab_profile = ImageCms.createProfile("LAB")
-
-        rgb2lab_transform = ImageCms.buildTransformFromOpenProfiles(srgb_profile, lab_profile, "RGB", "LAB")
-        lab = ImageCms.applyTransform(img_list[0], rgb2lab_transform)
-        lab_target = ImageCms.applyTransform(img_list[1], rgb2lab_transform)
+        lab =  convert_from_image_to_lab(img_list[0])
+        lab_target = convert_from_image_to_lab(img_list[1])
+        target = convert_from_image_to_cv2(img_list[1])
         if self.transform is not None:
-            img = self.transform(img_list[0])
+            img = self.transform(img)
             hsv = self.transform(hsv)
             lab = self.transform(lab)
-            target = self.transform(img_list[1])
+            target = self.transform(target)
             lab_target = self.transform(lab_target)
         if self.target_transform is not None:
             depth = self.target_transform(gt_list[0])
@@ -111,7 +119,7 @@ if __name__ == '__main__':
         # data1, data2 = data
         # inputs, flows, labels, inputs2, labels2 = data
         # data2 = next(dataloader_iterator)
-        rgb, hsv, lab, target, depth = data
+        rgb, hsv, lab, target, target_lab, depth = data
         print(torch.unique(rgb))
         # texture_features = get_features(rgb, vgg)
         # target_features = get_features(target, vgg)
