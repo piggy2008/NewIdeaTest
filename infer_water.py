@@ -28,12 +28,14 @@ torch.cuda.set_device(device_id)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = saving_path
 
-exp_name = 'WaterEnhance_2021-12-23 12:38:02'
+exp_name = 'WaterEnhance_2022-01-19 13:48:09'
 args = {
     'gnn': True,
-    'snapshot': '64000',  # your snapshot filename (exclude extension name)
+    'snapshot': '240000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
+    'en_channels': [64, 128, 256],
+    'de_channels': 128,
     # 'input_size': (380, 380),
     # 'image_path': '/mnt/hdd/data/ty2/input_test',
     # 'depth_path': '/mnt/hdd/data/ty2/depth_test',
@@ -42,7 +44,7 @@ args = {
     'depth_path': '/home/ty/data/uw/depth_test',
     'gt_path': '/home/ty/data/uw/gt_test',
     'dataset': 'UIEB',
-    'start': 100000
+    'start': 0
 }
 
 img_transform = transforms.Compose([
@@ -69,7 +71,7 @@ def read_testset(dataset, image_path):
 def main(snapshot):
     # net = R3Net(motion='', se_layer=False, dilation=False, basic_model='resnet50')
 
-    net = Water()
+    net = Water(en_channels=args['en_channels'], de_channels=args['de_channels'])
     # net = warp()
     if snapshot is None:
         print ('load snapshot \'%s\' for testing' % args['snapshot'])
@@ -106,15 +108,16 @@ def main(snapshot):
             hsv_var = Variable(img_transform(hsv).unsqueeze(0), volatile=True).cuda()
             lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
             depth_var = Variable(img_transform(depth).unsqueeze(0), volatile=True).cuda()
-            prediction, rgb_side, hsv_side, lab_side = net(img_var, hsv_var, lab_var, depth_var, [3, 3, 3, 3, 3, 3, 3, 3, 3, 3])
+            prediction, _, prediction2, hsv_side, lab_side = net(img_var, hsv_var, lab_var, depth_var, [1, 7, 2, 5, 2, 5, 5, 1, 5, 3, 2, 5, 5, 5, 7, 5, 1, 7])
             # prediction = torch.unsqueeze(prediction, 0)
             # print(torch.unique(prediction))
             # precision = to_pil(prediction.data.squeeze(0).cpu())
             # prediction = np.array(precision)
             # prediction = prediction.astype('float')
-            prediction = torch.clamp(prediction, 0, 1)
+            prediction = torch.clamp(prediction2, 0, 1)
             prediction = prediction.permute(0, 2, 3, 1).cpu().detach().numpy()
             prediction = np.squeeze(prediction)
+            # prediction = prediction[:, :, ::-1]
             # plt.style.use('classic')
             # plt.subplot(1, 2, 1)
             # plt.imshow(prediction)
@@ -128,6 +131,8 @@ def main(snapshot):
             gt = Image.open(os.path.join(args['gt_path'], name + '.png')).convert('RGB')
             gt = np.asarray(gt)
             print(gt.shape, '-----', prediction.shape)
+            # prediction = cv2.cvtColor(prediction * 255.0, cv2.COLOR_LAB2RGB)
+            # print(np.unique(prediction))
             psnr = calculate_psnr(prediction * 255.0, gt)
             ssim = calculate_ssim(prediction * 255.0, gt)
 
@@ -136,7 +141,8 @@ def main(snapshot):
                 if not os.path.exists(save_path):
                     os.makedirs(save_path)
                 prediction = img_as_ubyte(prediction)
-                cv2.imwrite(os.path.join(save_path, name + '.png'), cv2.cvtColor(prediction, cv2.COLOR_RGB2BGR))
+                # print(np.unique(prediction))
+                cv2.imwrite(os.path.join(save_path, name + '.png'), cv2.cvtColor(prediction, cv2.COLOR_LAB2BGR))
                 # Image.fromarray(prediction).save(os.path.join(save_path, name + '.png'))
 
             psnr_record.update(psnr)
