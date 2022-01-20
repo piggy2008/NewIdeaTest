@@ -60,7 +60,7 @@ class resblock_choice(nn.Module):
         # out = self.conv3(out)
         return out + x
 
-
+# top choice ] [1, 5, 5, 6, 5, 3, 7, 5, 4, 5, 2, 1, 6, 3, 7, 3]
 class Base(nn.Module):
     def __init__(self, channels):
         super(Base, self).__init__()
@@ -84,6 +84,13 @@ class Base(nn.Module):
                                        nn.ReLU(inplace=True))
         self.conv3_rgb = nn.Sequential(nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
+
+        self.block1 = resblock_choice(n_channels=channels[0])
+        self.block2 = resblock_choice(n_channels=channels[0])
+        self.block3 = resblock_choice(n_channels=channels[1])
+        self.block4 = resblock_choice(n_channels=channels[1])
+        self.block5 = resblock_choice(n_channels=channels[2])
+        self.block6 = resblock_choice(n_channels=channels[2])
 
         self.block1 = resblock_choice(n_channels=channels[0])
         self.block2 = resblock_choice(n_channels=channels[0])

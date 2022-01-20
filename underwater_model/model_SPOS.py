@@ -27,11 +27,10 @@ class Water(nn.Module):
         # self.vit3 = ViT(image_size=32, patch_size=4, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
 
         self.search = Search(channel=de_channels)
-        self.color = Color(channel=de_channels)
+        # self.color = Color(channel=de_channels)
 
-        # self.de_predict_color = nn.Sequential(nn.Conv2d(de_channels, 1, kernel_size=1, stride=1))
-        self.de_predict_color_final = nn.Sequential(nn.Conv2d(de_channels, 2, kernel_size=1, stride=1))
-        # self.de_predict_final = nn.Sequential(nn.Conv2d(de_channels, 3, kernel_size=1, stride=1))
+        # self.de_predict_color = nn.Sequential(nn.Conv2d(de_channels, 2, kernel_size=1, stride=1))
+
         self.de_predict = nn.Sequential(nn.Conv2d(de_channels, 3, kernel_size=1, stride=1))
         # self.de_predict_lab_final = nn.Sequential(nn.Conv2d(de_channels, 1, kernel_size=1, stride=1))
         # self.de_predict2 = nn.Sequential(nn.Conv2d(128, 3, kernel_size=1, stride=1))
@@ -69,17 +68,15 @@ class Water(nn.Module):
         # third = self.align3(third_rgb)
 
 
-        final = self.search(third, second, first, select[12:16])
+        final = self.search(third, second, first, select[12:])
         # final_color = self.search_color(third, second, first, select[16:])
         final_rgb = self.de_predict(final)
-        temp_gray = torch.mean(final_rgb, dim=1, keepdim=True)
-        # lab_color = self.de_predict_color(temp_gray)
-        lab_color = self.color(temp_gray, select[16:])
-        final_lab = self.de_predict_color_final(lab_color)
-        final_lab3 = torch.cat([temp_gray, final_lab], dim=1)
+        # temp_gray = torch.mean(final_rgb, dim=1, keepdim=True)
+        # final_lab = self.de_predict_color_final(final_color)
+        # final_lab = torch.cat([temp_gray, final_lab], dim=1)
         # final2 = self.de_predict2(final2)
 
-        return final_rgb, final_lab, final_lab3, inter_rgb, inter_lab
+        return final_rgb, inter_rgb, inter_lab
 
 if __name__ == '__main__':
     a = torch.zeros(2, 3, 128, 128)
