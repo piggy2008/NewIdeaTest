@@ -12,6 +12,7 @@ from PIL import Image, ImageCms
 from torch.autograd import Variable
 import numpy as np
 from infer_water import read_testset
+import cv2
 
 
 # assert torch.cuda.is_available()
@@ -79,14 +80,14 @@ def get_cand_err(model, cand, args):
     for name in image_names:
         # img_list = [i_id.strip() for i_id in open(imgs_path)]
         img = Image.open(os.path.join(args['image_path'], name + '.png')).convert('RGB')
+        img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
         depth = Image.open(os.path.join(args['depth_path'], name + '.png_depth_estimate.png')).convert('L')
 
-        hsv = img.convert('HSV')
-        srgb_profile = ImageCms.createProfile("sRGB")
-        lab_profile = ImageCms.createProfile("LAB")
-
-        rgb2lab_transform = ImageCms.buildTransformFromOpenProfiles(srgb_profile, lab_profile, "RGB", "LAB")
-        lab = ImageCms.applyTransform(img, rgb2lab_transform)
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        # srgb_profile = ImageCms.createProfile("sRGB")
+        # lab_profile = ImageCms.createProfile("LAB")
+        # rgb2lab_transform = ImageCms.buildTransformFromOpenProfiles(srgb_profile, lab_profile, "RGB", "LAB")
+        lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
         img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
         hsv_var = Variable(img_transform(hsv).unsqueeze(0), volatile=True).cuda()
         lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
@@ -101,7 +102,6 @@ def get_cand_err(model, cand, args):
         prediction = torch.clamp(prediction, 0, 1)
         prediction = prediction.permute(0, 2, 3, 1).cpu().detach().numpy()
         prediction = np.squeeze(prediction)
-        
         prediction = prediction[:, :, ::-1]
         # plt.style.use('classic')
         # plt.subplot(1, 2, 1)

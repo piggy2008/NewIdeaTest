@@ -226,7 +226,7 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     lab = Variable(lab).cuda(device_id)
     depth = Variable(depth).cuda(device_id)
     labels = Variable(target).cuda(device_id)
-    labels_lab = Variable(lab_target[:, :2, :, :]).cuda(device_id)
+    labels_lab = Variable(lab_target[:, 1:, :, :]).cuda(device_id)
     labels_lab3 = Variable(lab_target).cuda(device_id)
 
     get_random_cand = lambda: tuple(np.random.randint(args['choice']) for i in range(args['layers']))
