@@ -12,7 +12,7 @@ import numpy as np
 from joint_transforms import crop, scale, flip, rotate
 
 def convert_from_image_to_cv2(img):
-    return cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+    return np.array(img)
 
 def convert_from_image_to_hsv(img):
     return cv2.cvtColor(np.array(img), cv2.COLOR_RGB2HSV)
