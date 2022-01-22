@@ -33,6 +33,7 @@ class Water(nn.Module):
         # self.de_predict_color = nn.Sequential(nn.Conv2d(de_channels, 2, kernel_size=1, stride=1))
 
         self.de_predict = nn.Sequential(nn.Conv2d(de_channels, 3, kernel_size=1, stride=1))
+        self.de_predict2 = nn.Sequential(nn.Conv2d(de_channels, 3, kernel_size=1, stride=1))
         self.de_predict_conv1_ab = nn.Sequential(nn.Conv2d(de_channels, 128, kernel_size=1, stride=1), nn.ReLU(inplace=True))
         self.de_predict_conv2_ab = nn.Sequential(nn.Conv2d(de_channels, 2, kernel_size=1, stride=1))
         # self.de_predict_lab_final = nn.Sequential(nn.Conv2d(de_channels, 1, kernel_size=1, stride=1))
@@ -78,12 +79,13 @@ class Water(nn.Module):
         mid_ab = self.de_predict_conv2_ab(mid_ab_feat)
         mid_ab_feat3 = F.interpolate(mid_ab_feat, size=third.size()[2:], mode='bilinear')
         mid_ab_feat2 = F.interpolate(mid_ab_feat, size=second.size()[2:], mode='bilinear')
-        final2_rgb, third, second, first = self.search(third + mid_ab_feat3,
+        final2, third, second, first = self.search(third + mid_ab_feat3,
                                                    second + mid_ab_feat2, first + mid_ab_feat, select[16:])
         # temp_gray = torch.mean(final_rgb, dim=1, keepdim=True)
         # final_lab = self.de_predict_color_final(final_color)
         # final_lab = torch.cat([temp_gray, final_lab], dim=1)
         # final2 = self.de_predict2(final2)
+        final2_rgb = self.de_predict2(final2)
 
         return final_rgb, mid_ab, final2_rgb, inter_rgb, inter_lab
 
