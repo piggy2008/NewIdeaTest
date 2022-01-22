@@ -59,7 +59,7 @@ args = {
     'iter_num': 240000,
     'iter_save': 4000,
     'iter_start_seq': 0,
-    'train_batch_size': 14,
+    'train_batch_size': 12,
     'last_iter': 0,
     'lr': 1e-4,
     'lr_decay': 0.9,
@@ -287,7 +287,7 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     total_loss.backward()
     optimizer.step()
 
-    print_log(total_loss, loss0, loss7, loss_mid_ab, args['train_batch_size'], curr_iter, optimizer)
+    print_log(total_loss, loss0, loss0_2, loss_mid_ab, args['train_batch_size'], curr_iter, optimizer)
 
     return
 
