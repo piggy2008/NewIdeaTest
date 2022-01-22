@@ -47,11 +47,11 @@ class WaterImageFolder(data.Dataset):
         if self.joint_transform is not None:
             img_list, gt_list = self.joint_transform(img_list, gt_list)
 
-        img = convert_from_image_to_cv2(img_list[0])
+        img = img_list[0]
         # hsv = img_list[0].convert('HSV')
         hsv = convert_from_image_to_hsv(img_list[0])
         # lab = img_list[0].convert('HSV')
-        lab =  convert_from_image_to_lab(img_list[0])
+        lab = convert_from_image_to_lab(img_list[0])
         lab_target = convert_from_image_to_lab(img_list[1])
         target = convert_from_image_to_cv2(img_list[1])
         if self.transform is not None:
@@ -94,7 +94,7 @@ if __name__ == '__main__':
     import joint_transforms
     from torch.utils.data import DataLoader
     joint_transform = joint_transforms.Compose([
-        joint_transforms.RandomCrop(128),
+        joint_transforms.RandomCrop(256),
         joint_transforms.RandomHorizontallyFlip(),
     ])
 
@@ -127,28 +127,28 @@ if __name__ == '__main__':
         # content_loss = torch.mean((texture_features['conv4_2'] - target_features['conv4_2']) ** 2)
 
         # first, second = data
-        rgb = rgb.data.cpu().numpy()
-        hsv = hsv.data.cpu().numpy()
-        depth = depth.data.cpu().numpy()
-        target = target.data.cpu().numpy()
-        # target = target2.data.cpu().numpy()
-        # # np.savetxt('image.txt', input[0, 0, :, :])
-        rgb = rgb.transpose(0, 2, 3, 1)
-        hsv = hsv.transpose(0, 2, 3, 1)
-        depth = depth.transpose(0, 2, 3, 1)
-        # flow = flow.transpose(0, 2, 3, 1)
-        target = target.transpose(0, 2, 3, 1)
-        # # # for i in range(0, input.shape[0]):
-        plt.subplot(2, 2, 1)
-        plt.imshow(rgb[0, :, :, :])
-        plt.subplot(2, 2, 2)
-        plt.imshow(target[0, :, :, :])
-
-        plt.subplot(2, 2, 3)
-        plt.imshow(hsv[0, :, :, :])
-        plt.subplot(2, 2, 4)
-        plt.imshow(depth[0, :, :, 0])
-
-        plt.show()
+        # rgb = rgb.data.cpu().numpy()
+        # hsv = hsv.data.cpu().numpy()
+        # depth = depth.data.cpu().numpy()
+        # target = target.data.cpu().numpy()
+        # # target = target2.data.cpu().numpy()
+        # # # np.savetxt('image.txt', input[0, 0, :, :])
+        # rgb = rgb.transpose(0, 2, 3, 1)
+        # hsv = hsv.transpose(0, 2, 3, 1)
+        # depth = depth.transpose(0, 2, 3, 1)
+        # # flow = flow.transpose(0, 2, 3, 1)
+        # target = target.transpose(0, 2, 3, 1)
+        # # # # for i in range(0, input.shape[0]):
+        # plt.subplot(2, 2, 1)
+        # plt.imshow(rgb[0, :, :, :])
+        # plt.subplot(2, 2, 2)
+        # plt.imshow(target[0, :, :, :])
+        #
+        # plt.subplot(2, 2, 3)
+        # plt.imshow(hsv[0, :, :, :])
+        # plt.subplot(2, 2, 4)
+        # plt.imshow(depth[0, :, :, 0])
+        #
+        # plt.show()
         # print(lab.size())
         # print(depth.size())

@@ -174,7 +174,7 @@ class Round1(nn.Module):
         #     z = self.r1_l3_ca(z)
         fuse = z + xz + yz
 
-        return fuse
+        return fuse, xy, yz, z
 
 class Round2(nn.Module):
     def __init__(self):
