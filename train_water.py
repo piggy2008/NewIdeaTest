@@ -109,7 +109,7 @@ train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_wo
 criterion = nn.MSELoss()
 criterion_l1 = nn.L1Loss()
 criterion_perceptual = VGGPerceptualLoss(resize=False).cuda()
-criterion_lab = Lab_Loss().cuda()
+# criterion_lab = Lab_Loss().cuda()
 # criterion_context = cl.ContextualLoss(use_vgg=True, vgg_layer='relu5_4').cuda()
 # criterion_tv = TVLoss(TVLoss_weight=10).cuda()
 # erosion = Erosion2d(1, 1, 5, soft_max=False).cuda()
