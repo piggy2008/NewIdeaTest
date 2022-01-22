@@ -48,7 +48,7 @@ args = {
     'gnn': True,
     'choice': 8,
     # 'choice2': 4,
-    'layers': 18,
+    'layers': 16,
     # 'layers2': 3,
     'en_channels': [64, 128, 256],
     'de_channels': 128,
@@ -273,7 +273,7 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
 
     total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss4 \
                  + 0.25 * loss7 + 0.25 * loss8 + 0.25 * loss10 \
-                 + 0.01 * loss0_lab \
+                 + 0.00001 * loss0_lab \
                     + 0.1 * (loss2_1)
     # distill_loss = loss6_k + loss7_k + loss8_k
 
