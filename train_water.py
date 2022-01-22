@@ -48,7 +48,7 @@ args = {
     'gnn': True,
     'choice': 8,
     # 'choice2': 4,
-    'layers': 16,
+    'layers': 20,
     # 'layers2': 3,
     'en_channels': [64, 128, 256],
     'de_channels': 128,
@@ -109,7 +109,7 @@ train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_wo
 criterion = nn.MSELoss()
 criterion_l1 = nn.L1Loss()
 criterion_perceptual = VGGPerceptualLoss(resize=False).cuda()
-criterion_lab = Lab_Loss().cuda()
+# criterion_lab = Lab_Loss().cuda()
 # criterion_context = cl.ContextualLoss(use_vgg=True, vgg_layer='relu5_4').cuda()
 # criterion_tv = TVLoss(TVLoss_weight=10).cuda()
 # erosion = Erosion2d(1, 1, 5, soft_max=False).cuda()
@@ -227,8 +227,8 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     lab = Variable(lab).cuda(device_id)
     depth = Variable(depth).cuda(device_id)
     labels = Variable(target).cuda(device_id)
+    labels_lab = Variable(lab_target[:, 1:, :, :]).cuda(device_id)
 
-    # labels_lab = Variable(lab_target[:, :2, :, :]).cuda(device_id)
     # labels_lab3 = Variable(lab_target).cuda(device_id)
 
 
@@ -237,12 +237,16 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     # print(get_random_cand2() + get_random_cand())
     optimizer.zero_grad()
 
-    final, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
+    final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
 
     loss0 = criterion(final, labels)
     loss1 = criterion_l1(final, labels)
 
-    loss0_lab = criterion_lab(final, labels)
+    loss0_2 = criterion(final2, labels)
+    loss1_2 = criterion_l1(final2, labels)
+
+    # loss_mid_ab = criterion(mid_ab, labels_lab)
+    loss_mid_ab = criterion_l1(mid_ab, labels_lab)
 
     # loss0_lab = criterion(final_lab, labels_lab)
     # loss1_lab = criterion_l1(final_lab, labels_lab)
@@ -251,6 +255,7 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     # loss1_lab3 = criterion_l1(final_lab3, labels_lab3)
 
     loss7 = criterion_perceptual(final, labels)
+    loss7_2 = criterion_perceptual(final2, labels)
     # loss11 = criterion_tv(final)
 
     # loss5 = criterion(final2, labels)
@@ -260,7 +265,7 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     # loss3 = criterion(inter_hsv, labels)
     loss4 = criterion(inter_lab, labels)
 
-    loss2_1 = criterion_l1(inter_rgb, labels)
+    # loss2_1 = criterion_l1(inter_rgb, labels)
     # loss3_1 = criterion_l1(inter_hsv, labels)
     # loss4_1 = criterion_l1(inter_lab, labels)
 
@@ -273,15 +278,16 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
 
     total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss4 \
                  + 0.25 * loss7 + 0.25 * loss8 + 0.25 * loss10 \
-                 + 0.00001 * loss0_lab \
-                    + 0.1 * (loss2_1)
+                 + 1 * loss0_2 + 0.25 * loss1_2 + 0.25 * loss7_2 \
+                    + 0.5 * (loss_mid_ab)
+
     # distill_loss = loss6_k + loss7_k + loss8_k
 
     # total_loss = total_loss + 0.1 * distill_loss
     total_loss.backward()
     optimizer.step()
 
-    print_log(total_loss, loss0, loss7, loss0_lab, args['train_batch_size'], curr_iter, optimizer)
+    print_log(total_loss, loss0, loss7, loss_mid_ab, args['train_batch_size'], curr_iter, optimizer)
 
     return
 

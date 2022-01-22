@@ -27,11 +27,14 @@ class Water(nn.Module):
         # self.vit3 = ViT(image_size=32, patch_size=4, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
 
         self.search = Search(channel=de_channels)
+        # self.search2 = Search(channel=de_channels)
         # self.color = Color(channel=de_channels)
 
         # self.de_predict_color = nn.Sequential(nn.Conv2d(de_channels, 2, kernel_size=1, stride=1))
 
         self.de_predict = nn.Sequential(nn.Conv2d(de_channels, 3, kernel_size=1, stride=1))
+        self.de_predict_conv1_ab = nn.Sequential(nn.Conv2d(de_channels, 128, kernel_size=1, stride=1), nn.ReLU(inplace=True))
+        self.de_predict_conv2_ab = nn.Sequential(nn.Conv2d(de_channels, 2, kernel_size=1, stride=1))
         # self.de_predict_lab_final = nn.Sequential(nn.Conv2d(de_channels, 1, kernel_size=1, stride=1))
         # self.de_predict2 = nn.Sequential(nn.Conv2d(128, 3, kernel_size=1, stride=1))
         self.de_predict_rgb = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
@@ -68,22 +71,28 @@ class Water(nn.Module):
         # third = self.align3(third_rgb)
 
 
-        final = self.search(third, second, first, select[12:])
+        final, third, second, first = self.search(third, second, first, select[12:16])
         # final_color = self.search_color(third, second, first, select[16:])
         final_rgb = self.de_predict(final)
+        mid_ab_feat = self.de_predict_conv1_ab(final)
+        mid_ab = self.de_predict_conv2_ab(mid_ab_feat)
+        mid_ab_feat3 = F.interpolate(mid_ab_feat, size=third.size()[2:], mode='bilinear')
+        mid_ab_feat2 = F.interpolate(mid_ab_feat, size=second.size()[2:], mode='bilinear')
+        final2_rgb, third, second, first = self.search(third + mid_ab_feat3,
+                                                   second + mid_ab_feat2, first + mid_ab_feat, select[16:])
         # temp_gray = torch.mean(final_rgb, dim=1, keepdim=True)
         # final_lab = self.de_predict_color_final(final_color)
         # final_lab = torch.cat([temp_gray, final_lab], dim=1)
         # final2 = self.de_predict2(final2)
 
-        return final_rgb, inter_rgb, inter_lab
+        return final_rgb, mid_ab, final2_rgb, inter_rgb, inter_lab
 
 if __name__ == '__main__':
     a = torch.zeros(2, 3, 128, 128)
     b = torch.zeros(2, 1, 128, 128)
 
-    model = Water()
-    r = model(a, a, a, b, [1, 2, 3, 1, 2, 3, 1, 2, 3, 1])
+    model = Water(en_channels=[64, 128, 256], de_channels=128)
+    r = model(a, a, a, b, [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1])
     print(r[0].shape)
 
 
