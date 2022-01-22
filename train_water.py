@@ -48,7 +48,7 @@ args = {
     'gnn': True,
     'choice': 8,
     # 'choice2': 4,
-    'layers': 18,
+    'layers': 20,
     # 'layers2': 3,
     'en_channels': [64, 128, 256],
     'de_channels': 128,
