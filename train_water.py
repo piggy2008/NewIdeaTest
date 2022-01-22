@@ -59,7 +59,7 @@ args = {
     'iter_num': 240000,
     'iter_save': 4000,
     'iter_start_seq': 0,
-    'train_batch_size': 12,
+    'train_batch_size': 8,
     'last_iter': 0,
     'lr': 1e-4,
     'lr_decay': 0.9,
@@ -78,7 +78,7 @@ args = {
     # 'train_loader': 'flow_image3',
     # 'train_loader': 'video_sequence'
     # 'image_size': 430,
-    # 'crop_size': 380,
+    'crop_size': 256,
     # 'self_distill': 0.1,
     # 'teacher_distill': 0.6
 }
@@ -87,7 +87,7 @@ imgs_file = os.path.join(datasets_root, args['imgs_file'])
 # imgs_file = os.path.join(datasets_root, 'video_saliency/train_all_DAFB3_seq_5f.txt')
 
 joint_transform = joint_transforms.Compose([
-    joint_transforms.RandomCrop(128),
+    joint_transforms.RandomCrop(args['crop_size']),
     joint_transforms.RandomHorizontallyFlip(),
 ])
 
