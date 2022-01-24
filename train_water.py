@@ -235,16 +235,17 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     # print(get_random_cand2() + get_random_cand())
     optimizer.zero_grad()
 
-    final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
+    # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
+    final, final2 = net(rgb, hsv, lab, depth, get_random_cand())
 
-    loss0 = criterion(final, labels)
-    loss1 = criterion_l1(final, labels)
+    loss0 = criterion(final, labels_lab)
+    loss1 = criterion_l1(final, labels_lab)
 
     loss0_2 = criterion(final2, labels)
     loss1_2 = criterion_l1(final2, labels)
 
     # loss_mid_ab = criterion(mid_ab, labels_lab)
-    loss_mid_ab = criterion_l1(mid_ab, labels_lab)
+    # loss_mid_ab = criterion_l1(mid_ab, labels_lab)
 
     # loss0_lab = criterion(final_lab, labels_lab)
     # loss1_lab = criterion_l1(final_lab, labels_lab)
@@ -252,39 +253,41 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     # loss0_lab3 = criterion(final_lab3, labels_lab3)
     # loss1_lab3 = criterion_l1(final_lab3, labels_lab3)
 
-    loss7 = criterion_perceptual(final, labels)
+    # loss7 = criterion_perceptual(final, labels)
     loss7_2 = criterion_perceptual(final2, labels)
     # loss11 = criterion_tv(final)
 
     # loss5 = criterion(final2, labels)
     # loss6 = criterion_l1(final2, labels)
 
-    loss2 = criterion(inter_rgb, labels)
+    # loss2 = criterion(inter_rgb, labels)
     # loss3 = criterion(inter_hsv, labels)
-    loss4 = criterion(inter_lab, labels)
+    # loss4 = criterion(inter_lab, labels)
 
     # loss2_1 = criterion_l1(inter_rgb, labels)
     # loss3_1 = criterion_l1(inter_hsv, labels)
     # loss4_1 = criterion_l1(inter_lab, labels)
 
-    loss8 = criterion_perceptual(inter_rgb, labels)
+    # loss8 = criterion_perceptual(inter_rgb, labels)
     # loss9 = criterion_perceptual(inter_hsv, labels)
-    loss10 = criterion_perceptual(inter_lab, labels)
+    # loss10 = criterion_perceptual(inter_lab, labels)
     # texture_features = get_features(rgb, vgg)
     # target_features = get_features(labels, vgg)
     # content_loss = torch.mean((texture_features['relu5_4'] - target_features['relu5_4']) ** 2)
 
-    total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss4 \
-                 + 0.25 * loss7 + 0.25 * loss8 + 0.25 * loss10 \
+    # total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss4 \
+    #              + 0.25 * loss7 + 0.25 * loss8 + 0.25 * loss10 \
+    #              + 1 * loss0_2 + 0.25 * loss1_2 + 0.25 * loss7_2 \
+    #                 + 0.5 * (loss_mid_ab)
+    total_loss = 1 * loss0 + 0.25 * loss1  \
                  + 1 * loss0_2 + 0.25 * loss1_2 + 0.25 * loss7_2 \
-                    + 0.5 * (loss_mid_ab)
     # distill_loss = loss6_k + loss7_k + loss8_k
 
     # total_loss = total_loss + 0.1 * distill_loss
     total_loss.backward()
     optimizer.step()
 
-    print_log(total_loss, loss0, loss0_2, loss_mid_ab, args['train_batch_size'], curr_iter, optimizer)
+    print_log(total_loss, loss0, loss0_2, loss7_2, args['train_batch_size'], curr_iter, optimizer)
 
     return
 
