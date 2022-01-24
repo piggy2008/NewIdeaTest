@@ -59,7 +59,7 @@ args = {
     'iter_num': 240000,
     'iter_save': 4000,
     'iter_start_seq': 0,
-    'train_batch_size': 8,
+    'train_batch_size': 10,
     'last_iter': 0,
     'lr': 1e-4,
     'lr_decay': 0.9,
@@ -78,7 +78,7 @@ args = {
     # 'train_loader': 'flow_image3',
     # 'train_loader': 'video_sequence'
     # 'image_size': 430,
-    'crop_size': 256,
+    'crop_size': 128,
     # 'self_distill': 0.1,
     # 'teacher_distill': 0.6
 }
