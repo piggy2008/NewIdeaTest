@@ -103,9 +103,10 @@ def main(snapshot):
 
             # img_list = [i_id.strip() for i_id in open(imgs_path)]
             img = Image.open(os.path.join(args['image_path'], name + '.png')).convert('RGB')
-            img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+            img = np.array(img)
+            # img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
             # depth = Image.open(os.path.join(args['depth_path'], name + '.png_depth_estimate.png')).convert('L')
-
+            img = cv2.resize(img, (256, 256))
             hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
             # srgb_profile = ImageCms.createProfile("sRGB")
             # lab_profile = ImageCms.createProfile("LAB")
@@ -136,6 +137,7 @@ def main(snapshot):
 
             gt = Image.open(os.path.join(args['gt_path'], name + '.png')).convert('RGB')
             gt = np.asarray(gt)
+            gt = cv2.resize(gt, (256, 256))
             print(gt.shape, '-----', prediction.shape)
             psnr = calculate_psnr(prediction * 255.0, gt)
             ssim = calculate_ssim(prediction * 255.0, gt)
