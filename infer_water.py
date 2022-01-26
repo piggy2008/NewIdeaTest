@@ -16,6 +16,7 @@ from matplotlib import pyplot as plt
 from underwater_model.model_SPOS import Water
 from skimage import img_as_ubyte
 import cv2
+import random
 
 
 torch.manual_seed(2020)
@@ -42,10 +43,10 @@ args = {
     # 'image_path': '/mnt/hdd/data/ty2/input_test',
     # 'depth_path': '/mnt/hdd/data/ty2/depth_test',
     # 'gt_path': '/mnt/hdd/data/ty2/gt_test',
-    'image_path': '/home/ty/data/uw/input_test',
+    'image_path': '/home/ty/data/LSUI/backup/input',
     'depth_path': '/home/ty/data/uw/depth_test',
-    'gt_path': '/home/ty/data/uw/gt_test',
-    'dataset': 'deep',
+    'gt_path': '/home/ty/data/LSUI/backup/GT',
+    'dataset': 'LSUI',
     'start': 0
 }
 
@@ -55,15 +56,23 @@ img_transform = transforms.Compose([
 to_pil = transforms.ToPILImage()
 
 def read_testset(dataset, image_path):
-    images = os.listdir(image_path)
     if dataset == 'UIEB':
+        images = os.listdir(image_path)
         uieb = []
         for img in images:
             if img.find('deep') > 0:
                 continue
             uieb.append(img[:-4])
         return uieb
+    elif dataset == 'LSUI':
+        images = os.listdir(image_path)
+        lsui = []
+        random_list = random.sample(range(0, len(images)), 504)
+        for num in random_list:
+            lsui.append(images[num][:-4])
+        return lsui
     else:
+        images = os.listdir(image_path)
         s1000 = []
         for img in images:
             if img.find('deep') > 0:
@@ -97,11 +106,9 @@ def main(snapshot):
 
 
             # img_list = [i_id.strip() for i_id in open(imgs_path)]
-            img = Image.open(os.path.join(args['image_path'], name + '.png')).convert('RGB')
+            img = Image.open(os.path.join(args['image_path'], name + '.jpg')).convert('RGB')
             img = np.array(img)
-           
-            depth = Image.open(os.path.join(args['depth_path'], name + '.png_depth_estimate.png')).convert('L')
-
+            # depth = Image.open(os.path.join(args['depth_path'], name + '.png_depth_estimate.png')).convert('L')
             hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
             # srgb_profile = ImageCms.createProfile("sRGB")
             # lab_profile = ImageCms.createProfile("LAB")
@@ -110,8 +117,9 @@ def main(snapshot):
             img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
             hsv_var = Variable(img_transform(hsv).unsqueeze(0), volatile=True).cuda()
             lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
-            depth_var = Variable(img_transform(depth).unsqueeze(0), volatile=True).cuda()
-            prediction, prediction2, hsv_side, lab_side = net(img_var, hsv_var, lab_var, depth_var, [1, 7, 6, 5, 4, 5, 5, 1, 3, 5, 5, 6, 6, 4, 6, 3, 3, 6, 2, 1])
+            prediction, prediction2, hsv_side, lab_side = net(img_var, hsv_var, lab_var, None, [1, 7, 6, 5, 4, 5, 5, 1, 3, 5, 5, 6, 6, 4, 6, 3, 3, 6, 2, 1])
+            # depth_var = Variable(img_transform(depth).unsqueeze(0), volatile=True).cuda()
+
             # prediction = torch.unsqueeze(prediction, 0)
             # print(torch.unique(prediction))
             # precision = to_pil(prediction.data.squeeze(0).cpu())
@@ -131,7 +139,7 @@ def main(snapshot):
             # prediction = MaxMinNormalization(prediction, prediction.max(), prediction.min()) * 255.0
             # prediction = prediction.astype('uint8')
 
-            gt = Image.open(os.path.join(args['gt_path'], name + '.png')).convert('RGB')
+            gt = Image.open(os.path.join(args['gt_path'], name + '.jpg')).convert('RGB')
             gt = np.asarray(gt)
             print(gt.shape, '-----', prediction.shape)
             # prediction = cv2.cvtColor(prediction * 255.0, cv2.COLOR_LAB2RGB)
