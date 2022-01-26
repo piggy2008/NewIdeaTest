@@ -72,9 +72,9 @@ class WaterImage2Folder(data.Dataset):
     # image and gt should be in the same folder and have same filename except extended name (jpg and png respectively)
     def __init__(self, root, joint_transform=None, transform=None, target_transform=None):
         self.root = root
-        self.imgs = os.listdir(os.path.join(root, 'input_train'))
+        self.imgs = os.listdir(os.path.join(root, 'train_input'))
         self.imgs.sort()
-        self.labels = os.listdir(os.path.join(root, 'gt_train'))
+        self.labels = os.listdir(os.path.join(root, 'train_gt'))
         self.labels.sort()
         self.joint_transform = joint_transform
         self.transform = transform
