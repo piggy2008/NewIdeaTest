@@ -106,10 +106,13 @@ def main(snapshot):
 
 
             # img_list = [i_id.strip() for i_id in open(imgs_path)]
+
             img = Image.open(os.path.join(args['image_path'], name + '.jpg')).convert('RGB')
             img = np.array(img)
+            img = cv2.resize(img, (256, 256))
             # depth = Image.open(os.path.join(args['depth_path'], name + '.png_depth_estimate.png')).convert('L')
             hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+
             # srgb_profile = ImageCms.createProfile("sRGB")
             # lab_profile = ImageCms.createProfile("LAB")
             # rgb2lab_transform = ImageCms.buildTransformFromOpenProfiles(srgb_profile, lab_profile, "RGB", "LAB")
@@ -141,6 +144,7 @@ def main(snapshot):
 
             gt = Image.open(os.path.join(args['gt_path'], name + '.jpg')).convert('RGB')
             gt = np.asarray(gt)
+            gt = cv2.resize(gt, (256, 256))
             print(gt.shape, '-----', prediction.shape)
             # prediction = cv2.cvtColor(prediction * 255.0, cv2.COLOR_LAB2RGB)
             # print(np.unique(prediction))
