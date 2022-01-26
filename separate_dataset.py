@@ -38,4 +38,4 @@ for img in images:
         save_gt_path = os.path.join(save_root_path, 'train_gt')
         if not os.path.exists(save_gt_path):
             os.makedirs(save_gt_path)
-        image.save(os.path.join(gt_path, img))
+        image.save(os.path.join(save_gt_path, img))
