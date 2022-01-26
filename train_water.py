@@ -14,7 +14,7 @@ import contextual_loss as cl
 
 import joint_transforms
 from config import msra10k_path, video_train_path, datasets_root, video_seq_gt_path, video_seq_path, saving_path
-from water_dataset import WaterImageFolder
+from water_dataset import WaterImageFolder, WaterImage2Folder
 from underwater_model.model_SPOS import Water
 
 from misc import AvgMeter, check_mkdir, VGGPerceptualLoss, Lab_Loss
@@ -70,7 +70,7 @@ args = {
     'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
     # 'imgs_file': '/mnt/hdd/data/ty2',
-    'imgs_file': '/home/ty/data/uw',
+    'imgs_file': '/home/ty/data/LSUI',
     # 'imgs_file': 'Pre-train/pretrain_all_seq_DAFB2_DAVSOD_flow.txt',
     # 'imgs_file2': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB2_DAVSOD_5f.txt',
@@ -100,7 +100,7 @@ img_transform = transforms.Compose([
 target_transform = transforms.ToTensor()
 
 # train_set = ImageFolder(msra10k_path, joint_transform, img_transform, target_transform)
-train_set = WaterImageFolder(args['imgs_file'],
+train_set = WaterImage2Folder(args['imgs_file'],
                                   joint_transform, img_transform, target_transform)
 train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=4, shuffle=True)
 # if train_set2 is not None:
