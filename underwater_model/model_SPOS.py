@@ -42,8 +42,8 @@ class Water(nn.Module):
         # self.de_predict_hsv = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
         self.de_predict_lab = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
     def forward(self, rgb, hsv, lab, trans_map, select):
-        trans_map2 = F.max_pool2d(1 - trans_map, kernel_size=3, stride=2, padding=1)
-        trans_map3 = F.max_pool2d(trans_map2, kernel_size=3, stride=2, padding=1)
+        # trans_map2 = F.max_pool2d(1 - trans_map, kernel_size=3, stride=2, padding=1)
+        # trans_map3 = F.max_pool2d(trans_map2, kernel_size=3, stride=2, padding=1)
         # x_lab3 = F.max_pool2d(x_lab3, kernel_size=3, stride=2, padding=1)
         # first_rgb, first_hsv, first_lab, second_rgb, second_hsv, second_lab, third_rgb, \
         # third_hsv, third_lab = self.base(rgb, hsv, lab, select[:18])
@@ -94,7 +94,7 @@ if __name__ == '__main__':
     b = torch.zeros(2, 1, 128, 128)
 
     model = Water(en_channels=[64, 128, 256], de_channels=128)
-    r = model(a, a, a, b, [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1])
+    r = model(a, a, a, b, [1, 7, 6, 5, 4, 5, 5, 1, 3, 5, 5, 6, 6, 4, 6, 3, 3, 6, 2, 1])
     print(r[0].shape)
 
 
