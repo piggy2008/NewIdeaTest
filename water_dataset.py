@@ -68,6 +68,50 @@ class WaterImageFolder(data.Dataset):
     def __len__(self):
         return len(self.imgs)
 
+class WaterImage2Folder(data.Dataset):
+    # image and gt should be in the same folder and have same filename except extended name (jpg and png respectively)
+    def __init__(self, root, joint_transform=None, transform=None, target_transform=None):
+        self.root = root
+        self.imgs = os.listdir(os.path.join(root, 'input_train'))
+        self.imgs.sort()
+        self.labels = os.listdir(os.path.join(root, 'gt_train'))
+        self.labels.sort()
+        self.joint_transform = joint_transform
+        self.transform = transform
+        self.target_transform = target_transform
+
+    def __getitem__(self, index):
+        img = Image.open(os.path.join(self.root, 'train_input', self.imgs[index])).convert('RGB')
+        target = Image.open(os.path.join(self.root, 'train_gt', self.labels[index])).convert('RGB')
+
+        img_list = []
+        gt_list = []
+        img_list.append(img)
+        img_list.append(target)
+        gt_list.append(img.convert('L'))
+        gt_list.append(img.convert('L'))
+        if self.joint_transform is not None:
+            img_list, gt_list = self.joint_transform(img_list, gt_list)
+
+        img = img_list[0]
+        # hsv = img_list[0].convert('HSV')
+        hsv = convert_from_image_to_hsv(img_list[0])
+        # lab = img_list[0].convert('HSV')
+        lab = convert_from_image_to_lab(img_list[0])
+        lab_target = convert_from_image_to_lab(img_list[1])
+        target = convert_from_image_to_cv2(img_list[1])
+        if self.transform is not None:
+            img = self.transform(img)
+            hsv = self.transform(hsv)
+            lab = self.transform(lab)
+            target = self.transform(target)
+            lab_target = self.transform(lab_target)
+
+        return img, hsv, lab, target, lab_target
+
+    def __len__(self):
+        return len(self.imgs)
+
 def get_features(image, model, layers=None):
     if layers is None:
         layers = {'0': 'conv1_1',
