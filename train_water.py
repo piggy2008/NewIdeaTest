@@ -199,13 +199,13 @@ def train(net, vgg, optimizer):
             #                                                 ) ** args['lr_decay']
             #
             # inputs, flows, labels, pre_img, pre_lab, cur_img, cur_lab, next_img, next_lab = data
-            rgb, hsv, lab, target, lab_target, depth = data
+            rgb, hsv, lab, target, lab_target = data
             # data2 = next(dataloader_iterator)
             # inputs2, labels2 = data2
             # train_single(net, inputs, flows, labels, optimizer, curr_iter, teacher)
 
 
-            train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer, curr_iter)
+            train_single2(net, vgg, rgb, hsv, lab, target, lab_target, None, optimizer, curr_iter)
             curr_iter += 1
 
             if curr_iter % args['iter_save'] == 0:
@@ -225,7 +225,7 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     rgb = Variable(rgb).cuda(device_id)
     hsv = Variable(hsv).cuda(device_id)
     lab = Variable(lab).cuda(device_id)
-    depth = Variable(depth).cuda(device_id)
+    # depth = Variable(depth).cuda(device_id)
     labels = Variable(target).cuda(device_id)
     labels_lab = Variable(lab_target).cuda(device_id)
 
@@ -238,7 +238,7 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     optimizer.zero_grad()
 
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
-    final, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
+    final, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, None, get_random_cand())
 
     loss0 = criterion(final, labels_lab[:, 1:, :, :])
     loss1 = criterion_l1(final, labels_lab[:, 1:, :, :])
