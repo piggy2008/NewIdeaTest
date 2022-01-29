@@ -16,6 +16,7 @@ import joint_transforms
 from config import msra10k_path, video_train_path, datasets_root, video_seq_gt_path, video_seq_path, saving_path
 from water_dataset import WaterImageFolder, WaterImage2Folder
 from underwater_model.model_SPOS import Water
+from underwater_model.discriminator import Discriminator
 
 from misc import AvgMeter, check_mkdir, VGGPerceptualLoss, Lab_Loss
 from torch.backends import cudnn
@@ -59,7 +60,7 @@ args = {
     'iter_num': 240000,
     'iter_save': 4000,
     'iter_start_seq': 0,
-    'train_batch_size': 16,
+    'train_batch_size': 10,
     'last_iter': 0,
     'lr': 1e-4,
     'lr_decay': 0.9,
@@ -70,7 +71,7 @@ args = {
     'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
     # 'imgs_file': '/mnt/hdd/data/ty2',
-    'imgs_file': '/home/ty/data/EUVP',
+    'imgs_file': '/home/ty/data/uw',
     # 'imgs_file': 'Pre-train/pretrain_all_seq_DAFB2_DAVSOD_flow.txt',
     # 'imgs_file2': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB2_DAVSOD_5f.txt',
@@ -100,7 +101,7 @@ img_transform = transforms.Compose([
 target_transform = transforms.ToTensor()
 
 # train_set = ImageFolder(msra10k_path, joint_transform, img_transform, target_transform)
-train_set = WaterImage2Folder(args['imgs_file'],
+train_set = WaterImageFolder(args['imgs_file'],
                                   joint_transform, img_transform, target_transform)
 train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=4, shuffle=True)
 # if train_set2 is not None:
@@ -130,6 +131,7 @@ def fix_parameters(parameters):
 def main():
 
     net = Water(en_channels=args['en_channels'], de_channels=args['de_channels']).cuda(device_id).train()
+    discriminator = Discriminator().cuda(device_id).train()
     # vgg = models.vgg19(pretrained=True).features
     # for param in vgg.parameters():
     #     param.requires_grad_(False)
@@ -158,8 +160,9 @@ def main():
     # ], momentum=args['momentum'])
 
     optimizer = optim.Adam([{'params': remains}],
-                          lr=args['lr'], betas=(0.9, 0.999))
-
+                          lr=args['lr'], betas=(0.5, 0.999))
+    optimizer_d = optim.Adam([{'params': discriminator.parameters()}],
+                           lr=args['lr'], betas=(0.5, 0.999))
     if len(args['snapshot']) > 0:
         print('training resumes from ' + args['snapshot'])
         net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth')))
@@ -177,10 +180,10 @@ def main():
     check_mkdir(ckpt_path)
     check_mkdir(os.path.join(ckpt_path, exp_name))
     open(log_path, 'w').write(str(args) + '\n\n')
-    train(net, None, optimizer)
+    train(net, discriminator, optimizer, optimizer_d)
 
 
-def train(net, vgg, optimizer):
+def train(net, discriminator, optimizer, optimizer_d):
     curr_iter = args['last_iter']
     while True:
 
@@ -199,13 +202,13 @@ def train(net, vgg, optimizer):
             #                                                 ) ** args['lr_decay']
             #
             # inputs, flows, labels, pre_img, pre_lab, cur_img, cur_lab, next_img, next_lab = data
-            rgb, hsv, lab, target, lab_target = data
+            rgb, hsv, lab, target, lab_target, depth = data
             # data2 = next(dataloader_iterator)
             # inputs2, labels2 = data2
             # train_single(net, inputs, flows, labels, optimizer, curr_iter, teacher)
 
 
-            train_single2(net, vgg, rgb, hsv, lab, target, lab_target, None, optimizer, curr_iter)
+            train_single2(net, discriminator, rgb, hsv, lab, target, lab_target, None, optimizer, optimizer_d, curr_iter)
             curr_iter += 1
 
             if curr_iter % args['iter_save'] == 0:
@@ -221,15 +224,23 @@ def train(net, vgg, optimizer):
                 return
 
 
-def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer, curr_iter):
+def train_single2(net, discriminator, rgb, hsv, lab, target, lab_target, depth, optimizer, optimizer_d, curr_iter):
     rgb = Variable(rgb).cuda(device_id)
     hsv = Variable(hsv).cuda(device_id)
     lab = Variable(lab).cuda(device_id)
+    rgb_64 = F.interpolate(rgb, size=[64, 64], mode='bilinear')
+    rgb_32 = F.interpolate(rgb, size=[32, 32], mode='bilinear')
     # depth = Variable(depth).cuda(device_id)
     labels = Variable(target).cuda(device_id)
     labels_lab = Variable(lab_target).cuda(device_id)
 
+    labels_64 = F.interpolate(labels, size=[64, 64], mode='bilinear')
+    labels_32 = F.interpolate(labels, size=[32, 32], mode='bilinear')
+
     # labels_lab3 = Variable(lab_target).cuda(device_id)
+    patch = (1, 256 // 2 ** 5, 256 // 2 ** 5)
+    valid = Variable(torch.Tensor(np.ones((labels.size(0), *patch))), requires_grad=False)  # 全1
+    fake = Variable(torch.Tensor(np.zeros((labels.size(0), *patch))), requires_grad=False)  # 全0
 
 
     get_random_cand = lambda: tuple(np.random.randint(args['choice']) for i in range(args['layers']))
@@ -238,7 +249,10 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     optimizer.zero_grad()
 
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
-    final, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, None, get_random_cand())
+    final, final2, inter_rgb, inter_lab, third, second = net(rgb, hsv, lab, None, get_random_cand())
+
+    pred_fake = discriminator([third, second, final2], [rgb_32, rgb_64, rgb])
+    loss_GAN = criterion(pred_fake, valid)
 
     loss0 = criterion(final, labels_lab[:, 1:, :, :])
     loss1 = criterion_l1(final, labels_lab[:, 1:, :, :])
@@ -277,19 +291,46 @@ def train_single2(net, vgg, rgb, hsv, lab, target, lab_target, depth, optimizer,
     # target_features = get_features(labels, vgg)
     # content_loss = torch.mean((texture_features['relu5_4'] - target_features['relu5_4']) ** 2)
 
+    loss1_third = criterion(third, labels_32)
+    loss2_third = criterion_l1(third, labels_32)
+
+    loss1_second = criterion(second, labels_64)
+    loss2_second = criterion_l1(second, labels_64)
+
     total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss4 \
                  + 0.25 * loss8 + 0.25 * loss10 \
                  + 1 * loss0_2 + 0.25 * loss1_2 + 0.25 * loss7_2 \
-
+                 + loss1_third + 0.25 * loss2_third + loss1_second + 0.25 * loss2_second \
+                 + loss_GAN
     # total_loss = 1 * loss0 + 0.25 * loss1  \
     #              + 1 * loss0_2 + 0.25 * loss1_2 + 0.25 * loss7_2 \
     # distill_loss = loss6_k + loss7_k + loss8_k
 
     # total_loss = total_loss + 0.1 * distill_loss
-    total_loss.backward()
+    total_loss.backward(retain_graph=True)
     optimizer.step()
 
-    print_log(total_loss, loss0, loss0_2, loss7_2, args['train_batch_size'], curr_iter, optimizer)
+    # discriminator
+    optimizer_d.zero_grad()
+    # Real loss
+    pred_real = discriminator([labels_32, labels_64, labels], [rgb_32, rgb_64, rgb])
+    loss_real = criterion(pred_real, valid)
+
+    # Fake loss
+    final2 = final2.detach()
+    third = third.detach()
+    second = second.detach()
+    pred_fake1 = discriminator([third, second, final2], [rgb_32, rgb_64, rgb])
+    loss_fake = criterion(pred_fake1, fake)
+
+    # Total loss
+    loss_D = 0.5 * (loss_real + loss_fake)
+    # loss_D=loss_real
+
+    loss_D.backward(retain_graph=True)
+    optimizer_d.step()
+
+    print_log(total_loss, loss0, loss0_2, loss_D, args['train_batch_size'], curr_iter, optimizer)
 
     return
 

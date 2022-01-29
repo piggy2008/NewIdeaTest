@@ -7,6 +7,7 @@ from underwater_model.search_net import Search
 from underwater_model.color_SPOS import Color
 from underwater_model.vit import ViT
 
+
 class Water(nn.Module):
     def __init__(self, en_channels, de_channels):
         super(Water, self).__init__()
@@ -41,6 +42,8 @@ class Water(nn.Module):
         self.de_predict_rgb = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
         # self.de_predict_hsv = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
         self.de_predict_lab = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
+        self.de_predict_third = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
+        self.de_predict_second = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
     def forward(self, rgb, hsv, lab, trans_map, select):
         # trans_map2 = F.max_pool2d(1 - trans_map, kernel_size=3, stride=2, padding=1)
         # trans_map3 = F.max_pool2d(trans_map2, kernel_size=3, stride=2, padding=1)
@@ -86,16 +89,18 @@ class Water(nn.Module):
         # final_lab = torch.cat([temp_gray, final_lab], dim=1)
         # final2 = self.de_predict2(final2)
         final2_rgb = self.de_predict2(final2)
+        third = self.de_predict_third(third)
+        second = self.de_predict_second(second)
 
-        return final_ab, final2_rgb, inter_rgb, inter_lab
+        return final_ab, final2_rgb, inter_rgb, inter_lab, third, second
 
 if __name__ == '__main__':
     a = torch.zeros(2, 3, 128, 128)
     b = torch.zeros(2, 1, 128, 128)
 
     model = Water(en_channels=[64, 128, 256], de_channels=128)
-    r = model(a, a, a, b, [1, 7, 6, 5, 4, 5, 5, 1, 3, 5, 5, 6, 6, 4, 6, 3, 3, 6, 2, 1])
-    print(r[0].shape)
+    r, r1, r2, r3 = model(a, a, a, b, [1, 7, 6, 5, 4, 5, 5, 1, 3, 5, 5, 6, 6, 4, 6, 3, 3, 6, 2, 1])
+    print(r1.shape, '--', r2.shape, '--', r3.shape)
 
 
 

@@ -7,43 +7,43 @@ class Round1(nn.Module):
     def __init__(self, channel=128):
         super(Round1, self).__init__()
         # self.r1_l1_zero = Zero(1, True)
-        self.r1_l1_skipconnect = Identity(True)
+        self.r1_l1_skipconnect = Identity(False)
         # self.r1_l1_sepconv = SepConv(channel, channel, 3, 1, 1, affine=True, upsample=True)
         # self.r1_l1_sepconvdouble = SepConvDouble(channel, channel, 3, 1, 1, affine=True, upsample=True)
         # self.r1_l1_dilconv = DilConv(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
         self.r1_l1_sge = sge_layer(16)
         # self.r1_l1_dilconvdouble = DilConvDouble(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
         self.r1_l1_eca = eca_layer(3)
-        self.r1_l1_dil4Conv = DilConv(channel, channel, 3, 1, 4, 4, affine=True, upsample=True)
-        self.r1_l1_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=True)
+        self.r1_l1_dil4Conv = DilConv(channel, channel, 3, 1, 4, 4, affine=True, upsample=False)
+        self.r1_l1_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=False)
         self.r1_l1_da = DoubleAttentionLayer(channel, channel, channel)
         self.r1_l1_se = SELayer(channel)
         self.r1_l1_sa = sa_layer(channel, groups=16)
 
         # self.r1_l13_zero = Zero(1, True)
-        self.r1_l13_skipconnect = Identity(True)
+        self.r1_l13_skipconnect = Identity(False)
         # self.r1_l13_sepconv = SepConv(channel, channel, 3, 1, 1, affine=True, upsample=True)
         # self.r1_l13_sepconvdouble = SepConvDouble(channel, channel, 3, 1, 1, affine=True, upsample=True)
         # self.r1_l13_dilconv = DilConv(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
         self.r1_l13_sge = sge_layer(16)
         # self.r1_l13_dilconvdouble = DilConvDouble(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
         self.r1_l13_eca = eca_layer(3)
-        self.r1_l13_dil4Conv = DilConv(channel, channel, 3, 1, 4, 4, affine=True, upsample=True)
-        self.r1_l13_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=True)
+        self.r1_l13_dil4Conv = DilConv(channel, channel, 3, 1, 4, 4, affine=True, upsample=False)
+        self.r1_l13_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=False)
         self.r1_l13_da = DoubleAttentionLayer(channel, channel, channel)
         self.r1_l13_se = SELayer(channel)
         self.r1_l13_sa = sa_layer(channel, groups=16)
 
         # self.r1_l2_zero = Zero(1, True)
-        self.r1_l2_skipconnect = Identity(True)
+        self.r1_l2_skipconnect = Identity(False)
         # self.r1_l2_sepconv = SepConv(channel, channel, 3, 1, 1, affine=True, upsample=True)
         # self.r1_l2_sepconvdouble = SepConvDouble(channel, channel, 3, 1, 1, affine=True, upsample=True)
         # self.r1_l2_dilconv = DilConv(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
         self.r1_l2_sge = sge_layer(16)
         # self.r1_l2_dilconvdouble = DilConvDouble(channel, channel, 3, 1, 2, 2, affine=True, upsample=True)
         self.r1_l2_eca = eca_layer(3)
-        self.r1_l2_dil4Conv = DilConv(channel, channel, 3, 1, 4, 4, affine=True, upsample=True)
-        self.r1_l2_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=True)
+        self.r1_l2_dil4Conv = DilConv(channel, channel, 3, 1, 4, 4, affine=True, upsample=False)
+        self.r1_l2_conv = Conv(channel, channel, 3, 1, 1, affine=True, upsample=False)
         self.r1_l2_da = DoubleAttentionLayer(channel, channel, channel)
         self.r1_l2_se = SELayer(channel)
         self.r1_l2_sa = sa_layer(channel, groups=16)
@@ -87,6 +87,7 @@ class Round1(nn.Module):
             xy = self.r1_l1_sa(x)
         # else:
         #     x = self.r1_l1_ca(x)
+        xy_temp = xy
         if xy.size()[2:] != y.size()[2:]:
             xy = F.interpolate(xy, y.size()[2:], mode='bilinear')
 
@@ -115,7 +116,7 @@ class Round1(nn.Module):
             yz = self.r1_l2_sa(y)
         # else:
         #     y = self.r1_l2_ca(y)
-
+        yz_temp = yz
         if yz.size()[2:] != z.size()[2:]:
             yz = F.interpolate(yz, z.size()[2:], mode='bilinear')
         #
@@ -143,6 +144,7 @@ class Round1(nn.Module):
             xz = self.r1_l13_sa(x)
         # else:
         #     x = self.r1_l1_ca(x)
+        xz_temp = xz
         if xz.size()[2:] != z.size()[2:]:
             xz = F.interpolate(xz, z.size()[2:], mode='bilinear')
 
@@ -172,9 +174,10 @@ class Round1(nn.Module):
             z = self.r1_l3_sa(z)
         # else:
         #     z = self.r1_l3_ca(z)
+        z_temp = z
         fuse = z + xz + yz
 
-        return fuse, xy, yz, z
+        return fuse, xy_temp, yz_temp, z_temp
 
 class Round2(nn.Module):
     def __init__(self):
