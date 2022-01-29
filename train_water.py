@@ -239,8 +239,8 @@ def train_single2(net, discriminator, rgb, hsv, lab, target, lab_target, depth, 
 
     # labels_lab3 = Variable(lab_target).cuda(device_id)
     patch = (1, 256 // 2 ** 5, 256 // 2 ** 5)
-    valid = Variable(torch.Tensor(np.ones((labels.size(0), *patch))), requires_grad=False)  # 全1
-    fake = Variable(torch.Tensor(np.zeros((labels.size(0), *patch))), requires_grad=False)  # 全0
+    valid = Variable(torch.Tensor(np.ones((labels.size(0), *patch))), requires_grad=False).cuda(device_id) # 全1
+    fake = Variable(torch.Tensor(np.zeros((labels.size(0), *patch))), requires_grad=False).cuda(device_id)  # 全0
 
 
     get_random_cand = lambda: tuple(np.random.randint(args['choice']) for i in range(args['layers']))
