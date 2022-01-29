@@ -244,8 +244,8 @@ class Conv(nn.Module):
             torch.nn.Upsample(scale_factor=2, mode='bilinear')
         )
         self.op = nn.Sequential(
-            nn.ReLU(inplace=False),
             nn.Conv2d(C_in, C_out, kernel_size=kernel_size, stride=stride, padding=padding, bias=False),
+            nn.ReLU(inplace=False),
             # nn.BatchNorm2d(C_out, affine=affine),
         )
 
@@ -307,10 +307,10 @@ class DilConv(nn.Module):
         )
 
         self.op = nn.Sequential(
-            nn.ReLU(inplace=False),
             nn.Conv2d(C_in, C_in, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation,
                       bias=False),
             nn.Conv2d(C_in, C_out, kernel_size=1, padding=0, bias=False),
+            nn.ReLU(inplace=False),
             # nn.BatchNorm2d(C_out, affine=affine),
         )
 
@@ -437,7 +437,7 @@ class Identity(nn.Module):
     def forward(self, x):
         if self.upsample == True:
             x = self.up(x)
-        return x
+        return torch.relu(x)
 
 
 class Zero(nn.Module):
