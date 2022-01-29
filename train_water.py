@@ -101,7 +101,7 @@ img_transform = transforms.Compose([
 target_transform = transforms.ToTensor()
 
 # train_set = ImageFolder(msra10k_path, joint_transform, img_transform, target_transform)
-train_set = WaterImage2Folder(args['imgs_file'],
+train_set = WaterImageFolder(args['imgs_file'],
                                   joint_transform, img_transform, target_transform)
 train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=4, shuffle=True)
 # if train_set2 is not None:
@@ -131,7 +131,7 @@ def fix_parameters(parameters):
 def main():
 
     net = Water(en_channels=args['en_channels'], de_channels=args['de_channels']).cuda(device_id).train()
-    discriminator = Discriminator.cuda(device_id).train()
+    discriminator = Discriminator().cuda(device_id).train()
     # vgg = models.vgg19(pretrained=True).features
     # for param in vgg.parameters():
     #     param.requires_grad_(False)
@@ -237,8 +237,8 @@ def train_single2(net, discriminator, rgb, hsv, lab, target, lab_target, depth, 
     labels_32 = F.interpolate(labels, size=[32, 32], mode='bilinear')
     # labels_lab3 = Variable(lab_target).cuda(device_id)
     patch = (1, 256 // 2 ** 5, 256 // 2 ** 5)
-    valid = Variable(torch.Tensor(np.ones((labels.size(0), *patch))), requires_grad=False)  # 全1
-    fake = Variable(torch.Tensor(np.zeros((labels.size(0), *patch))), requires_grad=False)  # 全0
+    valid = Variable(torch.Tensor(np.ones((labels.size(0), *patch))), requires_grad=False).cuda(device_id) # 全1
+    fake = Variable(torch.Tensor(np.zeros((labels.size(0), *patch))), requires_grad=False).cuda(device_id)  # 全0
 
     get_random_cand = lambda: tuple(np.random.randint(args['choice']) for i in range(args['layers']))
     # get_random_cand2 = lambda: tuple(np.random.randint(args['choice2']) for i in range(args['layers2']))
