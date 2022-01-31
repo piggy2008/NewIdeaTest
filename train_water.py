@@ -110,7 +110,7 @@ train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_wo
 criterion = nn.MSELoss()
 criterion_l1 = nn.L1Loss()
 criterion_perceptual = VGGPerceptualLoss(resize=False).cuda()
-criterion_gan = GANLoss(gan_mode='lsgan').cuda()
+# criterion_gan = GANLoss(gan_mode='lsgan').cuda()
 # criterion_lab = Lab_Loss().cuda()
 # criterion_context = cl.ContextualLoss(use_vgg=True, vgg_layer='relu5_4').cuda()
 # criterion_tv = TVLoss(TVLoss_weight=10).cuda()
@@ -132,7 +132,7 @@ def fix_parameters(parameters):
 def main():
 
     net = Water(en_channels=args['en_channels'], de_channels=args['de_channels']).cuda(device_id).train()
-    discriminator = PatchDiscriminator(3).cuda(device_id).train()
+    # discriminator = PatchDiscriminator(3).cuda(device_id).train()
     # vgg = models.vgg19(pretrained=True).features
     # for param in vgg.parameters():
     #     param.requires_grad_(False)
@@ -161,9 +161,9 @@ def main():
     # ], momentum=args['momentum'])
 
     optimizer = optim.Adam([{'params': remains}],
-                          lr=args['lr'], betas=(0.5, 0.999))
-    optimizer_d = optim.Adam([{'params': discriminator.parameters()}],
-                           lr=args['lr'], betas=(0.5, 0.999))
+                          lr=args['lr'], betas=(0.9, 0.999))
+    # optimizer_d = optim.Adam([{'params': discriminator.parameters()}],
+    #                        lr=args['lr'], betas=(0.9, 0.999))
     if len(args['snapshot']) > 0:
         print('training resumes from ' + args['snapshot'])
         net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth')))
@@ -181,7 +181,7 @@ def main():
     check_mkdir(ckpt_path)
     check_mkdir(os.path.join(ckpt_path, exp_name))
     open(log_path, 'w').write(str(args) + '\n\n')
-    train(net, discriminator, optimizer, optimizer_d)
+    train(net, None, optimizer, None)
 
 
 def train(net, discriminator, optimizer, optimizer_d):
@@ -209,7 +209,7 @@ def train(net, discriminator, optimizer, optimizer_d):
             # train_single(net, inputs, flows, labels, optimizer, curr_iter, teacher)
 
 
-            train_single2(net, discriminator, rgb, hsv, lab, target, lab_target, None, optimizer, optimizer_d, curr_iter)
+            train_single2(net, None, rgb, hsv, lab, target, lab_target, None, optimizer, None, curr_iter)
             curr_iter += 1
 
             if curr_iter % args['iter_save'] == 0:
@@ -234,8 +234,8 @@ def train_single2(net, discriminator, rgb, hsv, lab, target, lab_target, depth, 
     # depth = Variable(depth).cuda(device_id)
     labels = Variable(target).cuda(device_id)
     labels_lab = Variable(lab_target).cuda(device_id)
-    labels_64 = F.interpolate(labels, size=[64, 64], mode='bilinear')
-    labels_32 = F.interpolate(labels, size=[32, 32], mode='bilinear')
+    # labels_64 = F.interpolate(labels, size=[64, 64], mode='bilinear')
+    # labels_32 = F.interpolate(labels, size=[32, 32], mode='bilinear')
     # labels_lab3 = Variable(lab_target).cuda(device_id)
     # patch = (1, 256 // 2 ** 5, 256 // 2 ** 5)
     # valid = Variable(torch.Tensor(np.ones((labels.size(0), *patch))), requires_grad=False).cuda(device_id) # 全1
@@ -249,8 +249,8 @@ def train_single2(net, discriminator, rgb, hsv, lab, target, lab_target, depth, 
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
     final, final2, inter_rgb, inter_lab, third, second = net(rgb, hsv, lab, None, get_random_cand())
 
-    pred_fake = discriminator(final2)
-    loss_GAN = criterion_gan(pred_fake, True)
+    # pred_fake = discriminator(final2)
+    # loss_GAN = criterion_gan(pred_fake, True)
 
     loss0 = criterion(final, labels_lab[:, 1:, :, :])
     loss1 = criterion_l1(final, labels_lab[:, 1:, :, :])
@@ -289,46 +289,46 @@ def train_single2(net, discriminator, rgb, hsv, lab, target, lab_target, depth, 
     # target_features = get_features(labels, vgg)
     # content_loss = torch.mean((texture_features['relu5_4'] - target_features['relu5_4']) ** 2)
 
-    loss1_third = criterion(third, labels_32)
-    loss2_third = criterion_l1(third, labels_32)
+    # loss1_third = criterion(third, labels_32)
+    # loss2_third = criterion_l1(third, labels_32)
 
-    loss1_second = criterion(second, labels_64)
-    loss2_second = criterion_l1(second, labels_64)
+    # loss1_second = criterion(second, labels_64)
+    # loss2_second = criterion_l1(second, labels_64)
 
     total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss4 \
                  + 0.25 * loss8 + 0.25 * loss10 \
                  + 1 * loss0_2 + 0.25 * loss1_2 + 0.25 * loss7_2 \
-                 + loss1_third + 0.25 * loss2_third + loss1_second + 0.25 * loss2_second \
-                 + 0.5 * loss_GAN
+                 # + loss1_third + 0.25 * loss2_third + loss1_second + 0.25 * loss2_second \
+                 # + 0.5 * loss_GAN
     # total_loss = 1 * loss0 + 0.25 * loss1  \
     #              + 1 * loss0_2 + 0.25 * loss1_2 + 0.25 * loss7_2 \
     # distill_loss = loss6_k + loss7_k + loss8_k
 
     # total_loss = total_loss + 0.1 * distill_loss
-    total_loss.backward(retain_graph=True)
+    total_loss.backward()
     optimizer.step()
 
     # discriminator
-    optimizer_d.zero_grad()
-    # Real loss
-    pred_real = discriminator(labels)
-    loss_real = criterion_gan(pred_real, True)
+    # optimizer_d.zero_grad()
+    # # Real loss
+    # pred_real = discriminator(labels)
+    # loss_real = criterion_gan(pred_real, True)
+    #
+    # # Fake loss
+    # final2 = final2.detach()
+    # # third = third.detach()
+    # # second = second.detach()
+    # pred_fake1 = discriminator(final2)
+    # loss_fake = criterion_gan(pred_fake1, False)
+    #
+    # # Total loss
+    # loss_D = 0.5 * (loss_real + loss_fake)
+    # # loss_D=loss_real
+    #
+    # loss_D.backward(retain_graph=True)
+    # optimizer_d.step()
 
-    # Fake loss
-    final2 = final2.detach()
-    # third = third.detach()
-    # second = second.detach()
-    pred_fake1 = discriminator(final2)
-    loss_fake = criterion_gan(pred_fake1, False)
-
-    # Total loss
-    loss_D = 0.5 * (loss_real + loss_fake)
-    # loss_D=loss_real
-
-    loss_D.backward(retain_graph=True)
-    optimizer_d.step()
-
-    print_log(total_loss, loss0, loss0_2, loss_D, args['train_batch_size'], curr_iter, optimizer)
+    print_log(total_loss, loss0, loss0_2, loss7_2, args['train_batch_size'], curr_iter, optimizer)
 
     return
 

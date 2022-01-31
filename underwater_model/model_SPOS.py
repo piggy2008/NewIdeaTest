@@ -92,6 +92,8 @@ class Water(nn.Module):
         self.de_predict_lab = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
         self.de_predict_third = nn.Sequential(nn.Conv2d(de_channels, 3, kernel_size=1, stride=1))
         self.de_predict_second = nn.Sequential(nn.Conv2d(de_channels, 3, kernel_size=1, stride=1))
+
+        self.global_rct = GlobalRCT(128, 128, 8)
     def forward(self, rgb, hsv, lab, trans_map, select):
         # trans_map2 = F.max_pool2d(1 - trans_map, kernel_size=3, stride=2, padding=1)
         # trans_map3 = F.max_pool2d(trans_map2, kernel_size=3, stride=2, padding=1)
@@ -132,6 +134,10 @@ class Water(nn.Module):
         mid_ab_feat2 = F.interpolate(mid_ab_feat, size=second.size()[2:], mode='bilinear')
         final2, third, second, first = self.search(third + mid_ab_feat3,
                                                    second + mid_ab_feat2, first + mid_ab_feat, select[16:])
+
+        p = F.adaptive_avg_pool2d(mid_ab_feat, 1)
+        final2_rgb_rct = self.global_rct(final2, p)
+
         # temp_gray = torch.mean(final_rgb, dim=1, keepdim=True)
         # final_lab = self.de_predict_color_final(final_color)
         # final_lab = torch.cat([temp_gray, final_lab], dim=1)
@@ -140,7 +146,7 @@ class Water(nn.Module):
         third = self.de_predict_third(third)
         second = self.de_predict_second(second)
 
-        return final_ab, final2_rgb, inter_rgb, inter_lab, third, second
+        return final_ab, final2_rgb + final2_rgb_rct, inter_rgb, inter_lab, third, second
 
 if __name__ == '__main__':
     a = torch.zeros(2, 128, 128, 128).cuda()
@@ -149,7 +155,7 @@ if __name__ == '__main__':
     # model = Water(en_channels=[64, 128, 256], de_channels=128)
     # r, r1, r2, r3 = model(a, a, a, b, [1, 7, 6, 5, 4, 5, 5, 1, 3, 5, 5, 6, 6, 4, 6, 3, 3, 6, 2, 1])
     # print(r1.shape, '--', r2.shape, '--', r3.shape)
-
+    c = F.adaptive_avg_pool2d(a, 1)
     global_rct = GlobalRCT(128, 128, 8)
     out = global_rct(a, b)
 
