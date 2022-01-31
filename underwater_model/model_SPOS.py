@@ -7,6 +7,54 @@ from underwater_model.search_net import Search
 from underwater_model.color_SPOS import Color
 from underwater_model.vit import ViT
 
+class RCTConvBlock(nn.Module):
+    def __init__(self, input_nc, output_nc, ksize=3, stride=2, pad=1, extra_conv=False):
+        super(RCTConvBlock, self).__init__()
+
+        lists = []
+
+        if extra_conv:
+            lists += [
+                nn.Conv2d(input_nc, input_nc, kernel_size=(ksize, ksize), stride=(stride, stride), padding=(pad, pad)),
+                nn.BatchNorm2d(input_nc),
+                nn.SiLU(inplace=True),  # Swish activation
+                nn.Conv2d(input_nc, output_nc, kernel_size=(ksize, ksize), stride=(stride, stride), padding=(pad, pad))
+            ]
+        else:
+            lists += [
+                nn.Conv2d(input_nc, output_nc, kernel_size=(ksize, ksize), stride=(stride, stride), padding=(pad, pad)),
+                nn.BatchNorm2d(output_nc),
+                nn.SiLU(inplace=True)
+            ]
+
+        self.model = nn.Sequential(*lists)
+
+    def forward(self, x):
+        return self.model(x)
+
+class GlobalRCT(nn.Module):
+    def __init__(self, fusion_filter, represent_feature, ngf):
+        super(GlobalRCT, self).__init__()
+        self.represent_feature = represent_feature
+        self.ngf = ngf
+        self.r_conv = RCTConvBlock(fusion_filter, represent_feature * ngf, 1, 1, 0, True)
+        self.t_conv = RCTConvBlock(fusion_filter, 3 * ngf, 1, 1, 0, True)
+        self.act = nn.Softmax(dim=2)
+
+    def forward(self, feature, p_high):
+        h, w = feature.shape[2], feature.shape[3]
+        f_r = feature.reshape(feature.size(0), self.represent_feature, -1)
+        f_r = f_r.transpose(1, 2)
+        r_g = self.r_conv(p_high)
+        r_g = r_g.reshape(r_g.size(0), self.represent_feature, self.ngf)
+        t_g = self.t_conv(p_high)
+        t_g = t_g.reshape(t_g.size(0), 3, self.ngf)
+
+        attention = torch.bmm(f_r, r_g) / torch.sqrt(torch.tensor(self.represent_feature))
+        attention = self.act(attention)
+        Y_G = torch.bmm(attention, t_g.transpose(1, 2))
+        Y_G = Y_G.transpose(1, 2)
+        return Y_G.reshape(Y_G.size(0), 3, h, w)
 
 class Water(nn.Module):
     def __init__(self, en_channels, de_channels):
@@ -95,12 +143,16 @@ class Water(nn.Module):
         return final_ab, final2_rgb, inter_rgb, inter_lab, third, second
 
 if __name__ == '__main__':
-    a = torch.zeros(2, 3, 128, 128)
-    b = torch.zeros(2, 1, 128, 128)
+    a = torch.zeros(2, 128, 128, 128).cuda()
+    b = torch.zeros(2, 128, 1, 1).cuda()
 
-    model = Water(en_channels=[64, 128, 256], de_channels=128)
-    r, r1, r2, r3 = model(a, a, a, b, [1, 7, 6, 5, 4, 5, 5, 1, 3, 5, 5, 6, 6, 4, 6, 3, 3, 6, 2, 1])
-    print(r1.shape, '--', r2.shape, '--', r3.shape)
+    # model = Water(en_channels=[64, 128, 256], de_channels=128)
+    # r, r1, r2, r3 = model(a, a, a, b, [1, 7, 6, 5, 4, 5, 5, 1, 3, 5, 5, 6, 6, 4, 6, 3, 3, 6, 2, 1])
+    # print(r1.shape, '--', r2.shape, '--', r3.shape)
+
+    global_rct = GlobalRCT(128, 128, 8)
+    out = global_rct(a, b)
+
 
 
 
