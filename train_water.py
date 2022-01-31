@@ -60,7 +60,7 @@ args = {
     'iter_num': 240000,
     'iter_save': 4000,
     'iter_start_seq': 0,
-    'train_batch_size': 12,
+    'train_batch_size': 14,
     'last_iter': 0,
     'lr': 1e-4,
     'lr_decay': 0.9,
@@ -129,9 +129,18 @@ def fix_parameters(parameters):
             print(name, 'is fixed')
             parameter.requires_grad = False
 
+def weights_init(m):
+    if isinstance(m, nn.Conv2d):
+        torch.nn.init.normal_(m.weight.data, 0.0, 0.02)
+    elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
+        torch.nn.init.normal_(m.weight.data, 1.0, 0.02)
+        torch.nn.init.constant_(m.bias.data, 0.0)
+
 def main():
 
     net = Water(en_channels=args['en_channels'], de_channels=args['de_channels']).cuda(device_id).train()
+    net.apply(weights_init)
+
     # discriminator = PatchDiscriminator(3).cuda(device_id).train()
     # vgg = models.vgg19(pretrained=True).features
     # for param in vgg.parameters():
