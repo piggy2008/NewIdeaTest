@@ -240,12 +240,12 @@ class Conv(nn.Module):
         super(Conv, self).__init__()
         self.upsample = upsample
         self.up = nn.Sequential(
-            torch.nn.SiLU(inplace=True),
+            torch.nn.ReLU(inplace=True),
             torch.nn.Upsample(scale_factor=2, mode='bilinear')
         )
         self.op = nn.Sequential(
             nn.Conv2d(C_in, C_out, kernel_size=kernel_size, stride=stride, padding=padding, bias=False),
-            nn.SiLU(inplace=False),
+            nn.ReLU(inplace=False),
             # nn.BatchNorm2d(C_out, affine=affine),
         )
 
@@ -262,15 +262,15 @@ class ConvDouble(nn.Module):
 
         self.upsample = upsample
         self.up = nn.Sequential(
-            torch.nn.SiLU(inplace=False),
+            torch.nn.ReLU(inplace=True),
             torch.nn.Upsample(scale_factor=2, mode='bilinear')
         )
 
         self.op = nn.Sequential(
-            nn.SiLU(inplace=False),
+            nn.ReLU(inplace=True),
             nn.Conv2d(C_in, C_in, kernel_size=kernel_size, stride=stride, padding=padding, bias=False),
             # nn.BatchNorm2d(C_in, affine=affine),
-            nn.SiLU(inplace=False),
+            nn.ReLU(inplace=True),
             nn.Conv2d(C_in, C_out, kernel_size=kernel_size, stride=1, padding=padding, bias=False),
             # nn.BatchNorm2d(C_out, affine=affine),
         )
@@ -286,7 +286,7 @@ class ReLUConvBN(nn.Module):
     def __init__(self, C_in, C_out, kernel_size, stride, padding, affine=True):
         super(ReLUConvBN, self).__init__()
         self.op = nn.Sequential(
-            nn.SiLU(inplace=False),
+            nn.ReLU(inplace=False),
             nn.Conv2d(C_in, C_out, kernel_size, stride=stride, padding=padding, bias=False),
             # nn.BatchNorm2d(C_out, affine=affine)
         )
@@ -302,7 +302,7 @@ class DilConv(nn.Module):
 
         self.upsample = upsample
         self.up = nn.Sequential(
-            torch.nn.SiLU(inplace=True),
+            torch.nn.ReLU(inplace=True),
             torch.nn.Upsample(scale_factor=2, mode='bilinear')
         )
 
@@ -310,7 +310,7 @@ class DilConv(nn.Module):
             nn.Conv2d(C_in, C_in, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation,
                       bias=False),
             nn.Conv2d(C_in, C_out, kernel_size=1, padding=0, bias=False),
-            nn.SiLU(inplace=True),
+            nn.ReLU(inplace=True),
             # nn.BatchNorm2d(C_out, affine=affine),
         )
 
@@ -326,16 +326,16 @@ class DilConvDouble(nn.Module):
         super(DilConvDouble, self).__init__()
         self.upsample = upsample
         self.up = nn.Sequential(
-            torch.nn.SiLU(inplace=True),
+            torch.nn.ReLU(inplace=True),
             torch.nn.Upsample(scale_factor=2, mode='bilinear')
         )
         self.op = nn.Sequential(
-            nn.SiLU(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(C_in, C_in, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation,
                       bias=False),
             nn.Conv2d(C_in, C_in, kernel_size=1, padding=0, bias=False),
             # nn.BatchNorm2d(C_in, affine=affine),
-            nn.SiLU(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(C_in, C_in, kernel_size=kernel_size, stride=1, padding=padding, dilation=dilation,
                       bias=False),
             nn.Conv2d(C_in, C_out, kernel_size=1, padding=0, bias=False),
@@ -355,12 +355,12 @@ class SepConv(nn.Module):
 
         self.upsample = upsample
         self.up = nn.Sequential(
-            torch.nn.SiLU(inplace=True),
+            torch.nn.ReLU(inplace=True),
             torch.nn.Upsample(scale_factor=2, mode='bilinear')
         )
 
         self.op = nn.Sequential(
-            nn.SiLU(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(C_in, C_in, kernel_size=kernel_size, stride=stride, padding=padding, bias=False),
             nn.Conv2d(C_in, C_out, kernel_size=1, padding=0, bias=False),
             # nn.BatchNorm2d(C_out, affine=affine),
@@ -379,11 +379,11 @@ class FactorizedReduce(nn.Module):
         assert C_out % 2 == 0
 
         self.up = nn.Sequential(
-            nn.SiLU(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Upsample(scale_factor=2, mode='bilinear')
         )
 
-        self.relu = nn.SiLU(inplace=True)
+        self.relu = nn.ReLU(inplace=True)
         self.conv_1 = nn.Conv2d(C_in, C_out, 1, stride=1, padding=0, bias=False)
         self.bn = nn.BatchNorm2d(C_out, affine=affine)
 
@@ -402,16 +402,16 @@ class SepConvDouble(nn.Module):
 
         self.upsample = upsample
         self.up = nn.Sequential(
-            torch.nn.SiLU(inplace=True),
+            torch.nn.ReLU(inplace=True),
             torch.nn.Upsample(scale_factor=2, mode='bilinear')
         )
 
         self.op = nn.Sequential(
-            nn.SiLU(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(C_in, C_in, kernel_size=kernel_size, stride=stride, padding=padding, bias=False),
             nn.Conv2d(C_in, C_in, kernel_size=1, padding=0, bias=False),
             # nn.BatchNorm2d(C_in, affine=affine),
-            nn.SiLU(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(C_in, C_in, kernel_size=kernel_size, stride=1, padding=padding, bias=False),
             nn.Conv2d(C_in, C_out, kernel_size=1, padding=0, bias=False),
             # nn.BatchNorm2d(C_out, affine=affine),
@@ -430,7 +430,7 @@ class Identity(nn.Module):
         super(Identity, self).__init__()
         self.upsample = upsample
         self.up = nn.Sequential(
-            torch.nn.SiLU(inplace=True),
+            torch.nn.ReLU(inplace=True),
             torch.nn.Upsample(scale_factor=2, mode='bilinear')
         )
 
@@ -447,7 +447,7 @@ class Zero(nn.Module):
         self.stride = stride
         self.upsample = upsample
         self.up = nn.Sequential(
-            torch.nn.SiLU(inplace=True),
+            torch.nn.ReLU(inplace=True),
             torch.nn.Upsample(scale_factor=2, mode='bilinear')
         )
 
@@ -464,7 +464,7 @@ class SELayer(nn.Module):
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.fc = nn.Sequential(
             nn.Linear(channel, channel // reduction, bias=False),
-            nn.SiLU(inplace=True),
+            nn.ReLU(inplace=True),
             nn.Linear(channel // reduction, channel, bias=False),
             nn.Sigmoid()
         )
