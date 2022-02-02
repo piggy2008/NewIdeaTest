@@ -254,10 +254,12 @@ if __name__ == '__main__':
     # r, r1, r2, r3 = model(a, a, a, b, [1, 7, 6, 5, 4, 5, 5, 1, 3, 5, 5, 6, 6, 4, 6, 3, 3, 6, 2, 1])
     # print(r1.shape, '--', r2.shape, '--', r3.shape)
     c = torch.zeros(2, 128, 16, 16).cuda()
-    global_rct = GlobalRCT(128, 128, 8)
-    global_rct = LocalRCT(128, 128, 8, 16)
-    out = global_rct(a, b)
-    global_rct = LocalRCT(128, 128, 8, 16)
+    # global_rct = GlobalRCT(128, 128, 8)
+    local_rct = LocalRCT(128, 128, 8, 16)
+    # out = global_rct(a, b)
+    # global_rct = LocalRCT(128, 128, 8, 16)
+    out = local_rct(a, c)
+    print(out.shape)
 
 
 
