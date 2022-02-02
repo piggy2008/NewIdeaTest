@@ -32,6 +32,48 @@ class RCTConvBlock(nn.Module):
     def forward(self, x):
         return self.model(x)
 
+def pad_tensor(input, divide):
+    height_org, width_org = input.shape[2], input.shape[3]
+
+    if width_org % divide != 0 or height_org % divide != 0:
+
+        width_res = width_org % divide
+        height_res = height_org % divide
+        if width_res != 0:
+            width_div = divide - width_res
+            pad_left = int(width_div / 2)
+            pad_right = int(width_div - pad_left)
+        else:
+            pad_left = 0
+            pad_right = 0
+
+        if height_res != 0:
+            height_div = divide - height_res
+            pad_top = int(height_div / 2)
+            pad_bottom = int(height_div - pad_top)
+        else:
+            pad_top = 0
+            pad_bottom = 0
+
+        padding = nn.ReflectionPad2d((pad_left, pad_right, pad_top, pad_bottom))
+        input = padding(input).data
+    else:
+        pad_left = 0
+        pad_right = 0
+        pad_top = 0
+        pad_bottom = 0
+
+    height, width = input.shape[2], input.shape[3]
+    assert width % divide == 0, 'width cant divided by stride'
+    assert height % divide == 0, 'height cant divided by stride'
+
+    return input, pad_left, pad_right, pad_top, pad_bottom
+
+
+def pad_tensor_back(input, pad_left, pad_right, pad_top, pad_bottom):
+    height, width = input.shape[2], input.shape[3]
+    return input[:, :, pad_top: height - pad_bottom, pad_left: width - pad_right]
+
 class GlobalRCT(nn.Module):
     def __init__(self, fusion_filter, represent_feature, ngf):
         super(GlobalRCT, self).__init__()
@@ -55,6 +97,62 @@ class GlobalRCT(nn.Module):
         Y_G = torch.bmm(attention, t_g.transpose(1, 2))
         Y_G = Y_G.transpose(1, 2)
         return Y_G.reshape(Y_G.size(0), 3, h, w)
+
+class LocalRCT(nn.Module):
+    def __init__(self, fusion_filter, represent_feature, nlf, mesh_size):
+        super(LocalRCT, self).__init__()
+
+        self.fusion_filter = fusion_filter
+        self.represent_feature = represent_feature
+        self.nlf = nlf
+        self.mesh_size = mesh_size
+
+        self.r_conv = RCTConvBlock(self.fusion_filter, self.represent_feature * self.nlf, 3, 1, 1, True)
+        self.t_conv = RCTConvBlock(self.fusion_filter, 3 * self.nlf, 3, 1, 1, True)
+        self.act = nn.Softmax(dim=2)
+
+
+    def forward(self, feature, p_low):
+        nfeature, pad_left, pad_right, pad_top, pad_bottom = pad_tensor(feature, self.mesh_size)
+        mesh_h = int(nfeature.shape[2] / self.mesh_size)
+        mesh_w = int(nfeature.shape[3] / self.mesh_size)
+
+        r_l = self.r_conv(p_low)
+        t_l = self.t_conv(p_low)
+        Y_L = torch.zeros(nfeature.size(0), 3, nfeature.size(2), nfeature.size(3), device=feature.device)
+
+        # Grid-wise
+        for i in range(self.mesh_size):
+            for j in range(self.mesh_size):
+                # cp means corner points of a grid
+                r_k = r_l[:, :, i, j].reshape(-1, self.represent_feature, self.nlf)
+                cp = r_l[:, :, i, j + 1].reshape(-1, self.represent_feature, self.nlf)
+                r_k = torch.cat((r_k, cp), dim=2)
+                cp = r_l[:, :, i + 1, j].reshape(-1, self.represent_feature, self.nlf)
+                r_k = torch.cat((r_k, cp), dim=2)
+                cp = r_l[:, :, i + 1, j + 1].reshape(-1, self.represent_feature, self.nlf)
+                r_k = torch.cat((r_k, cp), dim=2)
+
+                t_k = t_l[:, :, i, j].reshape(-1, 3, self.nlf)
+                cp = t_l[:, :, i, j + 1].reshape(-1, 3, self.nlf)
+                t_k = torch.cat((t_k, cp), dim=2)
+                cp = t_l[:, :, i + 1, j].reshape(-1, 3, self.nlf)
+                t_k = torch.cat((t_k, cp), dim=2)
+                cp = t_l[:, :, i + 1, j + 1].reshape(-1, 3, self.nlf)
+                t_k = torch.cat((t_k, cp), dim=2)
+
+                f_k = nfeature[:, :, i * mesh_h:(i + 1) * mesh_h, j * mesh_w:(j + 1) * mesh_w]
+                f_k = f_k.reshape(feature.size(0), self.represent_feature, -1)
+                f_k = f_k.transpose(1, 2)
+
+                attention = torch.bmm(f_k, r_k) / torch.sqrt(torch.tensor(self.represent_feature))
+                attention = self.act(attention)
+                mesh = torch.bmm(attention, t_k.transpose(1, 2))
+                mesh = mesh.transpose(1, 2)
+                Y_L[:, :, i * mesh_h:(i + 1) * mesh_h, j * mesh_w:(j + 1) * mesh_w] = mesh.reshape(mesh.size(0), 3,
+                                                                                                   mesh_h, mesh_w)
+
+        return pad_tensor_back(Y_L, pad_left, pad_right, pad_top, pad_bottom)
 
 class Water(nn.Module):
     def __init__(self, en_channels, de_channels):
@@ -155,10 +253,11 @@ if __name__ == '__main__':
     # model = Water(en_channels=[64, 128, 256], de_channels=128)
     # r, r1, r2, r3 = model(a, a, a, b, [1, 7, 6, 5, 4, 5, 5, 1, 3, 5, 5, 6, 6, 4, 6, 3, 3, 6, 2, 1])
     # print(r1.shape, '--', r2.shape, '--', r3.shape)
-    c = F.adaptive_avg_pool2d(a, 1)
+    c = torch.zeros(2, 128, 16, 16).cuda()
     global_rct = GlobalRCT(128, 128, 8)
+    global_rct = LocalRCT(128, 128, 8, 16)
     out = global_rct(a, b)
-
+    global_rct = LocalRCT(128, 128, 8, 16)
 
 
 
