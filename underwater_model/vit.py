@@ -98,8 +98,8 @@ class ViT(nn.Module):
         self.dropout = nn.Dropout(emb_dropout)
 
         self.transformer = Transformer(dim, depth, heads, dim_head, mlp_dim, dropout)
-        self.recovery = nn.Linear(mlp_dim, image_height * image_width)
-        self.recovery_conv = nn.Conv2d(num_patches + 1, channels, 1, 1)
+        self.recovery = nn.Linear(num_patches + 1, image_height * image_width)
+        # self.recovery_conv = nn.Conv2d(num_patches + 1, channels, 1, 1)
 
 
     def forward(self, img):
@@ -112,15 +112,17 @@ class ViT(nn.Module):
         x = self.dropout(x)
 
         x = self.transformer(x)
+        x = x.permute(0, 2, 1)
         x = self.recovery(x).reshape(b, -1, self.image_height, self.image_width)
-        x = self.recovery_conv(x)
+        # x = self.recovery(x).reshape(b, -1, self.image_height, self.image_width)
+        # x = self.recovery_conv(x)
         # x = x.mean(dim = 1) if self.pool == 'mean' else x[:, 0]
         #
         # x = self.to_latent(x)
         return x
 
 if __name__ == '__main__':
-    model = ViT(image_size=32, patch_size=4, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
-    input = torch.zeros(2, 128, 32, 32)
+    model = ViT(image_size=56, patch_size=7, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
+    input = torch.zeros(2, 128, 56, 56)
     output = model(input)
     print(output.shape)
