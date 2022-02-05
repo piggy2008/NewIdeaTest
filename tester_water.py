@@ -81,7 +81,7 @@ def get_cand_err(model, cand, args):
         # img_list = [i_id.strip() for i_id in open(imgs_path)]
         img = Image.open(os.path.join(args['image_path'], name + '.png')).convert('RGB')
         img = np.array(img)
-        img = cv2.resize(img, (256, 256))
+        img = cv2.resize(img, (224, 224))
         depth = Image.open(os.path.join(args['depth_path'], name + '.png_depth_estimate.png')).convert('L')
 
         hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
