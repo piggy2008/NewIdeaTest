@@ -171,7 +171,7 @@ class Water(nn.Module):
         # vit
         # self.vit1 = ViT(image_size=128, patch_size=16, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
         # self.vit2 = ViT(image_size=64, patch_size=8, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
-        # self.vit3 = ViT(image_size=32, patch_size=4, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
+        self.vit3 = ViT(image_size=56, patch_size=7, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
 
         self.search = Search(channel=de_channels)
         # self.search2 = Search(channel=de_channels)
@@ -180,7 +180,7 @@ class Water(nn.Module):
         # self.de_predict_color = nn.Sequential(nn.Conv2d(de_channels, 2, kernel_size=1, stride=1))
 
         self.de_predict = nn.Sequential(nn.Conv2d(de_channels, 2, kernel_size=1, stride=1))
-        # self.de_predict2 = nn.Sequential(nn.Conv2d(de_channels, 3, kernel_size=1, stride=1))
+        self.de_predict2 = nn.Sequential(nn.Conv2d(de_channels, 3, kernel_size=1, stride=1))
         # self.de_predict_conv1_ab = nn.Sequential(nn.Conv2d(de_channels, 128, kernel_size=1, stride=1), nn.ReLU(inplace=True))
         # self.de_predict_conv2_ab = nn.Sequential(nn.Conv2d(de_channels, 2, kernel_size=1, stride=1))
         # self.de_predict_lab_final = nn.Sequential(nn.Conv2d(de_channels, 1, kernel_size=1, stride=1))
@@ -191,9 +191,9 @@ class Water(nn.Module):
         # self.de_predict_third = nn.Sequential(nn.Conv2d(de_channels, 3, kernel_size=1, stride=1))
         # self.de_predict_second = nn.Sequential(nn.Conv2d(de_channels, 3, kernel_size=1, stride=1))
 
-        self.global_rct = GlobalRCT(128, 128, 8)
-        self.local_rct = LocalRCT(128, 128, 8, 15)
-        self.w = nn.Parameter(torch.tensor([0.3, 0.3], dtype=torch.float32))
+        # self.global_rct = GlobalRCT(128, 128, 8)
+        # self.local_rct = LocalRCT(128, 128, 8, 15)
+        # self.w = nn.Parameter(torch.tensor([0.3, 0.3], dtype=torch.float32))
     def forward(self, rgb, hsv, lab, trans_map, select):
         # trans_map2 = F.max_pool2d(1 - trans_map, kernel_size=3, stride=2, padding=1)
         # trans_map3 = F.max_pool2d(trans_map2, kernel_size=3, stride=2, padding=1)
@@ -223,6 +223,7 @@ class Water(nn.Module):
         # second = self.align2(second_rgb)
         #
         # third = self.align3(third_rgb)
+        third = self.vit3(third)
 
 
         mid_ab_feat, _, _, _ = self.search(third, second, first, select[12:16])
@@ -235,16 +236,16 @@ class Water(nn.Module):
         final2, third, second, first = self.search(third + mid_ab_feat3,
                                                    second + mid_ab_feat2, first + mid_ab_feat, select[16:])
 
-        p = F.adaptive_avg_pool2d(mid_ab_feat, 1)
-        p16 = F.adaptive_avg_pool2d(mid_ab_feat, 16)
+        # p = F.adaptive_avg_pool2d(mid_ab_feat, 1)
+        # p16 = F.adaptive_avg_pool2d(mid_ab_feat, 16)
         # final2_rgb_rct = self.global_rct(final2, p)
         # final2_rgb_rct2 = self.local_rct(final2, p16)
 
-        final2 = F.relu(self.w[0]) * self.global_rct(final2, p) + F.relu(self.w[1]) * self.local_rct(final2, p16)
+        # final2 = F.relu(self.w[0]) * self.global_rct(final2, p) + F.relu(self.w[1]) * self.local_rct(final2, p16)
         # temp_gray = torch.mean(final_rgb, dim=1, keepdim=True)
         # final_lab = self.de_predict_color_final(final_color)
         # final_lab = torch.cat([temp_gray, final_lab], dim=1)
-        # final2 = self.de_predict2(final2)
+        final2 = self.de_predict2(final2)
         # final2_rgb = self.de_predict2(final2)
         # third = self.de_predict_third(third)
         # second = self.de_predict_second(second)
@@ -252,14 +253,15 @@ class Water(nn.Module):
         return final_ab, final2, inter_rgb, inter_lab, third, second
 
 if __name__ == '__main__':
-    a = torch.zeros(2, 128, 128, 128).cuda()
-    b = torch.zeros(2, 128, 1, 1).cuda()
+    a = torch.zeros(2, 128, 200, 300)
+    b = torch.zeros(2, 128, 1, 1)
 
     # model = Water(en_channels=[64, 128, 256], de_channels=128)
     # r, r1, r2, r3 = model(a, a, a, b, [1, 7, 6, 5, 4, 5, 5, 1, 3, 5, 5, 6, 6, 4, 6, 3, 3, 6, 2, 1])
     # print(r1.shape, '--', r2.shape, '--', r3.shape)
 
     c = torch.zeros(2, 128, 48, 64).cuda()
+
     # global_rct = GlobalRCT(128, 128, 8)
 
     local_rct = LocalRCT(128, 128, 8, 15).cuda()

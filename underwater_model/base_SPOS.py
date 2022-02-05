@@ -92,12 +92,12 @@ class Base(nn.Module):
         self.block5 = resblock_choice(n_channels=channels[2])
         self.block6 = resblock_choice(n_channels=channels[2])
 
-        self.block1 = resblock_choice(n_channels=channels[0])
-        self.block2 = resblock_choice(n_channels=channels[0])
-        self.block3 = resblock_choice(n_channels=channels[1])
-        self.block4 = resblock_choice(n_channels=channels[1])
-        self.block5 = resblock_choice(n_channels=channels[2])
-        self.block6 = resblock_choice(n_channels=channels[2])
+        # self.block1 = resblock_choice(n_channels=channels[0])
+        # self.block2 = resblock_choice(n_channels=channels[0])
+        # self.block3 = resblock_choice(n_channels=channels[1])
+        # self.block4 = resblock_choice(n_channels=channels[1])
+        # self.block5 = resblock_choice(n_channels=channels[2])
+        # self.block6 = resblock_choice(n_channels=channels[2])
 
         # self.block1_rgb = resblock(n_channels=128)
         # self.block2_rgb = resblock(n_channels=128)
