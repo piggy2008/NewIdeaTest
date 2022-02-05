@@ -18,7 +18,7 @@ from water_dataset import WaterImageFolder, WaterImage2Folder
 from underwater_model.model_SPOS import Water
 from underwater_model.discriminator import Discriminator, PatchDiscriminator
 
-from misc import AvgMeter, check_mkdir, VGGPerceptualLoss, Lab_Loss, GANLoss
+from misc import AvgMeter, check_mkdir, VGGPerceptualLoss, Lab_Loss, GANLoss, VGG19_PercepLoss
 from torch.backends import cudnn
 import time
 from utils.utils_mine import load_part_of_model, load_part_of_model2, load_MGA
@@ -110,7 +110,7 @@ train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_wo
 
 criterion = nn.MSELoss()
 criterion_l1 = nn.L1Loss()
-criterion_perceptual = VGGPerceptualLoss(resize=False).cuda()
+criterion_perceptual = VGG19_PercepLoss().cuda()
 # criterion_gan = GANLoss(gan_mode='lsgan').cuda()
 # criterion_lab = Lab_Loss().cuda()
 # criterion_context = cl.ContextualLoss(use_vgg=True, vgg_layer='relu5_4').cuda()
