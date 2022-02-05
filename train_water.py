@@ -18,7 +18,7 @@ from water_dataset import WaterImageFolder, WaterImage2Folder
 from underwater_model.model_SPOS import Water
 from underwater_model.discriminator import Discriminator, PatchDiscriminator
 
-from misc import AvgMeter, check_mkdir, VGGPerceptualLoss, Lab_Loss, GANLoss
+from misc import AvgMeter, check_mkdir, VGGPerceptualLoss, Lab_Loss, GANLoss, VGG19_PercepLoss
 from torch.backends import cudnn
 import time
 from utils.utils_mine import load_part_of_model, load_part_of_model2, load_MGA
@@ -60,7 +60,7 @@ args = {
     'iter_num': 240000,
     'iter_save': 4000,
     'iter_start_seq': 0,
-    'train_batch_size': 6,
+    'train_batch_size': 5,
     'last_iter': 0,
     'lr': 1e-4,
     'lr_decay': 0.9,
@@ -70,8 +70,8 @@ args = {
     # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2021-04-06 11:56:00', '92000.pth'),
     'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
-    'imgs_file': '/mnt/hdd/data/ty2',
-    # 'imgs_file': '/home/ty/data/uw',
+    # 'imgs_file': '/mnt/hdd/data/ty2',
+    'imgs_file': '/home/ty/data/uw',
     # 'imgs_file': 'Pre-train/pretrain_all_seq_DAFB2_DAVSOD_flow.txt',
     # 'imgs_file2': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB2_DAVSOD_5f.txt',
@@ -110,7 +110,7 @@ train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_wo
 
 criterion = nn.MSELoss()
 criterion_l1 = nn.L1Loss()
-criterion_perceptual = VGGPerceptualLoss(resize=False).cuda()
+criterion_perceptual = VGG19_PercepLoss().cuda()
 # criterion_gan = GANLoss(gan_mode='lsgan').cuda()
 # criterion_lab = Lab_Loss().cuda()
 # criterion_context = cl.ContextualLoss(use_vgg=True, vgg_layer='relu5_4').cuda()

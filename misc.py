@@ -176,6 +176,35 @@ class VGGPerceptualLoss(torch.nn.Module):
             loss += torch.nn.functional.l1_loss(x, y)
         return loss
 
+class VGG19_PercepLoss(nn.Module):
+    """ Calculates perceptual loss in vgg19 space
+    """
+    def __init__(self, _pretrained_=True):
+        super(VGG19_PercepLoss, self).__init__()
+        self.vgg = torchvision.models.vgg19(pretrained=_pretrained_).features
+        self.mean = torch.nn.Parameter(torch.tensor([0.485, 0.456, 0.406], device='cuda').view(1, 3, 1, 1))
+        self.std = torch.nn.Parameter(torch.tensor([0.229, 0.224, 0.225], device='cuda').view(1, 3, 1, 1))
+        for param in self.vgg.parameters():
+            param.requires_grad_(False)
+
+    def get_features(self, image, layers=None):
+        if layers is None:
+            layers = {'30': 'conv5_2'} # may add other layers
+        features = {}
+        x = image
+        for name, layer in self.vgg._modules.items():
+            x = layer(x)
+            if name in layers:
+                features[layers[name]] = x
+        return features
+
+    def forward(self, pred, true, layer='conv5_2'):
+        pred = (pred - self.mean) / self.std
+        true = (true - self.mean) / self.std
+        true_f = self.get_features(true)
+        pred_f = self.get_features(pred)
+        return torch.mean((true_f[layer]-pred_f[layer])**2)
+
 class CriterionKL(nn.Module):
     def __init__(self):
         super(CriterionKL, self).__init__()
