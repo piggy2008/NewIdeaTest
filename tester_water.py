@@ -80,26 +80,28 @@ def get_cand_err(model, cand, args):
     for name in image_names:
         # img_list = [i_id.strip() for i_id in open(imgs_path)]
         img = Image.open(os.path.join(args['image_path'], name + '.png')).convert('RGB')
-        img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+        img = np.array(img)
+        img = cv2.resize(img, (256, 256))
         depth = Image.open(os.path.join(args['depth_path'], name + '.png_depth_estimate.png')).convert('L')
 
-        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
         # srgb_profile = ImageCms.createProfile("sRGB")
         # lab_profile = ImageCms.createProfile("LAB")
         # rgb2lab_transform = ImageCms.buildTransformFromOpenProfiles(srgb_profile, lab_profile, "RGB", "LAB")
-        lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+
+        lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
         img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
         hsv_var = Variable(img_transform(hsv).unsqueeze(0), volatile=True).cuda()
         lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
         depth_var = Variable(img_transform(depth).unsqueeze(0), volatile=True).cuda()
         # temp = (1, 1, 0)
-        prediction, _, _, _, _ = model(img_var, hsv_var, lab_var, depth_var, cand)
+        prediction, prediction2, _, _, _, _ = model(img_var, hsv_var, lab_var, depth_var, cand)
         # prediction = torch.unsqueeze(prediction, 0)
         # print(torch.unique(prediction))
         # precision = to_pil(prediction.data.squeeze(0).cpu())
         # prediction = np.array(precision)
         # prediction = prediction.astype('float')
-        prediction = torch.clamp(prediction, 0, 1)
+        prediction = torch.clamp(prediction2, 0, 1)
         prediction = prediction.permute(0, 2, 3, 1).cpu().detach().numpy()
         prediction = np.squeeze(prediction)
         prediction = prediction[:, :, ::-1]
