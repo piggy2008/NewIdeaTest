@@ -14,7 +14,7 @@ import contextual_loss as cl
 
 import joint_transforms
 from config import msra10k_path, video_train_path, datasets_root, video_seq_gt_path, video_seq_path, saving_path
-from water_dataset import WaterImageFolder, WaterImage2Folder
+from water_dataset import WaterImageFolder, WaterImage2Folder, WaterImage3Folder
 from underwater_model.model_SPOS import Water
 from underwater_model.discriminator import Discriminator, PatchDiscriminator
 
@@ -57,7 +57,7 @@ args = {
     'L2': False,
     'KL': True,
     'structure': True,
-    'iter_num': 240000,
+    'iter_num': 140000,
     'iter_save': 4000,
     'iter_start_seq': 0,
     'train_batch_size': 5,
@@ -87,10 +87,16 @@ args = {
 imgs_file = os.path.join(datasets_root, args['imgs_file'])
 # imgs_file = os.path.join(datasets_root, 'video_saliency/train_all_DAFB3_seq_5f.txt')
 
-joint_transform = joint_transforms.Compose([
-    joint_transforms.ImageResize(args['image_size']),
-    joint_transforms.RandomCrop(args['crop_size']),
-    joint_transforms.RandomHorizontallyFlip(),
+# joint_transform = joint_transforms.Compose([
+#     joint_transforms.ImageResize(args['image_size']),
+#     joint_transforms.RandomCrop(args['crop_size']),
+#     joint_transforms.RandomHorizontallyFlip(),
+# ])
+
+joint_transform = joint_transforms.Compose_single([
+    joint_transforms.ImageResize_numpy(args['image_size']),
+    joint_transforms.RandomCrop_numpy(args['crop_size']),
+    joint_transforms.RandomHorizontallyFlip_numpy(),
 ])
 
 input_size = (473, 473)
@@ -102,7 +108,7 @@ img_transform = transforms.Compose([
 target_transform = transforms.ToTensor()
 
 # train_set = ImageFolder(msra10k_path, joint_transform, img_transform, target_transform)
-train_set = WaterImageFolder(args['imgs_file'],
+train_set = WaterImage3Folder(args['imgs_file'],
                                   joint_transform, img_transform, target_transform)
 train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=4, shuffle=True)
 # if train_set2 is not None:
@@ -110,7 +116,7 @@ train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_wo
 
 criterion = nn.MSELoss()
 criterion_l1 = nn.L1Loss()
-criterion_perceptual = VGG19_PercepLoss().cuda()
+criterion_perceptual = VGGPerceptualLoss().cuda()
 # criterion_gan = GANLoss(gan_mode='lsgan').cuda()
 # criterion_lab = Lab_Loss().cuda()
 # criterion_context = cl.ContextualLoss(use_vgg=True, vgg_layer='relu5_4').cuda()
@@ -213,13 +219,13 @@ def train(net, discriminator, optimizer, optimizer_d):
             #                                                 ) ** args['lr_decay']
             #
             # inputs, flows, labels, pre_img, pre_lab, cur_img, cur_lab, next_img, next_lab = data
-            rgb, hsv, lab, target, lab_target, depth = data
+            rgb, hsv, lab, target, lab_target, segmentation = data
             # data2 = next(dataloader_iterator)
             # inputs2, labels2 = data2
             # train_single(net, inputs, flows, labels, optimizer, curr_iter, teacher)
 
 
-            train_single2(net, None, rgb, hsv, lab, target, lab_target, None, optimizer, None, curr_iter)
+            train_single2(net, None, rgb, hsv, lab, target, lab_target, segmentation, optimizer, None, curr_iter)
             curr_iter += 1
 
             if curr_iter % args['iter_save'] == 0:
@@ -241,7 +247,7 @@ def train_single2(net, discriminator, rgb, hsv, lab, target, lab_target, depth, 
     lab = Variable(lab).cuda(device_id)
     # rgb_64 = F.interpolate(rgb, size=[64, 64], mode='bilinear')
     # rgb_32 = F.interpolate(rgb, size=[32, 32], mode='bilinear')
-    # depth = Variable(depth).cuda(device_id)
+    segmentation = Variable(depth).cuda(device_id)
     labels = Variable(target).cuda(device_id)
     labels_lab = Variable(lab_target).cuda(device_id)
     # labels_64 = F.interpolate(labels, size=[64, 64], mode='bilinear')
@@ -259,7 +265,7 @@ def train_single2(net, discriminator, rgb, hsv, lab, target, lab_target, depth, 
     optimizer.zero_grad()
 
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
-    final, final2, inter_rgb, inter_lab, third, second = net(rgb, hsv, lab, None, get_random_cand())
+    final, final2, inter_rgb, inter_lab, third, second = net(rgb, hsv, lab, segmentation, get_random_cand())
 
     # pred_fake = discriminator(final2)
     # loss_GAN = criterion_gan(pred_fake, True)
