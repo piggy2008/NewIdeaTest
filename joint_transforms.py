@@ -80,7 +80,10 @@ class ImageResize_numpy(object):
                 tw, th = self.size
                 print(img_s.shape)
                 tmp = cv2.resize(img_s, (tw, th))
-                img_resized.append(tmp)
+                if tmp.ndim == 2:
+                    img_resized.append(tmp[:, :, np.newaxis])
+                else:
+                    img_resized.append(tmp)
                 # mask_resized.append(mask_s.resize((tw, th), Image.BILINEAR))
             return img_resized
         else:
@@ -150,12 +153,19 @@ class RandomCrop_numpy(object):
             imgs_crop = []
             img_first = True
             for img_s in img:
-                print('crop:', img_s.shape)
-                w, h, c = img_s.shape
+                # print('crop:', img_s.shape)
+                # w, h, c = img_s.shape
+                w = img_s.shape(0)
+                h = img_s.shape(1)
                 th, tw = self.size
 
                 if w < tw or h < th:
-                    imgs_crop.append(cv2.resize(img_s, (tw, th)))
+                    tmp = cv2.resize(img_s, (tw, th))
+                    if tmp.ndim == 2:
+                        imgs_crop.append(tmp[:, :, np.newaxis])
+                    else:
+                        imgs_crop.append(tmp)
+
                 else:
                     if img_first:
                         x1 = random.randint(0, w - tw)
