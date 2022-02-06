@@ -77,7 +77,7 @@ class ImageResize_numpy(object):
         if isinstance(img, list):
             img_resized = []
             mask_resized = []
-            for img_s, mask_s in img:
+            for img_s in img:
                 tw, th = self.size
                 img_resized.append(cv2.resize(img_s, (tw, th)))
                 # mask_resized.append(mask_s.resize((tw, th), Image.BILINEAR))
