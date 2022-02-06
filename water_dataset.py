@@ -135,7 +135,9 @@ class WaterImage3Folder(data.Dataset):
         ri = cv2.imread(os.path.join(self.root, 'segment_train_uw', 'RI', self.segments[index]), 0)
         ro = cv2.imread(os.path.join(self.root, 'segment_train_uw', 'RO', self.segments[index]), 0)
         wr = cv2.imread(os.path.join(self.root, 'segment_train_uw', 'WR', self.segments[index]), 0)
+        fv = cv2.resize(fv, (224, 224))
         print(fv.shape, '-', hd.shape)
+
         segmentation = np.stack((fv, hd, ri, ro, wr), axis=0)
         img_list = []
         img_list.append(np.array(img))
