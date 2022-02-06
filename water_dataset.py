@@ -112,6 +112,58 @@ class WaterImage2Folder(data.Dataset):
     def __len__(self):
         return len(self.imgs)
 
+class WaterImage3Folder(data.Dataset):
+    # image and gt should be in the same folder and have same filename except extended name (jpg and png respectively)
+    def __init__(self, root, joint_transform=None, transform=None, target_transform=None):
+        self.root = root
+        self.imgs = os.listdir(os.path.join(root, 'train_input_uw'))
+        self.imgs.sort()
+        self.labels = os.listdir(os.path.join(root, 'train_gt_uw'))
+        self.labels.sort()
+        self.segments = os.listdir(os.path.join(root, 'segment_input_uw'))
+        self.labels.sort()
+        self.joint_transform = joint_transform
+        self.transform = transform
+        self.target_transform = target_transform
+
+    def __getitem__(self, index):
+        img = Image.open(os.path.join(self.root, 'train_input', self.imgs[index])).convert('RGB')
+        target = Image.open(os.path.join(self.root, 'train_gt', self.labels[index])).convert('RGB')
+
+        fv = cv2.imread(os.path.join(self.root, 'FV', self.segments[index]), 0)
+        hd = cv2.imread(os.path.join(self.root, 'HD', self.segments[index]), 0)
+        ri = cv2.imread(os.path.join(self.root, 'RI', self.segments[index]), 0)
+        ro = cv2.imread(os.path.join(self.root, 'RO', self.segments[index]), 0)
+        wr = cv2.imread(os.path.join(self.root, 'WR', self.segments[index]), 0)
+        segmentation = np.stack((fv, hd, ri, ro, wr), axis=0)
+        img_list = []
+        img_list.append(np.array(img))
+        img_list.append(np.array(target))
+        img_list.append(segmentation)
+
+        if self.joint_transform is not None:
+            img_list = self.joint_transform(img_list)
+
+        img = img_list[0]
+        # hsv = img_list[0].convert('HSV')
+        hsv = convert_from_image_to_hsv(img_list[0])
+        # lab = img_list[0].convert('HSV')
+        lab = convert_from_image_to_lab(img_list[0])
+        lab_target = convert_from_image_to_lab(img_list[1])
+        target = convert_from_image_to_cv2(img_list[1])
+        if self.transform is not None:
+            img = self.transform(img)
+            hsv = self.transform(hsv)
+            lab = self.transform(lab)
+            target = self.transform(target)
+            lab_target = self.transform(lab_target)
+            segmentation = self.transform(img_list[2])
+
+        return img, hsv, lab, target, lab_target, segmentation
+
+    def __len__(self):
+        return len(self.imgs)
+
 def get_features(image, model, layers=None):
     if layers is None:
         layers = {'0': 'conv1_1',
@@ -138,8 +190,9 @@ if __name__ == '__main__':
     import joint_transforms
     from torch.utils.data import DataLoader
     joint_transform = joint_transforms.Compose([
-        joint_transforms.RandomCrop(256),
-        joint_transforms.RandomHorizontallyFlip(),
+        joint_transforms.ImageResize_numpy(256),
+        joint_transforms.RandomCrop_numpy(224),
+        joint_transforms.RandomHorizontallyFlip_numpy(),
     ])
 
     img_transform = transforms.Compose([
@@ -148,23 +201,23 @@ if __name__ == '__main__':
     target_transform = transforms.ToTensor()
     input_size = (200, 200)
 
-    train_set2 = WaterImageFolder('/Users/tangyi/Downloads/Ucolor_final_model_corrected',
+    train_set2 = WaterImage3Folder('/home/ty/data/uw',
                                   joint_transform, img_transform, target_transform)
 
     train_loader = DataLoader(train_set2, batch_size=6, num_workers=1, shuffle=True)
     # train_loader2 = DataLoader(train_set2, batch_size=6, num_workers=4, shuffle=True)
     # dataloader_iterator = iter(train_loader2)
-    vgg = models.vgg19(pretrained=True).features
-    for param in vgg.parameters():
-        param.requires_grad_(False)
-    vgg.eval()
+    # vgg = models.vgg19(pretrained=True).features
+    # for param in vgg.parameters():
+    #     param.requires_grad_(False)
+    # vgg.eval()
     for i, data in enumerate(train_loader):
         print('i=', i)
         # data1, data2 = data
         # inputs, flows, labels, inputs2, labels2 = data
         # data2 = next(dataloader_iterator)
-        rgb, hsv, lab, target, target_lab, depth = data
-        print(torch.unique(rgb))
+        rgb, hsv, lab, target, target_lab, segmentation = data
+        print(segmentation.shape)
         # texture_features = get_features(rgb, vgg)
         # target_features = get_features(target, vgg)
         #
