@@ -129,7 +129,7 @@ class WaterImage3Folder(data.Dataset):
     def __getitem__(self, index):
         img = Image.open(os.path.join(self.root, 'input_train_uw', self.imgs[index])).convert('RGB')
         target = Image.open(os.path.join(self.root, 'gt_train_uw', self.labels[index])).convert('RGB')
-
+        print(os.path.join(self.root, 'segment_train_uw', 'FV', self.segments[index]))
         fv = cv2.imread(os.path.join(self.root, 'segment_train_uw', 'FV', self.segments[index]), 0)
         hd = cv2.imread(os.path.join(self.root, 'segment_train_uw', 'HD', self.segments[index]), 0)
         ri = cv2.imread(os.path.join(self.root, 'segment_train_uw', 'RI', self.segments[index]), 0)
