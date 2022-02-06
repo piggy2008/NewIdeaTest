@@ -120,7 +120,7 @@ class WaterImage3Folder(data.Dataset):
         self.imgs.sort()
         self.labels = os.listdir(os.path.join(root, 'gt_train_uw'))
         self.labels.sort()
-        self.segments = os.listdir(os.path.join(root, 'segment_train_uw'))
+        self.segments = os.listdir(os.path.join(root, 'segment_train_uw', 'FV'))
         self.labels.sort()
         self.joint_transform = joint_transform
         self.transform = transform
