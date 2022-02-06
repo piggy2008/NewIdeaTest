@@ -162,7 +162,7 @@ class WaterImage3Folder(data.Dataset):
         target = convert_from_BGR_to_RGB(img_list[1])
         lab_target = convert_from_image_to_lab(target)
         segmentation = np.concatenate((img_list[2], img_list[3], img_list[4], img_list[5], img_list[6]), axis=-1)
-        print(img.shape, '-', lab.shape, '-', target.shape, '-', segmentation.shape)
+        # print(img.shape, '-', lab.shape, '-', target.shape, '-', segmentation.shape)
         if self.transform is not None:
             img = self.transform(img)
             hsv = self.transform(hsv)

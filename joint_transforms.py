@@ -78,7 +78,7 @@ class ImageResize_numpy(object):
             img_resized = []
             for img_s in img:
                 tw, th = self.size
-                print(img_s.shape)
+
                 tmp = cv2.resize(img_s, (tw, th))
                 if tmp.ndim == 2:
                     img_resized.append(tmp[:, :, np.newaxis])
@@ -153,7 +153,7 @@ class RandomCrop_numpy(object):
             imgs_crop = []
             img_first = True
             for img_s in img:
-                # print('crop:', img_s.shape)
+
                 # w, h, c = img_s.shape
                 w = img_s.shape[0]
                 h = img_s.shape[1]
