@@ -14,6 +14,9 @@ from joint_transforms import crop, scale, flip, rotate
 def convert_from_image_to_cv2(img):
     return np.array(img)
 
+def convert_from_BGR_to_RGB(img):
+    return cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
+
 def convert_from_image_to_hsv(img):
     return cv2.cvtColor(np.array(img), cv2.COLOR_RGB2HSV)
 
@@ -127,8 +130,8 @@ class WaterImage3Folder(data.Dataset):
         self.target_transform = target_transform
 
     def __getitem__(self, index):
-        img = Image.open(os.path.join(self.root, 'input_train_uw', self.imgs[index])).convert('RGB')
-        target = Image.open(os.path.join(self.root, 'gt_train_uw', self.labels[index])).convert('RGB')
+        img = cv2.imread(os.path.join(self.root, 'input_train_uw', self.imgs[index]))
+        target = cv2.imread(os.path.join(self.root, 'gt_train_uw', self.labels[index]))
 
         fv = cv2.imread(os.path.join(self.root, 'segment_train_uw', 'FV', self.segments[index]), 0)
         hd = cv2.imread(os.path.join(self.root, 'segment_train_uw', 'HD', self.segments[index]), 0)
@@ -138,22 +141,27 @@ class WaterImage3Folder(data.Dataset):
         # fv = cv2.resize(fv, (224, 224))
         # print(fv.shape, '-', hd.shape)
 
-        segmentation = np.stack((fv, hd, ri, ro, wr), axis=0)
+        # segmentation = np.stack((fv, hd, ri, ro, wr), axis=0)
         img_list = []
-        img_list.append(np.array(img))
-        img_list.append(np.array(target))
-        img_list.append(segmentation)
+        img_list.append(img)
+        img_list.append(target)
+        img_list.append(fv[:, np.newaxis])
+        img_list.append(hd[:, np.newaxis])
+        img_list.append(ri[:, np.newaxis])
+        img_list.append(ro[:, np.newaxis])
+        img_list.append(wr[:, np.newaxis])
 
         if self.joint_transform is not None:
             img_list = self.joint_transform(img_list)
 
-        img = img_list[0]
+        img = convert_from_BGR_to_RGB(img_list[0])
         # hsv = img_list[0].convert('HSV')
-        hsv = convert_from_image_to_hsv(img_list[0])
+        hsv = convert_from_image_to_hsv(img)
         # lab = img_list[0].convert('HSV')
-        lab = convert_from_image_to_lab(img_list[0])
-        lab_target = convert_from_image_to_lab(img_list[1])
-        target = convert_from_image_to_cv2(img_list[1])
+        lab = convert_from_image_to_lab(img)
+        target = convert_from_BGR_to_RGB(img_list[1])
+        lab_target = convert_from_image_to_lab(target)
+
         if self.transform is not None:
             img = self.transform(img)
             hsv = self.transform(hsv)
