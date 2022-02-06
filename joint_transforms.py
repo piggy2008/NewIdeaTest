@@ -34,6 +34,16 @@ class Compose(object):
             img, mask = t(img, mask)
         return img, mask
 
+class Compose_single(object):
+    def __init__(self, transforms):
+        self.transforms = transforms
+
+    def __call__(self, img):
+        # assert img.size == mask.size
+        for t in self.transforms:
+            img = t(img)
+        return img
+
 class ImageResize(object):
 
     def __init__(self, size):
