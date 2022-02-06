@@ -155,8 +155,8 @@ class RandomCrop_numpy(object):
             for img_s in img:
                 # print('crop:', img_s.shape)
                 # w, h, c = img_s.shape
-                w = img_s.shape(0)
-                h = img_s.shape(1)
+                w = img_s.shape[0]
+                h = img_s.shape[1]
                 th, tw = self.size
 
                 if w < tw or h < th:
