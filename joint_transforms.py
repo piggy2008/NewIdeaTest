@@ -2,6 +2,8 @@ import numbers
 import random
 from torchvision.transforms import functional as F
 import torchvision
+import cv2
+import numpy as np
 
 from PIL import Image, ImageOps
 
@@ -52,6 +54,27 @@ class ImageResize(object):
         else:
             tw, th = self.size
             return img.resize((tw, th), Image.BILINEAR), mask.resize((tw, th), Image.NEAREST)
+
+class ImageResize_numpy(object):
+
+    def __init__(self, size):
+        if isinstance(size, numbers.Number):
+            self.size = (int(size), int(size))
+        else:
+            self.size = size
+
+    def __call__(self, img):
+        if isinstance(img, list):
+            img_resized = []
+            mask_resized = []
+            for img_s, mask_s in img:
+                tw, th = self.size
+                img_resized.append(cv2.resize(img_s, (tw, th)))
+                # mask_resized.append(mask_s.resize((tw, th), Image.BILINEAR))
+            return img_resized
+        else:
+            tw, th = self.size
+            return cv2.resize(img, (tw, th))
 
 
 class RandomCrop(object):
@@ -104,6 +127,43 @@ class RandomCrop(object):
             y1 = random.randint(0, h - th)
             return img.crop((x1, y1, x1 + tw, y1 + th)), mask.crop((x1, y1, x1 + tw, y1 + th))
 
+class RandomCrop_numpy(object):
+    def __init__(self, size):
+        if isinstance(size, numbers.Number):
+            self.size = (int(size), int(size))
+        else:
+            self.size = size
+
+    def __call__(self, img):
+        if isinstance(img, list):
+            imgs_crop = []
+            img_first = True
+            for img_s in img:
+                c, w, h = img_s.shape
+                th, tw = self.size
+
+                if w < tw or h < th:
+                    imgs_crop.append(cv2.resize(img_s, (tw, th)))
+                else:
+                    if img_first:
+                        x1 = random.randint(0, w - tw)
+                        y1 = random.randint(0, h - th)
+                        img_first = False
+                    imgs_crop.append(img_s[:, x1:x1 + tw, y1:y1 + th])
+                    # masks_crop.append(mask_s.crop((x1, y1, x1 + tw, y1 + th)))
+            return imgs_crop
+        else:
+
+            w, h = img.size
+            th, tw = self.size
+            if w == tw and h == th:
+                return img
+            if w < tw or h < th:
+                return cv2.resize(img, (tw, th))
+
+            x1 = random.randint(0, w - tw)
+            y1 = random.randint(0, h - th)
+            return img[:, x1:x1 + tw, y1:y1 + th]
 
 class RandomHorizontallyFlip(object):
     def __call__(self, img, mask):
@@ -120,6 +180,21 @@ class RandomHorizontallyFlip(object):
             if random.random() < 0.5:
                 return img.transpose(Image.FLIP_LEFT_RIGHT), mask.transpose(Image.FLIP_LEFT_RIGHT)
             return img, mask
+
+class RandomHorizontallyFlip_numpy(object):
+    def __call__(self, img):
+        if isinstance(img, list):
+            if random.random() < 0.5:
+                img_flips = []
+                for img_s in img:
+                    img_flips.append(np.flip(img_s, axis=-1))
+
+                return img_flips
+            return img
+        else:
+            if random.random() < 0.5:
+                return np.flip(img, axis=-1)
+            return img
 
 class RandomRotate(object):
     def __init__(self, degree):
