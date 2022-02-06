@@ -76,10 +76,11 @@ class ImageResize_numpy(object):
     def __call__(self, img):
         if isinstance(img, list):
             img_resized = []
-            mask_resized = []
             for img_s in img:
                 tw, th = self.size
-                img_resized.append(cv2.resize(img_s, (tw, th)))
+                print(img_s.shape)
+                tmp = cv2.resize(img_s, (tw, th))
+                img_resized.append(tmp)
                 # mask_resized.append(mask_s.resize((tw, th), Image.BILINEAR))
             return img_resized
         else:
