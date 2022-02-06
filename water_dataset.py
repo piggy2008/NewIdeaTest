@@ -127,14 +127,14 @@ class WaterImage3Folder(data.Dataset):
         self.target_transform = target_transform
 
     def __getitem__(self, index):
-        img = Image.open(os.path.join(self.root, 'train_input', self.imgs[index])).convert('RGB')
-        target = Image.open(os.path.join(self.root, 'train_gt', self.labels[index])).convert('RGB')
+        img = Image.open(os.path.join(self.root, 'input_train_uw', self.imgs[index])).convert('RGB')
+        target = Image.open(os.path.join(self.root, 'gt_train_uw', self.labels[index])).convert('RGB')
 
-        fv = cv2.imread(os.path.join(self.root, 'FV', self.segments[index]), 0)
-        hd = cv2.imread(os.path.join(self.root, 'HD', self.segments[index]), 0)
-        ri = cv2.imread(os.path.join(self.root, 'RI', self.segments[index]), 0)
-        ro = cv2.imread(os.path.join(self.root, 'RO', self.segments[index]), 0)
-        wr = cv2.imread(os.path.join(self.root, 'WR', self.segments[index]), 0)
+        fv = cv2.imread(os.path.join(self.root, 'segment_train_uw', 'FV', self.segments[index]), 0)
+        hd = cv2.imread(os.path.join(self.root, 'segment_train_uw', 'HD', self.segments[index]), 0)
+        ri = cv2.imread(os.path.join(self.root, 'segment_train_uw', 'RI', self.segments[index]), 0)
+        ro = cv2.imread(os.path.join(self.root, 'segment_train_uw', 'RO', self.segments[index]), 0)
+        wr = cv2.imread(os.path.join(self.root, 'segment_train_uw', 'WR', self.segments[index]), 0)
         segmentation = np.stack((fv, hd, ri, ro, wr), axis=0)
         img_list = []
         img_list.append(np.array(img))
