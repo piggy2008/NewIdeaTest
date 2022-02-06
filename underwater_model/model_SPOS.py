@@ -160,13 +160,13 @@ class Water(nn.Module):
 
         self.base = Base(en_channels)
 
-        self.align1 = nn.Sequential(nn.Conv2d(en_channels[0] * 2, de_channels, kernel_size=3, stride=1, padding=1),
+        self.align1 = nn.Sequential(nn.Conv2d(en_channels[0] * 2 + 5, de_channels, kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
 
-        self.align2 = nn.Sequential(nn.Conv2d(en_channels[1] * 2, de_channels, kernel_size=3, stride=1, padding=1),
+        self.align2 = nn.Sequential(nn.Conv2d(en_channels[1] * 2 + 5, de_channels, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(inplace=True))
 
-        self.align3 = nn.Sequential(nn.Conv2d(en_channels[2] * 2, de_channels, kernel_size=3, stride=1, padding=1),
+        self.align3 = nn.Sequential(nn.Conv2d(en_channels[2] * 2 + 5, de_channels, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(inplace=True))
         # vit
         # self.vit1 = ViT(image_size=128, patch_size=16, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
@@ -213,11 +213,14 @@ class Water(nn.Module):
         inter_lab = F.interpolate(self.de_predict_lab(third_lab), lab.size()[2:], mode='bilinear')
 
         # if select[0] == 0:
-        first = self.align1(torch.cat([first_rgb, first_lab], dim=1))
+        segment_first = F.interpolate(trans_map, first_rgb.size()[2:], mode='bilinear')
+        first = self.align1(torch.cat([first_rgb, first_lab, segment_first], dim=1))
 
-        second = self.align2(torch.cat([second_rgb, second_lab], dim=1))
+        segment_second = F.interpolate(trans_map, second_rgb.size()[2:], mode='bilinear')
+        second = self.align2(torch.cat([second_rgb, second_lab, segment_second], dim=1))
 
-        third = self.align3(torch.cat([third_rgb, third_lab], dim=1))
+        segment_third = F.interpolate(trans_map, third_rgb.size()[2:], mode='bilinear')
+        third = self.align3(torch.cat([third_rgb, third_lab, segment_third], dim=1))
         # first = self.align1(first_rgb)
         #
         # second = self.align2(second_rgb)
