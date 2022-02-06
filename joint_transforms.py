@@ -160,7 +160,7 @@ class RandomCrop_numpy(object):
                         x1 = random.randint(0, w - tw)
                         y1 = random.randint(0, h - th)
                         img_first = False
-                    imgs_crop.append(img_s[:, x1:x1 + tw, y1:y1 + th])
+                    imgs_crop.append(img_s[x1:x1 + tw, y1:y1 + th, :])
                     # masks_crop.append(mask_s.crop((x1, y1, x1 + tw, y1 + th)))
             return imgs_crop
         else:
@@ -174,7 +174,7 @@ class RandomCrop_numpy(object):
 
             x1 = random.randint(0, w - tw)
             y1 = random.randint(0, h - th)
-            return img[:, x1:x1 + tw, y1:y1 + th]
+            return img[x1:x1 + tw, y1:y1 + th, :]
 
 class RandomHorizontallyFlip(object):
     def __call__(self, img, mask):
@@ -198,13 +198,13 @@ class RandomHorizontallyFlip_numpy(object):
             if random.random() < 0.5:
                 img_flips = []
                 for img_s in img:
-                    img_flips.append(np.flip(img_s, axis=-1))
+                    img_flips.append(np.flip(img_s, axis=-2))
 
                 return img_flips
             return img
         else:
             if random.random() < 0.5:
-                return np.flip(img, axis=-1)
+                return np.flip(img, axis=-2)
             return img
 
 class RandomRotate(object):
