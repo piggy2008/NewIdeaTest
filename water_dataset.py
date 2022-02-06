@@ -145,11 +145,11 @@ class WaterImage3Folder(data.Dataset):
         img_list = []
         img_list.append(img)
         img_list.append(target)
-        img_list.append(fv[:, np.newaxis])
-        img_list.append(hd[:, np.newaxis])
-        img_list.append(ri[:, np.newaxis])
-        img_list.append(ro[:, np.newaxis])
-        img_list.append(wr[:, np.newaxis])
+        img_list.append(fv[:, :, np.newaxis])
+        img_list.append(hd[:, :, np.newaxis])
+        img_list.append(ri[:, :, np.newaxis])
+        img_list.append(ro[:, :, np.newaxis])
+        img_list.append(wr[:, :, np.newaxis])
 
         if self.joint_transform is not None:
             img_list = self.joint_transform(img_list)
