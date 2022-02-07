@@ -52,8 +52,8 @@ if __name__ == '__main__':
         image = Image.open(os.path.join(gt_path, img + '.png'))
         image.save(os.path.join(save_gt_root, img + '.png'))
 
-        image = Image.open(os.path.join(depth_path, img + '.png'))
-        image.save(os.path.join(save_depth_root, img + '.png'))
+        image = Image.open(os.path.join(depth_path, img + '.png_depth_estimate.png'))
+        image.save(os.path.join(save_depth_root, img + '.png_depth_estimate.png'))
 
     # plt.style.use('classic')
     # img = Image.open('/Users/tangyi/Downloads/Ucolor_final_model_corrected/input_test/15704.png')

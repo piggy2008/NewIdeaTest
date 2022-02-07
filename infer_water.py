@@ -30,7 +30,7 @@ torch.cuda.set_device(device_id)
 ckpt_path = saving_path
 
 
-exp_name = 'WaterEnhance_2022-01-24 11:55:21'
+exp_name = 'WaterEnhance_2022-02-01 17:31:46'
 
 args = {
     'gnn': True,
@@ -43,10 +43,10 @@ args = {
     # 'image_path': '/mnt/hdd/data/ty2/input_test',
     # 'depth_path': '/mnt/hdd/data/ty2/depth_test',
     # 'gt_path': '/mnt/hdd/data/ty2/gt_test',
-    'image_path': '/home/ty/data/LSUI/backup/input',
+    'image_path': '/home/ty/data/uw/input_test',
     'depth_path': '/home/ty/data/uw/depth_test',
-    'gt_path': '/home/ty/data/LSUI/backup/GT',
-    'dataset': 'LSUI',
+    'gt_path': '/home/ty/data/uw/gt_test',
+    'dataset': 'UIEB',
     'start': 0
 }
 
@@ -67,9 +67,9 @@ def read_testset(dataset, image_path):
     elif dataset == 'LSUI':
         images = os.listdir(image_path)
         lsui = []
-        random_list = random.sample(range(0, len(images)), 504)
-        for num in random_list:
-            lsui.append(images[num][:-4])
+        # random_list = random.sample(range(0, len(images)), 504)
+        for img in images:
+            lsui.append(img[:-4])
         return lsui
     else:
         images = os.listdir(image_path)
@@ -107,7 +107,7 @@ def main(snapshot):
 
             # img_list = [i_id.strip() for i_id in open(imgs_path)]
 
-            img = Image.open(os.path.join(args['image_path'], name + '.jpg')).convert('RGB')
+            img = Image.open(os.path.join(args['image_path'], name + '.png')).convert('RGB')
             img = np.array(img)
             img = cv2.resize(img, (256, 256))
             # depth = Image.open(os.path.join(args['depth_path'], name + '.png_depth_estimate.png')).convert('L')
@@ -120,7 +120,7 @@ def main(snapshot):
             img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
             hsv_var = Variable(img_transform(hsv).unsqueeze(0), volatile=True).cuda()
             lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
-            prediction, prediction2, hsv_side, lab_side = net(img_var, hsv_var, lab_var, None, [1, 7, 6, 5, 4, 5, 5, 1, 3, 5, 5, 6, 6, 4, 6, 3, 3, 6, 2, 1])
+            prediction, prediction2, hsv_side, lab_side, _, _ = net(img_var, hsv_var, lab_var, None, [7, 1, 6, 5, 3, 5, 7, 1, 1, 5, 2, 3, 5, 0, 6, 5, 6, 6, 7, 4])
             # depth_var = Variable(img_transform(depth).unsqueeze(0), volatile=True).cuda()
 
             # prediction = torch.unsqueeze(prediction, 0)
@@ -142,7 +142,7 @@ def main(snapshot):
             # prediction = MaxMinNormalization(prediction, prediction.max(), prediction.min()) * 255.0
             # prediction = prediction.astype('uint8')
 
-            gt = Image.open(os.path.join(args['gt_path'], name + '.jpg')).convert('RGB')
+            gt = Image.open(os.path.join(args['gt_path'], name + '.png')).convert('RGB')
             gt = np.asarray(gt)
             gt = cv2.resize(gt, (256, 256))
             print(gt.shape, '-----', prediction.shape)
