@@ -39,17 +39,17 @@ torch.cuda.set_device(device_id)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = saving_path
 
-exp_name = 'WaterEnhance_2022-01-19 13:48:09'
+exp_name = 'WaterEnhance_2022-02-05 20:46:49'
 
 args = {
     'gnn': True,
     'snapshot': '240000',  # your snapshot filename (exclude extension name)
     'choice': 8,
-    'layers': 18,
+    'layers': 20,
     'en_channels': [64, 128, 256],
     'de_channels': 128,
     'log_dir': 'log',
-    'max_epochs': 30,
+    'max_epochs': 42,
     'select_num': 10,
     'population_num': 40,
     'top_k': 20,
@@ -129,7 +129,8 @@ class EvolutionSearcher(object):
         self.epoch = info['epoch']
 
         print('load checkpoint from', self.checkpoint_name)
-        print('infor message:', info)
+        # print('top k:', info.keys())
+        # print('infor message:', info)
         return True
 
     def is_legal(self, cand):
