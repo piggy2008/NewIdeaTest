@@ -42,6 +42,7 @@ args = {
     'image_path': '/home/ty/data/uw/input_test',
     'depth_path': '/home/ty/data/uw/depth_test',
     'gt_path': '/home/ty/data/uw/gt_test',
+    'segment_path': '/home/ty/data/uw/segment_input_test',
     'dataset': 'UIEB',
     'start': 0
 }
@@ -105,18 +106,29 @@ def main(snapshot):
             img = Image.open(os.path.join(args['image_path'], name + '.png')).convert('RGB')
             img = np.array(img)
             # img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
-            # depth = Image.open(os.path.join(args['depth_path'], name + '.png_depth_estimate.png')).convert('L')
+            fv = Image.open(os.path.join(args['segment_path'], 'FV', name + '.bmp')).convert('L')
+            hd = Image.open(os.path.join(args['segment_path'], 'HD', name + '.bmp')).convert('L')
+            ri = Image.open(os.path.join(args['segment_path'], 'RI', name + '.bmp')).convert('L')
+            ro = Image.open(os.path.join(args['segment_path'], 'RO', name + '.bmp')).convert('L')
+            wr = Image.open(os.path.join(args['segment_path'], 'WR', name + '.bmp')).convert('L')
+
+            fv = cv2.resize(np.array(fv), (224, 224))
+            hd = cv2.resize(np.array(hd), (224, 224))
+            ri = cv2.resize(np.array(ri), (224, 224))
+            ro = cv2.resize(np.array(ro), (224, 224))
+            wr = cv2.resize(np.array(wr), (224, 224))
+            segmentation = np.stack((fv, hd, ri, ro, wr), axis=-1)
+            w = img.shape[0]
+            h = img.shape[1]
             img = cv2.resize(img, (256, 256))
             hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-            # srgb_profile = ImageCms.createProfile("sRGB")
-            # lab_profile = ImageCms.createProfile("LAB")
-            # rgb2lab_transform = ImageCms.buildTransformFromOpenProfiles(srgb_profile, lab_profile, "RGB", "LAB")
+
             lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
             img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
             hsv_var = Variable(img_transform(hsv).unsqueeze(0), volatile=True).cuda()
             lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
-            # depth_var = Variable(img_transform(depth).unsqueeze(0), volatile=True).cuda()
-            prediction, prediction2, hsv_side, lab_side = net(img_var, hsv_var, lab_var, None, [3, 3, 3, 3])
+            segmentation = Variable(img_transform(segmentation).unsqueeze(0), volatile=True).cuda()
+            prediction, prediction2, hsv_side, lab_side, _, _ = net(img_var, hsv_var, lab_var, segmentation, [3, 3, 3, 3])
             # prediction = torch.unsqueeze(prediction, 0)
             # print(torch.unique(prediction))
             # precision = to_pil(prediction.data.squeeze(0).cpu())
@@ -134,10 +146,10 @@ def main(snapshot):
 
             # prediction = MaxMinNormalization(prediction, prediction.max(), prediction.min()) * 255.0
             # prediction = prediction.astype('uint8')
-
+            prediction = cv2.resize(prediction, (w, h))
             gt = Image.open(os.path.join(args['gt_path'], name + '.png')).convert('RGB')
             gt = np.asarray(gt)
-            gt = cv2.resize(gt, (256, 256))
+            # gt = cv2.resize(gt, (256, 256))
             print(gt.shape, '-----', prediction.shape)
             psnr = calculate_psnr(prediction * 255.0, gt)
             ssim = calculate_ssim(prediction * 255.0, gt)
