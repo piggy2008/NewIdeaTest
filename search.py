@@ -39,21 +39,23 @@ torch.cuda.set_device(device_id)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = saving_path
 
-exp_name = 'WaterEnhance_2021-12-25 10:52:24'
+exp_name = 'WaterEnhance_2022-02-04 15:03:03'
 
 args = {
     'gnn': True,
-    'snapshot': '200000',  # your snapshot filename (exclude extension name)
-    'choice': 9,
-    'layers': 10,
+    'snapshot': '240000',  # your snapshot filename (exclude extension name)
+    'choice': 8,
+    'layers': 20,
+    'en_channels': [64, 128, 256],
+    'de_channels': 128,
     'log_dir': 'log',
-    'max_epochs': 5,
+    'max_epochs': 40,
     'select_num': 10,
-    'population_num': 30,
+    'population_num': 40,
     'top_k': 20,
     'm_prob': 0.1,
-    'crossover_num': 25,
-    'mutation_num': 25,
+    'crossover_num': 40,
+    'mutation_num': 40,
     'flops_limit': 330 * 1e6,
     'max_train_iters': 20,
     'train_batch_size': 5,
@@ -66,6 +68,7 @@ args = {
     'image_path': '/home/ty/data/uw/input_test',
     'depth_path': '/home/ty/data/uw/depth_test',
     'gt_path': '/home/ty/data/uw/gt_test',
+    'segment_path': '/home/ty/data/uw/segment_input_test',
     'dataset': 'UIEB',
 }
 
@@ -85,7 +88,7 @@ class EvolutionSearcher(object):
         self.mutation_num = args['mutation_num']
         self.flops_limit = args['flops_limit']
 
-        self.model = Water()
+        self.model = Water(en_channels=args['en_channels'], de_channels=args['de_channels'])
         # self.model = torch.nn.DataParallel(self.model).cuda()
         # supernet_state_dict = torch.load(
         #     '../Supernet/models/checkpoint-latest.pth.tar')['state_dict']
