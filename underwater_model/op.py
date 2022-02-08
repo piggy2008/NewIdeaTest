@@ -109,19 +109,19 @@ class sge_layer(nn.Module):
         self.sig = nn.Sigmoid()
     def forward(self, x):
         b, c, h, w = x.size()
-        print(x.shape)
-        x = x.view(b * self.groups, -1, h, w)
+        # print(x.shape)
+        x = x.contiguous().view(b * self.groups, -1, h, w)
         xn = x * self.avg_pool(x)
         xn = xn.sum(dim=1, keepdim=True)
-        t = xn.view(b * self.groups, -1)
+        t = xn.contiguous().view(b * self.groups, -1)
         t = t - t.mean(dim=1, keepdim=True) + 1e-5
         std = t.std(dim=1, keepdim=True) + 1e-5
         t = t / std
-        t = t.view(b, self.groups, h, w)
+        t = t.contiguous().view(b, self.groups, h, w)
         t = t * self.weight + self.bias
-        t = t.view(b * self.groups, 1, h, w)
+        t = t.contiguous().view(b * self.groups, 1, h, w)
         x = x * self.sig(t)
-        x = x.view(b, c, h, w)
+        x = x.contiguous().view(b, c, h, w)
         return x
 
 

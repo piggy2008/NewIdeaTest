@@ -173,7 +173,7 @@ class Water(nn.Module):
         # self.vit1 = ViT(image_size=128, patch_size=16, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
         # self.vit2 = ViT(image_size=64, patch_size=8, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
         # self.vit3 = ViT(image_size=56, patch_size=7, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
-        self.refine = refine_block(128, 56)
+        self.refine = refine_block(128, 64)
 
         self.search = Search(channel=de_channels)
         # self.search2 = Search(channel=de_channels)
@@ -229,9 +229,9 @@ class Water(nn.Module):
         #
         # third = self.align3(third_rgb)
         # third = self.vit3(third)
-        print('before:', third.shape)
+        # print('before:', third.shape)
         third = self.refine(third, select[12])
-        print('after:', third.shape)
+        # print('after:', third.shape)
 
 
 
