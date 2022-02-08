@@ -6,6 +6,7 @@ from underwater_model.base_SPOS import Base
 from underwater_model.search_net import Search
 from underwater_model.color_SPOS import Color
 from underwater_model.vit import ViT
+from underwater_model.refine import refine_block
 
 class RCTConvBlock(nn.Module):
     def __init__(self, input_nc, output_nc, ksize=3, stride=2, pad=1, extra_conv=False):
@@ -171,7 +172,8 @@ class Water(nn.Module):
         # vit
         # self.vit1 = ViT(image_size=128, patch_size=16, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
         # self.vit2 = ViT(image_size=64, patch_size=8, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
-        self.vit3 = ViT(image_size=56, patch_size=7, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
+        # self.vit3 = ViT(image_size=56, patch_size=7, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
+        self.refine = refine_block(128, 64)
 
         self.search = Search(channel=de_channels)
         # self.search2 = Search(channel=de_channels)
@@ -227,9 +229,10 @@ class Water(nn.Module):
         #
         # third = self.align3(third_rgb)
         third = self.vit3(third)
+        third = self.refine(third, select[12])
 
 
-        mid_ab_feat, _, _, _ = self.search(third, second, first, select[12:16])
+        mid_ab_feat, _, _, _ = self.search(third, second, first, select[13:17])
         # final_color = self.search_color(third, second, first, select[16:])
         final_ab = self.de_predict(mid_ab_feat)
         # mid_ab_feat = self.de_predict_conv1_ab(final_feat)
@@ -237,7 +240,7 @@ class Water(nn.Module):
         mid_ab_feat3 = F.interpolate(mid_ab_feat, size=third.size()[2:], mode='bilinear')
         mid_ab_feat2 = F.interpolate(mid_ab_feat, size=second.size()[2:], mode='bilinear')
         final2, third, second, first = self.search(third + mid_ab_feat3,
-                                                   second + mid_ab_feat2, first + mid_ab_feat, select[16:])
+                                                   second + mid_ab_feat2, first + mid_ab_feat, select[17:])
 
         # p = F.adaptive_avg_pool2d(mid_ab_feat, 1)
         # p16 = F.adaptive_avg_pool2d(mid_ab_feat, 16)
