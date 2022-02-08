@@ -79,7 +79,7 @@ args = {
     # 'train_loader': 'flow_image3',
     # 'train_loader': 'video_sequence'
     'image_size': 320,
-    'crop_size': 64,
+    'crop_size': 256,
     # 'self_distill': 0.1,
     # 'teacher_distill': 0.6
 }
