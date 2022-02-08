@@ -228,7 +228,7 @@ class Water(nn.Module):
         # second = self.align2(second_rgb)
         #
         # third = self.align3(third_rgb)
-        third = self.vit3(third)
+        # third = self.vit3(third)
         third = self.refine(third, select[12])
 
 
