@@ -229,7 +229,10 @@ class Water(nn.Module):
         #
         # third = self.align3(third_rgb)
         # third = self.vit3(third)
+        print('before:', third.shape)
         third = self.refine(third, select[12])
+        print('after:', third.shape)
+
 
 
         mid_ab_feat, _, _, _ = self.search(third, second, first, select[13:17])
