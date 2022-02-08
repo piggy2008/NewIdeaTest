@@ -109,6 +109,7 @@ class sge_layer(nn.Module):
         self.sig = nn.Sigmoid()
     def forward(self, x):
         b, c, h, w = x.size()
+        print(x.shape)
         x = x.view(b * self.groups, -1, h, w)
         xn = x * self.avg_pool(x)
         xn = xn.sum(dim=1, keepdim=True)
