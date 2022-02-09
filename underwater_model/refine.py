@@ -19,7 +19,7 @@ class refine_block(nn.Module):
         self.rfblock_psp = PSPModule(n_channels, n_channels)
         self.rfblock_vit = ViT(image_size=image_size, patch_size=int(image_size/8),
                        dim=n_channels, depth=1, heads=1, mlp_dim=n_channels, channels=n_channels)
-        self.rfblock_cait = CaiT(image_size=image_size,patch_size=8, num_classes=1000, dim=128,
+        self.rfblock_cait = CaiT(image_size=image_size,patch_size=int(image_size/8), num_classes=1000, dim=128,
                          depth=1, cls_depth=2, heads=1, mlp_dim=n_channels, channels=n_channels,
                          dropout=0.1, emb_dropout=0.1, layer_dropout=0.05)
         self.rfblock_cct = CCT(img_size=image_size, n_input_channels=n_channels, embedding_dim=n_channels, n_conv_layers=1,
