@@ -39,9 +39,9 @@ class refine_block(nn.Module):
         elif select == 2:
             out = self.rfblock_eca(x)
         elif select == 3:
-            out = self.rfblock_aspp(x)
+            out = self.rfblock_dil4Conv(x)
         elif select == 4:
-            out = self.rfblock_psp(x)
+            out = self.rfblock_conv(x)
         elif select == 5:
             out = self.rfblock_vit(x)
         elif select == 6:
