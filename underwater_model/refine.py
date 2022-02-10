@@ -15,8 +15,11 @@ class refine_block(nn.Module):
         self.rfblock_skipconnect = Identity(False)
         self.rfblock_sge = sge_layer(16)
         self.rfblock_eca = eca_layer(3)
-        self.rfblock_aspp = ASPP(n_channels, n_channels, [4, 8, 12])
-        self.rfblock_psp = PSPModule(n_channels, n_channels)
+        # self.rfblock_aspp = ASPP(n_channels, n_channels, [4, 8, 12])
+        # self.rfblock_psp = PSPModule(n_channels, n_channels)
+        self.rfblock_dil4Conv = DilConv(n_channels, n_channels, 3, 1, 4, 4, affine=True, upsample=False)
+        self.rfblock_conv = Conv(n_channels, n_channels, 3, 1, 1, affine=True, upsample=False)
+
         self.rfblock_vit = ViT(image_size=image_size, patch_size=int(image_size/8),
                        dim=n_channels, depth=1, heads=1, mlp_dim=n_channels, channels=n_channels)
         self.rfblock_cait = CaiT(image_size=image_size,patch_size=int(image_size/8), num_classes=1000, dim=128,
