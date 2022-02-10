@@ -57,7 +57,7 @@ args = {
     'L2': False,
     'KL': True,
     'structure': True,
-    'iter_num': 140000,
+    'iter_num': 200000,
     'iter_save': 4000,
     'iter_start_seq': 0,
     'train_batch_size': 4,
@@ -78,8 +78,8 @@ args = {
     # 'train_loader': 'video_image'
     # 'train_loader': 'flow_image3',
     # 'train_loader': 'video_sequence'
-    'image_size': 256,
-    'crop_size': 224,
+    'image_size': 320,
+    'crop_size': 256,
     # 'self_distill': 0.1,
     # 'teacher_distill': 0.6
 }
