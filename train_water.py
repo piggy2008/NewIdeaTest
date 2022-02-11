@@ -14,7 +14,7 @@ import contextual_loss as cl
 
 import joint_transforms
 from config import msra10k_path, video_train_path, datasets_root, video_seq_gt_path, video_seq_path, saving_path
-from water_dataset import WaterImageFolder, WaterImage2Folder, WaterImage3Folder
+from water_dataset import WaterImageFolder, WaterImage2Folder, WaterImage3Folder, WaterImage4Folder
 from underwater_model.model_SPOS import Water
 from underwater_model.discriminator import Discriminator, PatchDiscriminator
 
@@ -49,7 +49,7 @@ args = {
     'gnn': True,
     'choice': 8,
     # 'choice2': 4,
-    'layers': 21,
+    'layers': 11,
     # 'layers2': 3,
     'en_channels': [64, 128, 256],
     'de_channels': 128,
@@ -57,7 +57,7 @@ args = {
     'L2': False,
     'KL': True,
     'structure': True,
-    'iter_num': 200000,
+    'iter_num': 100000,
     'iter_save': 4000,
     'iter_start_seq': 0,
     'train_batch_size': 4,
@@ -71,7 +71,7 @@ args = {
     'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
     # 'imgs_file': '/mnt/hdd/data/ty2',
-    'imgs_file': '/home/ty/data/uw',
+    'imgs_file': '/home/ty/data/color',
     # 'imgs_file': 'Pre-train/pretrain_all_seq_DAFB2_DAVSOD_flow.txt',
     # 'imgs_file2': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB2_DAVSOD_5f.txt',
@@ -108,8 +108,9 @@ img_transform = transforms.Compose([
 target_transform = transforms.ToTensor()
 
 # train_set = ImageFolder(msra10k_path, joint_transform, img_transform, target_transform)
-train_set = WaterImage3Folder(args['imgs_file'],
-                                  joint_transform, img_transform, target_transform)
+# train_set = WaterImage3Folder(args['imgs_file'],
+#                                   joint_transform, img_transform, target_transform)
+train_set = WaterImage4Folder(args['imgs_file'], 256)
 train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=4, shuffle=True)
 # if train_set2 is not None:
 #     train_loader2 = DataLoader(train_set2, batch_size=args['train_batch_size'], num_workers=4, shuffle=True)
@@ -219,13 +220,14 @@ def train(net, discriminator, optimizer, optimizer_d):
             #                                                 ) ** args['lr_decay']
             #
             # inputs, flows, labels, pre_img, pre_lab, cur_img, cur_lab, next_img, next_lab = data
-            rgb, hsv, lab, target, lab_target, segmentation = data
+            # rgb, hsv, lab, target, lab_target, segmentation = data
+            rgb, L, ab = data
             # data2 = next(dataloader_iterator)
             # inputs2, labels2 = data2
             # train_single(net, inputs, flows, labels, optimizer, curr_iter, teacher)
 
 
-            train_single2(net, None, rgb, hsv, lab, target, lab_target, segmentation, optimizer, None, curr_iter)
+            train_single2(net, None, rgb, L, ab, None, None, optimizer, None, curr_iter)
             curr_iter += 1
 
             if curr_iter % args['iter_save'] == 0:
@@ -241,15 +243,14 @@ def train(net, discriminator, optimizer, optimizer_d):
                 return
 
 
-def train_single2(net, discriminator, rgb, hsv, lab, target, lab_target, depth, optimizer, optimizer_d, curr_iter):
+def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optimizer, optimizer_d, curr_iter):
     rgb = Variable(rgb).cuda(device_id)
-    hsv = Variable(hsv).cuda(device_id)
+
     lab = Variable(lab).cuda(device_id)
-    # rgb_64 = F.interpolate(rgb, size=[64, 64], mode='bilinear')
-    # rgb_32 = F.interpolate(rgb, size=[32, 32], mode='bilinear')
-    segmentation = Variable(depth).cuda(device_id)
+
+    # segmentation = Variable(depth).cuda(device_id)
     labels = Variable(target).cuda(device_id)
-    labels_lab = Variable(lab_target).cuda(device_id)
+    # labels_lab = Variable(lab_target).cuda(device_id)
     # labels_64 = F.interpolate(labels, size=[64, 64], mode='bilinear')
     # labels_32 = F.interpolate(labels, size=[32, 32], mode='bilinear')
     # labels_lab3 = Variable(lab_target).cuda(device_id)
@@ -263,16 +264,16 @@ def train_single2(net, discriminator, rgb, hsv, lab, target, lab_target, depth, 
     optimizer.zero_grad()
 
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
-    final, final2, inter_rgb, inter_lab, third, second = net(rgb, hsv, lab, segmentation, get_random_cand())
+    final, _, _ = net(rgb, lab, get_random_cand())
 
     # pred_fake = discriminator(final2)
     # loss_GAN = criterion_gan(pred_fake, True)
 
-    loss0 = criterion(final, labels_lab[:, 1:, :, :])
-    loss1 = criterion_l1(final, labels_lab[:, 1:, :, :])
+    loss0 = criterion(final, labels)
+    loss1 = criterion_l1(final, labels)
 
-    loss0_2 = criterion(final2, labels)
-    loss1_2 = criterion_l1(final2, labels)
+    # loss0_2 = criterion(final2, labels)
+    # loss1_2 = criterion_l1(final2, labels)
 
     # loss_mid_ab = criterion(mid_ab, labels_lab)
     # loss_mid_ab = criterion_l1(mid_ab, labels_lab)
@@ -284,23 +285,23 @@ def train_single2(net, discriminator, rgb, hsv, lab, target, lab_target, depth, 
     # loss1_lab3 = criterion_l1(final_lab3, labels_lab3)
 
     # loss7 = criterion_perceptual(final, labels)
-    loss7_2 = criterion_perceptual(final2, labels)
+    # loss7_2 = criterion_perceptual(final2, labels)
     # loss11 = criterion_tv(final)
 
     # loss5 = criterion(final2, labels)
     # loss6 = criterion_l1(final2, labels)
 
-    loss2 = criterion(inter_rgb, labels)
+    # loss2 = criterion(inter_rgb, labels)
     # loss3 = criterion(inter_hsv, labels)
-    loss4 = criterion(inter_lab, labels_lab)
+    # loss4 = criterion(inter_lab, labels_lab)
 
     # loss2_1 = criterion_l1(inter_rgb, labels)
     # loss3_1 = criterion_l1(inter_hsv, labels)
     # loss4_1 = criterion_l1(inter_lab, labels_lab)
 
-    loss8 = criterion_perceptual(inter_rgb, labels)
+    # loss8 = criterion_perceptual(inter_rgb, labels)
     # loss9 = criterion_perceptual(inter_hsv, labels)
-    loss10 = criterion_perceptual(inter_lab, labels_lab)
+    # loss10 = criterion_perceptual(inter_lab, labels_lab)
     # texture_features = get_features(rgb, vgg)
     # target_features = get_features(labels, vgg)
     # content_loss = torch.mean((texture_features['relu5_4'] - target_features['relu5_4']) ** 2)
@@ -310,10 +311,10 @@ def train_single2(net, discriminator, rgb, hsv, lab, target, lab_target, depth, 
 
     # loss1_second = criterion(second, labels_64)
     # loss2_second = criterion_l1(second, labels_64)
-
-    total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss4 \
-                 + 0.25 * loss8 + 0.25 * loss10 \
-                 + 1 * loss0_2 + 0.25 * loss1_2 + 0.25 * loss7_2 \
+    total_loss = 1 * loss0 + 0.25 * loss1
+    # total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss4 \
+    #              + 0.25 * loss8 + 0.25 * loss10 \
+    #              + 1 * loss0_2 + 0.25 * loss1_2 + 0.25 * loss7_2 \
                  # + loss1_third + 0.25 * loss2_third + loss1_second + 0.25 * loss2_second \
                  # + 0.5 * loss_GAN
     # total_loss = 1 * loss0 + 0.25 * loss1  \
@@ -344,7 +345,7 @@ def train_single2(net, discriminator, rgb, hsv, lab, target, lab_target, depth, 
     # loss_D.backward(retain_graph=True)
     # optimizer_d.step()
 
-    print_log(total_loss, loss0, loss0_2, loss7_2, args['train_batch_size'], curr_iter, optimizer)
+    print_log(total_loss, loss0, loss1, loss1, args['train_batch_size'], curr_iter, optimizer)
 
     return
 
