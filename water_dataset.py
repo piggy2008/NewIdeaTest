@@ -176,6 +176,32 @@ class WaterImage3Folder(data.Dataset):
     def __len__(self):
         return len(self.imgs)
 
+class WaterImage4Folder(data.Dataset):
+    # image and gt should be in the same folder and have same filename except extended name (jpg and png respectively)
+    def __init__(self, root, input_size):
+        self.root = root
+        self.imgs = os.listdir(root)
+        self.imgs.sort()
+        self.transforms = transforms.Compose([
+            transforms.Resize((input_size, input_size), Image.BICUBIC),
+            transforms.RandomHorizontalFlip(),  # A little data augmentation!
+        ])
+
+    def __getitem__(self, index):
+        img = Image.open(os.path.join(self.root, self.imgs[index])).convert("RGB")
+
+        img = self.transforms(img)
+        img = np.array(img)
+        lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
+        lab = transforms.ToTensor()(lab)
+        L = lab[[0], ...] / 50. - 1.  # Between -1 and 1
+        ab = lab[[1, 2], ...] / 110.  # Between -1 and 1
+
+        return img, L, ab
+
+    def __len__(self):
+        return len(self.imgs)
+
 def get_features(image, model, layers=None):
     if layers is None:
         layers = {'0': 'conv1_1',
