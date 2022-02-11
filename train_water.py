@@ -266,7 +266,7 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     optimizer.zero_grad()
 
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
-    final, _, _ = net(rgb, lab, get_random_cand())
+    final = net(rgb, lab, get_random_cand())
 
     # pred_fake = discriminator(final2)
     # loss_GAN = criterion_gan(pred_fake, True)

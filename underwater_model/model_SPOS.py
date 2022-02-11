@@ -190,17 +190,20 @@ class Water(nn.Module):
 
     def forward(self, rgb, lab, select):
 
-        first_rgb, first_lab, second_rgb, second_lab, third_rgb, \
-        third_lab = self.base(rgb, lab, select[:6])
+        # first_rgb, first_lab, second_rgb, second_lab, third_rgb, \
+        # third_lab = self.base(rgb, lab, select[:6])
 
-        inter_rgb = F.interpolate(self.de_predict_rgb(third_rgb), rgb.size()[2:], mode='bilinear')
+        first_lab,  second_lab, third_lab = self.base(rgb, lab, select[:6])
+
+        # inter_rgb = F.interpolate(self.de_predict_rgb(third_rgb), rgb.size()[2:], mode='bilinear')
         inter_lab = F.interpolate(self.de_predict_lab(third_lab), lab.size()[2:], mode='bilinear')
 
-        first = self.align1(torch.cat([first_rgb, first_lab], dim=1))
+        # first = self.align1(torch.cat([first_rgb, first_lab], dim=1))
+        first = self.align1(first_lab)
 
-        second = self.align2(torch.cat([second_rgb, second_lab], dim=1))
+        second = self.align2(second_lab)
 
-        third = self.align3(torch.cat([third_rgb, third_lab], dim=1))
+        third = self.align3(third_lab)
 
         third = self.refine(third, select[6])
         mid_ab_feat, _, _, _ = self.search(third, second, first, select[6:10])
@@ -226,7 +229,7 @@ class Water(nn.Module):
         # third = self.de_predict_third(third)
         # second = self.de_predict_second(second)
 
-        return final_ab, inter_rgb, inter_lab
+        return final_ab
 
 if __name__ == '__main__':
     a = torch.zeros(2, 128, 200, 300)
