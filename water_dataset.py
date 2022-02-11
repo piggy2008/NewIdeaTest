@@ -194,6 +194,7 @@ class WaterImage4Folder(data.Dataset):
         img = np.array(img)
         lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
         lab = transforms.ToTensor()(lab)
+        img = transforms.ToTensor()(img)
         L = lab[[0], ...] / 50. - 1.  # Between -1 and 1
         ab = lab[[1, 2], ...] / 110.  # Between -1 and 1
 
@@ -239,8 +240,7 @@ if __name__ == '__main__':
     target_transform = transforms.ToTensor()
     input_size = (200, 200)
 
-    train_set2 = WaterImage3Folder('/home/ty/data/uw',
-                                  joint_transform, img_transform, target_transform)
+    train_set2 = WaterImage4Folder('/home/ty/data/color', 256)
 
     train_loader = DataLoader(train_set2, batch_size=6, num_workers=1, shuffle=True)
     # train_loader2 = DataLoader(train_set2, batch_size=6, num_workers=4, shuffle=True)
@@ -254,8 +254,8 @@ if __name__ == '__main__':
         # data1, data2 = data
         # inputs, flows, labels, inputs2, labels2 = data
         # data2 = next(dataloader_iterator)
-        rgb, hsv, lab, target, target_lab, segmentation = data
-        print(segmentation.shape)
+        rgb, L, ab = data
+        print(ab.shape)
         # texture_features = get_features(rgb, vgg)
         # target_features = get_features(target, vgg)
         #
