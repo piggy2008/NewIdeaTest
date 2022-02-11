@@ -128,16 +128,16 @@ class Base(nn.Module):
         # x_rgb3 = F.max_pool2d(x_rgb3, kernel_size=3, stride=2, padding=1)
 
         x_lab = self.conv1_lab(lab)
-        x_lab = self.block1(x_lab, select[6])
-        x_lab = self.block2(x_lab, select[7])
+        x_lab = self.block1(x_lab, select[0])
+        x_lab = self.block2(x_lab, select[1])
         x_lab2 = F.max_pool2d(x_lab, kernel_size=3, stride=2, padding=1)
         x_lab2 = self.conv2_lab(x_lab2)
-        x_lab2 = self.block3(x_lab2, select[8])
-        x_lab2 = self.block4(x_lab2, select[9])
+        x_lab2 = self.block3(x_lab2, select[2])
+        x_lab2 = self.block4(x_lab2, select[3])
         x_lab3 = F.max_pool2d(x_lab2, kernel_size=3, stride=2, padding=1)
         x_lab3 = self.conv3_lab(x_lab3)
-        x_lab3 = self.block5(x_lab3, select[10])
-        x_lab3 = self.block6(x_lab3, select[11])
+        x_lab3 = self.block5(x_lab3, select[4])
+        x_lab3 = self.block6(x_lab3, select[5])
         # return x_rgb, x_lab, x_rgb2, x_lab2, \
         #        x_rgb3, x_lab3
         return x_lab, x_lab2, x_lab3
