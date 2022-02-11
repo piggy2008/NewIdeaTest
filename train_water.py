@@ -67,8 +67,8 @@ args = {
     'weight_decay': 5e-4,
     'momentum': 0.925,
     'snapshot': '',
-    # 'pretrain': os.path.join(ckpt_path, 'VideoSaliency_2021-04-06 11:56:00', '92000.pth'),
-    'pretrain': '',
+    'pretrain': os.path.join(ckpt_path, 'WaterEnhance_2022-02-11 18:11:18', '40000.pth'),
+    # 'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
     # 'imgs_file': '/mnt/hdd/data/ty2',
     'imgs_file': '/home/ty/data/color',
@@ -118,7 +118,7 @@ train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_wo
 criterion = nn.MSELoss()
 criterion_l1 = nn.L1Loss()
 criterion_perceptual = VGGPerceptualLoss().cuda()
-# criterion_gan = GANLoss(gan_mode='lsgan').cuda()
+criterion_gan = GANLoss(gan_mode='vanilla').cuda()
 # criterion_lab = Lab_Loss().cuda()
 # criterion_context = cl.ContextualLoss(use_vgg=True, vgg_layer='relu5_4').cuda()
 # criterion_tv = TVLoss(TVLoss_weight=10).cuda()
@@ -149,7 +149,7 @@ def main():
     net = Water(en_channels=args['en_channels'], de_channels=args['de_channels']).cuda(device_id).train()
     net.apply(weights_init)
 
-    # discriminator = PatchDiscriminator(3).cuda(device_id).train()
+    discriminator = PatchDiscriminator(3).cuda(device_id).train()
     # vgg = models.vgg19(pretrained=True).features
     # for param in vgg.parameters():
     #     param.requires_grad_(False)
@@ -179,8 +179,8 @@ def main():
 
     optimizer = optim.Adam([{'params': remains}],
                           lr=args['lr'], betas=(0.9, 0.999))
-    # optimizer_d = optim.Adam([{'params': discriminator.parameters()}],
-    #                        lr=args['lr'], betas=(0.9, 0.999))
+    optimizer_d = optim.Adam([{'params': discriminator.parameters()}],
+                           lr=args['lr'], betas=(0.9, 0.999))
     if len(args['snapshot']) > 0:
         print('training resumes from ' + args['snapshot'])
         net.load_state_dict(torch.load(os.path.join(ckpt_path, exp_name, args['snapshot'] + '.pth')))
@@ -227,7 +227,7 @@ def train(net, discriminator, optimizer, optimizer_d):
             # train_single(net, inputs, flows, labels, optimizer, curr_iter, teacher)
 
 
-            train_single2(net, None, rgb, L, ab, None, None, optimizer, None, curr_iter)
+            train_single2(net, discriminator, rgb, L, ab, None, None, optimizer, optimizer_d, curr_iter)
             curr_iter += 1
 
             if curr_iter % args['iter_save'] == 0:
@@ -268,8 +268,8 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
     final = net(rgb, lab, get_random_cand())
 
-    # pred_fake = discriminator(final2)
-    # loss_GAN = criterion_gan(pred_fake, True)
+    pred_fake = discriminator(final)
+    loss_GAN = criterion_gan(pred_fake, True)
 
     loss0 = criterion(final, labels)
     loss1 = criterion_l1(final, labels)
@@ -313,7 +313,7 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
 
     # loss1_second = criterion(second, labels_64)
     # loss2_second = criterion_l1(second, labels_64)
-    total_loss = 1 * loss0 + 0.25 * loss1
+    total_loss = 1 * loss0 + 0.25 * loss1 + 0.5 * loss_GAN
     # total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss4 \
     #              + 0.25 * loss8 + 0.25 * loss10 \
     #              + 1 * loss0_2 + 0.25 * loss1_2 + 0.25 * loss7_2 \
@@ -328,26 +328,28 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     optimizer.step()
 
     # discriminator
-    # optimizer_d.zero_grad()
-    # # Real loss
-    # pred_real = discriminator(labels)
-    # loss_real = criterion_gan(pred_real, True)
-    #
-    # # Fake loss
-    # final2 = final2.detach()
-    # # third = third.detach()
-    # # second = second.detach()
-    # pred_fake1 = discriminator(final2)
-    # loss_fake = criterion_gan(pred_fake1, False)
-    #
-    # # Total loss
-    # loss_D = 0.5 * (loss_real + loss_fake)
-    # # loss_D=loss_real
-    #
-    # loss_D.backward(retain_graph=True)
-    # optimizer_d.step()
+    optimizer_d.zero_grad()
+    # Real loss
+    real_image = torch.cat([lab, labels], dim=1)
+    pred_real = discriminator(real_image)
+    loss_real = criterion_gan(pred_real, True)
 
-    print_log(total_loss, loss0, loss1, loss1, args['train_batch_size'], curr_iter, optimizer)
+    # Fake loss
+    final2 = final.detach()
+    fake_image = torch.cat([lab, final2], dim=1)
+    # third = third.detach()
+    # second = second.detach()
+    pred_fake1 = discriminator(fake_image)
+    loss_fake = criterion_gan(pred_fake1, False)
+
+    # Total loss
+    loss_D = 0.5 * (loss_real + loss_fake)
+    # loss_D=loss_real
+
+    loss_D.backward(retain_graph=True)
+    optimizer_d.step()
+
+    print_log(total_loss, loss0, loss1, loss_D, args['train_batch_size'], curr_iter, optimizer)
 
     return
 
