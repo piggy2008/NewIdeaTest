@@ -198,7 +198,7 @@ def main():
     check_mkdir(ckpt_path)
     check_mkdir(os.path.join(ckpt_path, exp_name))
     open(log_path, 'w').write(str(args) + '\n\n')
-    train(net, None, optimizer, None)
+    train(net, discriminator, optimizer, optimizer_d)
 
 
 def train(net, discriminator, optimizer, optimizer_d):
