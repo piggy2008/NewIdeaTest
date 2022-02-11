@@ -57,12 +57,12 @@ args = {
     'L2': False,
     'KL': True,
     'structure': True,
-    'iter_num': 100000,
+    'iter_num': 180000,
     'iter_save': 4000,
     'iter_start_seq': 0,
     'train_batch_size': 5,
     'last_iter': 0,
-    'lr': 1e-4,
+    'lr': 1e-5,
     'lr_decay': 0.9,
     'weight_decay': 5e-4,
     'momentum': 0.925,
@@ -267,8 +267,8 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
 
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
     final = net(rgb, lab, get_random_cand())
-
-    pred_fake = discriminator(final)
+    fake_image = torch.cat([lab, final], dim=1)
+    pred_fake = discriminator(fake_image)
     loss_GAN = criterion_gan(pred_fake, True)
 
     loss0 = criterion(final, labels)
