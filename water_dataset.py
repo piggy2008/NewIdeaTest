@@ -10,6 +10,7 @@ import random
 import torchvision
 import numpy as np
 from joint_transforms import crop, scale, flip, rotate
+from torchvision import transforms
 
 def convert_from_image_to_cv2(img):
     return np.array(img)
