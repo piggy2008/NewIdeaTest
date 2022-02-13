@@ -172,7 +172,10 @@ class WaterImage3Folder(data.Dataset):
             lab_target = self.transform(lab_target)
             segmentation = self.transform(segmentation)
 
-        return img, hsv, lab, target, lab_target, segmentation
+        L = lab[[0], ...] / 50. - 1.  # Between -1 and 1
+        ab = lab_target[[1, 2], ...] / 110.  # Between -1 and 1
+
+        return img, hsv, L, target, ab, segmentation
 
     def __len__(self):
         return len(self.imgs)
