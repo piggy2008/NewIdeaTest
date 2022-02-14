@@ -83,7 +83,7 @@ def get_cand_err(model, cand, args):
 
         # img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
         img = np.array(img)
-        img = cv2.resize(img, (224, 224))
+        img = cv2.resize(img, (256, 256))
         # depth = Image.open(os.path.join(args['depth_path'], name + '.png_depth_estimate.png')).convert('L')
         fv = Image.open(os.path.join(args['segment_path'], 'FV', name + '.bmp')).convert('L')
         hd = Image.open(os.path.join(args['segment_path'], 'HD', name + '.bmp')).convert('L')
@@ -91,11 +91,11 @@ def get_cand_err(model, cand, args):
         ro = Image.open(os.path.join(args['segment_path'], 'RO', name + '.bmp')).convert('L')
         wr = Image.open(os.path.join(args['segment_path'], 'WR', name + '.bmp')).convert('L')
 
-        fv = cv2.resize(np.array(fv), (224, 224))
-        hd = cv2.resize(np.array(hd), (224, 224))
-        ri = cv2.resize(np.array(ri), (224, 224))
-        ro = cv2.resize(np.array(ro), (224, 224))
-        wr = cv2.resize(np.array(wr), (224, 224))
+        fv = cv2.resize(np.array(fv), (256, 256))
+        hd = cv2.resize(np.array(hd), (256, 256))
+        ri = cv2.resize(np.array(ri), (256, 256))
+        ro = cv2.resize(np.array(ro), (256, 256))
+        wr = cv2.resize(np.array(wr), (256, 256))
         segmentation = np.stack((fv, hd, ri, ro, wr), axis=-1)
         
 
@@ -104,13 +104,16 @@ def get_cand_err(model, cand, args):
         # lab_profile = ImageCms.createProfile("LAB")
         # rgb2lab_transform = ImageCms.buildTransformFromOpenProfiles(srgb_profile, lab_profile, "RGB", "LAB")
         lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
+        
         img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
         hsv_var = Variable(img_transform(hsv).unsqueeze(0), volatile=True).cuda()
         lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
+        L = lab_var[0, [0], ...] / 50. - 1.
+        L = L.unsqueeze(0)
         segmentation_var = Variable(img_transform(segmentation).unsqueeze(0), volatile=True).cuda()
         
         # temp = (1, 1, 0)
-        prediction, prediction2, _, _, _, _ = model(img_var, hsv_var, lab_var, segmentation_var, cand)
+        prediction, prediction2, _, _ = model(img_var, L, cand)
         # prediction = torch.unsqueeze(prediction, 0)
         # print(torch.unique(prediction))
         # precision = to_pil(prediction.data.squeeze(0).cpu())
@@ -132,7 +135,7 @@ def get_cand_err(model, cand, args):
 
         gt = Image.open(os.path.join(args['gt_path'], name + '.png')).convert('RGB')
         gt = np.asarray(gt)
-        gt = cv2.resize(gt, (224, 224))
+        gt = cv2.resize(gt, (256, 256))
         # print(gt.shape, '-----', prediction.shape)
         psnr = calculate_psnr(prediction * 255.0, gt)
         ssim = calculate_ssim(prediction * 255.0, gt)
