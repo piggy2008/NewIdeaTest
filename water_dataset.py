@@ -198,6 +198,7 @@ class WaterImage4Folder(data.Dataset):
         img = np.array(img)
         lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
         lab = transforms.ToTensor()(lab)
+        img = transforms.ToTensor()(img)
         # L = lab[[0], ...] / 50. - 1.  # Between -1 and 1
         # ab = lab[[1, 2], ...] / 110.  # Between -1 and 1
 

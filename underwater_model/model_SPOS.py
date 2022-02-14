@@ -193,28 +193,28 @@ class Water(nn.Module):
         # first_rgb, first_lab, second_rgb, second_lab, third_rgb, \
         # third_lab = self.base(rgb, lab, select[:6])
 
-        first_lab, second_lab, third_lab, first_rgb, second_rgb, third_rgb = self.base(rgb, lab, select[:6])
+        first_lab, second_lab, third_lab, first_rgb, second_rgb, third_rgb = self.base(rgb, lab, select[:12])
 
-        # inter_rgb = F.interpolate(self.de_predict_rgb(third_rgb), rgb.size()[2:], mode='bilinear')
-        # inter_lab = F.interpolate(self.de_predict_lab(third_lab), lab.size()[2:], mode='bilinear')
+        inter_rgb = F.interpolate(self.de_predict_rgb(third_rgb), rgb.size()[2:], mode='bilinear')
+        inter_lab = F.interpolate(self.de_predict_lab(third_lab), lab.size()[2:], mode='bilinear')
 
-        # first = self.align1(torch.cat([first_rgb, first_lab], dim=1))
-        first = self.align1(first_lab)
+        first = self.align1(torch.cat([first_rgb, first_lab], dim=1))
+        # first = self.align1(first_lab)
+        second = self.align2(torch.cat([second_rgb, second_lab], dim=1))
+        # second = self.align2(second_lab)
+        third = self.align3(torch.cat([third_rgb, third_lab], dim=1))
+        # third = self.align3(third_lab)
 
-        second = self.align2(second_lab)
-
-        third = self.align3(third_lab)
-
-        third = self.refine(third, select[6])
-        mid_ab_feat, _, _, _ = self.search(third, second, first, select[7:])
+        third = self.refine(third, select[12])
+        mid_ab_feat, _, _, _ = self.search(third, second, first, select[13:17])
 
         final_ab = self.de_predict(mid_ab_feat)
 
-        # mid_ab_feat3 = F.interpolate(mid_ab_feat, size=third.size()[2:], mode='bilinear')
-        # mid_ab_feat2 = F.interpolate(mid_ab_feat, size=second.size()[2:], mode='bilinear')
-        # final2, third, second, first = self.search(third + mid_ab_feat3,
-        #                                            second + mid_ab_feat2, first + mid_ab_feat, select[17:])
-
+        mid_ab_feat3 = F.interpolate(mid_ab_feat, size=third.size()[2:], mode='bilinear')
+        mid_ab_feat2 = F.interpolate(mid_ab_feat, size=second.size()[2:], mode='bilinear')
+        final2, third, second, first = self.search(third + mid_ab_feat3,
+                                                   second + mid_ab_feat2, first + mid_ab_feat, select[17:])
+        final2 = self.de_predict2(final2)
         # p = F.adaptive_avg_pool2d(mid_ab_feat, 1)
         # p16 = F.adaptive_avg_pool2d(mid_ab_feat, 16)
         # final2_rgb_rct = self.global_rct(final2, p)
@@ -229,7 +229,7 @@ class Water(nn.Module):
         # third = self.de_predict_third(third)
         # second = self.de_predict_second(second)
 
-        return final_ab
+        return final_ab, final2, inter_rgb, inter_lab
 
 if __name__ == '__main__':
     a = torch.zeros(2, 128, 200, 300)
