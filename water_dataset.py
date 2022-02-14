@@ -172,10 +172,10 @@ class WaterImage3Folder(data.Dataset):
             lab_target = self.transform(lab_target)
             segmentation = self.transform(segmentation)
 
-        L = lab[[0], ...] / 50. - 1.  # Between -1 and 1
-        ab = lab_target[[1, 2], ...] / 110.  # Between -1 and 1
+        # L = lab[[0], ...] / 50. - 1.  # Between -1 and 1
+        # ab = lab_target[[1, 2], ...] / 110.  # Between -1 and 1
 
-        return img, hsv, L, target, ab, segmentation
+        return img, hsv, lab, target, lab_target, segmentation
 
     def __len__(self):
         return len(self.imgs)
@@ -199,10 +199,11 @@ class WaterImage4Folder(data.Dataset):
         lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
         lab = transforms.ToTensor()(lab)
         img = transforms.ToTensor()(img)
-        L = lab[[0], ...] / 50. - 1.  # Between -1 and 1
-        ab = lab[[1, 2], ...] / 110.  # Between -1 and 1
+        # L = lab[[0], ...] / 50. - 1.  # Between -1 and 1
+        # ab = lab[[1, 2], ...] / 110.  # Between -1 and 1
 
-        return img, L, ab
+
+        return img, lab
 
     def __len__(self):
         return len(self.imgs)
