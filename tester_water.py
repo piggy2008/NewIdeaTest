@@ -94,7 +94,7 @@ def get_cand_err(model, cand, args):
         ri = cv2.resize(np.array(ri), (256, 256))
         ro = cv2.resize(np.array(ro), (256, 256))
         wr = cv2.resize(np.array(wr), (256, 256))
-        segmentation = np.stack((fv, hd, ri, ro, wr), axis=0)
+        segmentation = np.stack((fv, hd, ri, ro, wr), axis=-1)
 
         hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
         # srgb_profile = ImageCms.createProfile("sRGB")
@@ -107,7 +107,7 @@ def get_cand_err(model, cand, args):
         lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
         segmentation_var = Variable(img_transform(segmentation).unsqueeze(0), volatile=True).cuda()
         # temp = (1, 1, 0)
-        prediction, prediction2, _, _, _, _ = model(img_var, hsv_var, lab_var, segmentation_var, cand)
+        prediction, prediction2, _, _ = model(img_var, hsv_var, lab_var, segmentation_var, cand)
         # prediction = torch.unsqueeze(prediction, 0)
         # print(torch.unique(prediction))
         # precision = to_pil(prediction.data.squeeze(0).cpu())
