@@ -60,14 +60,14 @@ args = {
     'iter_num': 180000,
     'iter_save': 4000,
     'iter_start_seq': 0,
-    'train_batch_size': 5,
+    'train_batch_size': 4,
     'last_iter': 0,
     'lr': 1e-5,
     'lr_decay': 0.9,
     'weight_decay': 5e-4,
     'momentum': 0.925,
     'snapshot': '',
-    'pretrain': os.path.join(ckpt_path, 'WaterEnhance_2022-02-14 18:11:18', '12000.pth'),
+    'pretrain': os.path.join(ckpt_path, 'WaterEnhance_2022-02-14 18:11:18', '40000.pth'),
     # 'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
     # 'imgs_file': '/mnt/hdd/data/ty2',
@@ -154,20 +154,20 @@ def main():
     #     param.requires_grad_(False)
     # vgg.to(device_id).eval()
     # net = warp().cuda(device_id).train()
-    remains = []
+    remains = [], bkbone = []
     for name, param in net.named_parameters():
-        # if 'bkbone' in name:
-        #     # param.requires_grad = False
-        #     bkbone.append(param)
+        if 'base' in name:
+            # param.requires_grad = False
+            bkbone.append(param)
         # # elif 'flow' in name or 'linearf' in name or 'decoder' in name:
         # #     print('flow related:', name)
         # #     flow_modules.append(param)
         # elif 'flow' in name or 'linearf' in name or 'decoder' in name:
         #     print('decoder related:', name)
         #     flow_modules.append(param)
-        # else:
-        #     print('remains:', name)
-        remains.append(param)
+        else:
+            print('remains:', name)
+            remains.append(param)
     # fix_parameters(net.named_parameters())
     # optimizer = optim.SGD([
     #     {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
@@ -176,8 +176,8 @@ def main():
     #      'lr': args['lr'], 'weight_decay': args['weight_decay']}
     # ], momentum=args['momentum'])
 
-    optimizer = optim.Adam([{'params': remains}],
-                          lr=args['lr'], betas=(0.9, 0.999))
+    optimizer = optim.Adam([{'params': remains, 'lr': 10 * args['lr']}, {'params': bkbone, 'lr': args['lr']}],
+                         betas=(0.9, 0.999))
     # optimizer_d = optim.Adam([{'params': discriminator.parameters()}],
     #                        lr=args['lr'], betas=(0.9, 0.999))
     if len(args['snapshot']) > 0:
@@ -208,10 +208,10 @@ def train(net, discriminator, optimizer, optimizer_d):
         # dataloader_iterator = iter(train_loader2)
         for i, data in enumerate(train_loader):
 
-            optimizer.param_groups[0]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
+            optimizer.param_groups[0]['lr'] = 10 * args['lr'] * (1 - float(curr_iter) / args['iter_num']
                                                                   ) ** args['lr_decay']
-            # optimizer.param_groups[1]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
-            #                                                 ) ** args['lr_decay']
+            optimizer.param_groups[1]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
+                                                            ) ** args['lr_decay']
             # optimizer.param_groups[2]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
             #                                                 ) ** args['lr_decay']
             #
@@ -293,11 +293,11 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     loss2 = criterion(inter_rgb, labels)
     loss4 = criterion(inter_lab, labels_lab)
 
-    loss2_1 = criterion_l1(inter_rgb, labels)
-    loss4_1 = criterion_l1(inter_lab, labels_lab)
+    # loss2_1 = criterion_l1(inter_rgb, labels)
+    # loss4_1 = criterion_l1(inter_lab, labels_lab)
 
     loss8 = criterion_perceptual(inter_rgb, labels)
-    # loss10 = criterion_perceptual(inter_lab, labels_lab)
+    loss10 = criterion_perceptual(inter_lab, labels_lab)
     # texture_features = get_features(rgb, vgg)
     # target_features = get_features(labels, vgg)
     # content_loss = torch.mean((texture_features['relu5_4'] - target_features['relu5_4']) ** 2)
@@ -308,8 +308,8 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # loss1_second = criterion(second, labels_64)
     # loss2_second = criterion_l1(second, labels_64)
     # total_loss = 1 * loss0 + 0.25 * loss1
-    total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss4 + 0.25 * loss2_1 + 0.25 * loss4_1\
-                 + 0.25 * loss8 \
+    total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss4 \
+                 + 0.25 * loss8 + 0.25 * loss10 \
                  + 1 * loss0_2 + 0.25 * loss1_2 + 0.25 * loss7_2 \
                  # + loss1_third + 0.25 * loss2_third + loss1_second + 0.25 * loss2_second \
                  # + 0.5 * loss_GAN

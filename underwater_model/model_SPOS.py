@@ -161,13 +161,13 @@ class Water(nn.Module):
 
         self.base = Base(en_channels)
 
-        self.align1 = nn.Sequential(nn.Conv2d(en_channels[0] * 1, de_channels, kernel_size=3, stride=1, padding=1),
+        self.align1 = nn.Sequential(nn.Conv2d(en_channels[0] * 2, de_channels, kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
 
-        self.align2 = nn.Sequential(nn.Conv2d(en_channels[1] * 1, de_channels, kernel_size=3, stride=1, padding=1),
+        self.align2 = nn.Sequential(nn.Conv2d(en_channels[1] * 2, de_channels, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(inplace=True))
 
-        self.align3 = nn.Sequential(nn.Conv2d(en_channels[2] * 1, de_channels, kernel_size=3, stride=1, padding=1),
+        self.align3 = nn.Sequential(nn.Conv2d(en_channels[2] * 2, de_channels, kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(inplace=True))
         # vit
         # self.vit1 = ViT(image_size=128, patch_size=16, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
