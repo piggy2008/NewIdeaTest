@@ -125,7 +125,7 @@ class Base(nn.Module):
         x_rgb3 = self.conv3_rgb(x_rgb3)
         x_rgb3 = self.block5(x_rgb3, select[4])
         x_rgb3 = self.block6(x_rgb3, select[5])
-        x_rgb3 = F.max_pool2d(x_rgb3, kernel_size=3, stride=2, padding=1)
+        # x_rgb3 = F.max_pool2d(x_rgb3, kernel_size=3, stride=2, padding=1)
 
         x_lab = self.conv1_lab(lab)
         x_lab = self.block1(x_lab, select[6])

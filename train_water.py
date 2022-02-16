@@ -49,7 +49,7 @@ args = {
     'gnn': True,
     'choice': 8,
     # 'choice2': 4,
-    'layers': 21,
+    'layers': 17,
     # 'layers2': 3,
     'en_channels': [64, 128, 256],
     'de_channels': 128,
@@ -62,13 +62,13 @@ args = {
     'iter_start_seq': 0,
     'train_batch_size': 4,
     'last_iter': 0,
-    'lr': 1e-5,
+    'lr': 1e-4,
     'lr_decay': 0.9,
     'weight_decay': 5e-4,
     'momentum': 0.925,
     'snapshot': '',
-    'pretrain': os.path.join(ckpt_path, 'WaterEnhance_2022-02-14 18:11:18', '40000.pth'),
-    # 'pretrain': '',
+    # 'pretrain': os.path.join(ckpt_path, 'WaterEnhance_2022-02-14 18:11:18', '40000.pth'),
+    'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
     # 'imgs_file': '/mnt/hdd/data/ty2',
     'imgs_file': '/home/ty/data/uw',
@@ -176,7 +176,7 @@ def main():
     #      'lr': args['lr'], 'weight_decay': args['weight_decay']}
     # ], momentum=args['momentum'])
 
-    optimizer = optim.Adam([{'params': remains, 'lr': 10 * args['lr']}, {'params': bkbone, 'lr': args['lr']}],
+    optimizer = optim.Adam([{'params': remains, 'lr': args['lr']}, {'params': bkbone, 'lr': args['lr']}],
                          betas=(0.9, 0.999))
     # optimizer_d = optim.Adam([{'params': discriminator.parameters()}],
     #                        lr=args['lr'], betas=(0.9, 0.999))
@@ -208,7 +208,7 @@ def train(net, discriminator, optimizer, optimizer_d):
         # dataloader_iterator = iter(train_loader2)
         for i, data in enumerate(train_loader):
 
-            optimizer.param_groups[0]['lr'] = 10 * args['lr'] * (1 - float(curr_iter) / args['iter_num']
+            optimizer.param_groups[0]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
                                                                   ) ** args['lr_decay']
             optimizer.param_groups[1]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
                                                             ) ** args['lr_decay']
@@ -263,16 +263,16 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     optimizer.zero_grad()
 
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
-    final, final2, inter_rgb, inter_lab = net(rgb, lab, get_random_cand())
+    final, inter_rgb, inter_lab = net(rgb, lab, get_random_cand())
     # fake_image = torch.cat([lab, final], dim=1)
     # pred_fake = discriminator(fake_image)
     # loss_GAN = criterion_gan(pred_fake, True)
 
-    loss0 = criterion(final, labels_lab[:, 1:, :, :])
-    loss1 = criterion_l1(final, labels_lab[:, 1:, :, :])
+    loss0 = criterion(final, labels)
+    loss1 = criterion_l1(final, labels)
 
-    loss0_2 = criterion(final2, labels)
-    loss1_2 = criterion_l1(final2, labels)
+    # loss0_2 = criterion(final2, labels)
+    # loss1_2 = criterion_l1(final2, labels)
 
     # loss_mid_ab = criterion(mid_ab, labels_lab)
     # loss_mid_ab = criterion_l1(mid_ab, labels_lab)
@@ -283,8 +283,8 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # loss0_lab3 = criterion(final_lab3, labels_lab3)
     # loss1_lab3 = criterion_l1(final_lab3, labels_lab3)
 
-    # loss7 = criterion_perceptual(final, labels)
-    loss7_2 = criterion_perceptual(final2, labels)
+    loss7 = criterion_perceptual(final, labels)
+    # loss7_2 = criterion_perceptual(final2, labels)
     # loss11 = criterion_tv(final)
 
     # loss5 = criterion(final2, labels)
@@ -310,7 +310,8 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # total_loss = 1 * loss0 + 0.25 * loss1
     total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss4 \
                  + 0.25 * loss8 + 0.25 * loss10 \
-                 + 1 * loss0_2 + 0.25 * loss1_2 + 0.25 * loss7_2 \
+                 + 0.25 * loss7
+                 # + 1 * loss0_2 + 0.25 * loss1_2 + 0.25 * loss7_2 \
                  # + loss1_third + 0.25 * loss2_third + loss1_second + 0.25 * loss2_second \
                  # + 0.5 * loss_GAN
     # total_loss = 1 * loss0 + 0.25 * loss1  \
@@ -343,7 +344,7 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # loss_D.backward(retain_graph=True)
     # optimizer_d.step()
 
-    print_log(total_loss, loss0, loss0_2, loss7_2, args['train_batch_size'], curr_iter, optimizer)
+    print_log(total_loss, loss0, loss1, loss7, args['train_batch_size'], curr_iter, optimizer)
 
     return
 
