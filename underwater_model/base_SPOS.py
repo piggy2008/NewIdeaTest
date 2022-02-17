@@ -126,6 +126,7 @@ class Base(nn.Module):
         x_rgb3 = self.block5(x_rgb3, select[4])
         x_rgb3 = self.block6(x_rgb3, select[5])
 
+
         x_lab = self.conv1_lab(lab)
         x_lab = self.block1(x_lab, select[6])
         x_lab = self.block2(x_lab, select[7])
