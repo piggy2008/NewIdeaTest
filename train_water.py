@@ -49,7 +49,7 @@ args = {
     'gnn': True,
     'choice': 8,
     # 'choice2': 4,
-    'layers': 17,
+    'layers': 11,
     # 'layers2': 3,
     'en_channels': [64, 128, 256],
     'de_channels': 128,
@@ -60,7 +60,7 @@ args = {
     'iter_num': 180000,
     'iter_save': 4000,
     'iter_start_seq': 0,
-    'train_batch_size': 4,
+    'train_batch_size': 5,
     'last_iter': 0,
     'lr': 1e-4,
     'lr_decay': 0.9,
@@ -263,7 +263,7 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     optimizer.zero_grad()
 
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
-    final, inter_rgb, inter_lab = net(rgb, lab, get_random_cand())
+    final, inter_rgb = net(rgb, lab, get_random_cand())
     # fake_image = torch.cat([lab, final], dim=1)
     # pred_fake = discriminator(fake_image)
     # loss_GAN = criterion_gan(pred_fake, True)
@@ -291,13 +291,13 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # loss6 = criterion_l1(final2, labels)
 
     loss2 = criterion(inter_rgb, labels)
-    loss4 = criterion(inter_lab, labels_lab)
+    # loss4 = criterion(inter_lab, labels_lab)
 
     # loss2_1 = criterion_l1(inter_rgb, labels)
     # loss4_1 = criterion_l1(inter_lab, labels_lab)
 
     loss8 = criterion_perceptual(inter_rgb, labels)
-    loss10 = criterion_perceptual(inter_lab, labels_lab)
+    # loss10 = criterion_perceptual(inter_lab, labels_lab)
     # texture_features = get_features(rgb, vgg)
     # target_features = get_features(labels, vgg)
     # content_loss = torch.mean((texture_features['relu5_4'] - target_features['relu5_4']) ** 2)
@@ -308,8 +308,8 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # loss1_second = criterion(second, labels_64)
     # loss2_second = criterion_l1(second, labels_64)
     # total_loss = 1 * loss0 + 0.25 * loss1
-    total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss4 \
-                 + 0.25 * loss8 + 0.25 * loss10 \
+    total_loss = 1 * loss0 + 0.25 * loss1 + loss2 \
+                 + 0.25 * loss8 \
                  + 0.25 * loss7
                  # + 1 * loss0_2 + 0.25 * loss1_2 + 0.25 * loss7_2 \
                  # + loss1_third + 0.25 * loss2_third + loss1_second + 0.25 * loss2_second \
