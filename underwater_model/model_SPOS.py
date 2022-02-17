@@ -213,7 +213,7 @@ class Water(nn.Module):
         mid_ab_feat3 = F.interpolate(mid_ab_feat, size=third.size()[2:], mode='bilinear')
         mid_ab_feat2 = F.interpolate(mid_ab_feat, size=second.size()[2:], mode='bilinear')
         final2, third, second, first = self.search(third + mid_ab_feat3,
-                                                   second + mid_ab_feat2, first + mid_ab_feat, select[17:])
+                                                   second + mid_ab_feat2, first + mid_ab_feat, select[13:])
         final2 = self.de_predict2(final2)
         # p = F.adaptive_avg_pool2d(mid_ab_feat, 1)
         # p16 = F.adaptive_avg_pool2d(mid_ab_feat, 16)
