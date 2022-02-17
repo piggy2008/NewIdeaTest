@@ -66,22 +66,22 @@ class Base(nn.Module):
         super(Base, self).__init__()
         # self.conv1_hsv = nn.Sequential(nn.Conv2d(3, channels[0], kernel_size=3, stride=1, padding=1),
         #                                nn.ReLU(inplace=True))
-        # self.conv1_lab = nn.Sequential(nn.Conv2d(3, channels[0], kernel_size=3, stride=1, padding=1),
-        #                                nn.ReLU(inplace=True))
+        self.conv1_lab = nn.Sequential(nn.Conv2d(3, channels[0], kernel_size=3, stride=1, padding=1),
+                                       nn.ReLU(inplace=True))
         self.conv1_rgb = nn.Sequential(nn.Conv2d(3, channels[0], kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
 
         # self.conv2_hsv = nn.Sequential(nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
         #                                nn.ReLU(inplace=True))
-        # self.conv2_lab = nn.Sequential(nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
-        #                                nn.ReLU(inplace=True))
+        self.conv2_lab = nn.Sequential(nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
+                                       nn.ReLU(inplace=True))
         self.conv2_rgb = nn.Sequential(nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
 
         # self.conv3_hsv = nn.Sequential(nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
         #                                nn.ReLU(inplace=True))
-        # self.conv3_lab = nn.Sequential(nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
-        #                                nn.ReLU(inplace=True))
+        self.conv3_lab = nn.Sequential(nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
+                                       nn.ReLU(inplace=True))
         self.conv3_rgb = nn.Sequential(nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
 
@@ -127,17 +127,17 @@ class Base(nn.Module):
         x_rgb3 = self.block6(x_rgb3, select[5])
         # x_rgb3 = F.max_pool2d(x_rgb3, kernel_size=3, stride=2, padding=1)
 
-        # x_lab = self.conv1_lab(lab)
-        # x_lab = self.block1(x_lab, select[6])
-        # x_lab = self.block2(x_lab, select[7])
-        # x_lab2 = F.max_pool2d(x_lab, kernel_size=3, stride=2, padding=1)
-        # x_lab2 = self.conv2_lab(x_lab2)
-        # x_lab2 = self.block3(x_lab2, select[8])
-        # x_lab2 = self.block4(x_lab2, select[9])
-        # x_lab3 = F.max_pool2d(x_lab2, kernel_size=3, stride=2, padding=1)
-        # x_lab3 = self.conv3_lab(x_lab3)
-        # x_lab3 = self.block5(x_lab3, select[10])
-        # x_lab3 = self.block6(x_lab3, select[11])
+        x_lab = self.conv1_lab(lab)
+        x_lab = self.block1(x_lab, select[6])
+        x_lab = self.block2(x_lab, select[7])
+        x_lab2 = F.max_pool2d(x_lab, kernel_size=3, stride=2, padding=1)
+        x_lab2 = self.conv2_lab(x_lab2)
+        x_lab2 = self.block3(x_lab2, select[8])
+        x_lab2 = self.block4(x_lab2, select[9])
+        x_lab3 = F.max_pool2d(x_lab2, kernel_size=3, stride=2, padding=1)
+        x_lab3 = self.conv3_lab(x_lab3)
+        x_lab3 = self.block5(x_lab3, select[10])
+        x_lab3 = self.block6(x_lab3, select[11])
         # return x_rgb, x_lab, x_rgb2, x_lab2, \
         #        x_rgb3, x_lab3
-        return x_rgb, x_rgb2, x_rgb3
+        return x_lab, x_lab2, x_lab3, x_rgb, x_rgb2, x_rgb3
