@@ -247,7 +247,7 @@ class Round1_chosen(nn.Module):
             xy = F.interpolate(xy, y.size()[2:], mode='bilinear')
 
         y = y + xy
-        yz = self.r1_l2_dil4Conv
+        yz = self.r1_l2_dil4Conv(y)
         #     y = self.r1_l2_ca(y)
         yz_temp = yz
         if yz.size()[2:] != z.size()[2:]:
@@ -255,7 +255,7 @@ class Round1_chosen(nn.Module):
         #
         # if select[3] == 0:
         #     xz = self.r1_l13_zero(x)
-        xz = self.r1_l13_se
+        xz = self.r1_l13_se(yz)
 
         if xz.size()[2:] != z.size()[2:]:
             xz = F.interpolate(xz, z.size()[2:], mode='bilinear')
