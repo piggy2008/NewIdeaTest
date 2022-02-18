@@ -70,7 +70,7 @@ args = {
     'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
     # 'imgs_file': '/mnt/hdd/data/ty2',
-    'imgs_file': '/home/ty/data/uw',
+    'imgs_file': '/home/ty/data/LSUI',
     # 'imgs_file': 'Pre-train/pretrain_all_seq_DAFB2_DAVSOD_flow.txt',
     # 'imgs_file2': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB2_DAVSOD_5f.txt',
@@ -86,17 +86,17 @@ args = {
 imgs_file = os.path.join(datasets_root, args['imgs_file'])
 # imgs_file = os.path.join(datasets_root, 'video_saliency/train_all_DAFB3_seq_5f.txt')
 
-# joint_transform = joint_transforms.Compose([
-#     joint_transforms.ImageResize(args['image_size']),
-#     joint_transforms.RandomCrop(args['crop_size']),
-#     joint_transforms.RandomHorizontallyFlip(),
-# ])
-
-joint_transform = joint_transforms.Compose_single([
-    joint_transforms.ImageResize_numpy(args['image_size']),
-    joint_transforms.RandomCrop_numpy(args['crop_size']),
-    joint_transforms.RandomHorizontallyFlip_numpy(),
+joint_transform = joint_transforms.Compose([
+    joint_transforms.ImageResize(args['image_size']),
+    joint_transforms.RandomCrop(args['crop_size']),
+    joint_transforms.RandomHorizontallyFlip(),
 ])
+
+# joint_transform = joint_transforms.Compose_single([
+#     joint_transforms.ImageResize_numpy(args['image_size']),
+#     joint_transforms.RandomCrop_numpy(args['crop_size']),
+#     joint_transforms.RandomHorizontallyFlip_numpy(),
+# ])
 
 input_size = (473, 473)
 
@@ -107,7 +107,7 @@ img_transform = transforms.Compose([
 target_transform = transforms.ToTensor()
 
 # train_set = ImageFolder(msra10k_path, joint_transform, img_transform, target_transform)
-train_set = WaterImage3Folder(args['imgs_file'], joint_transform, img_transform, target_transform)
+train_set = WaterImage2Folder(args['imgs_file'], joint_transform, img_transform, target_transform)
 # train_set = WaterImage4Folder(args['imgs_file'], 256)
 train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=4, shuffle=True)
 # if train_set2 is not None:
@@ -219,7 +219,7 @@ def train(net, discriminator, optimizer, optimizer_d):
             #                                                 ) ** args['lr_decay']
             #
             # inputs, flows, labels, pre_img, pre_lab, cur_img, cur_lab, next_img, next_lab = data
-            rgb, hsv, lab, target, lab_target, segmentation = data
+            rgb, hsv, lab, target, lab_target = data
             # rgb, lab = data
             # data2 = next(dataloader_iterator)
             # inputs2, labels2 = data2
@@ -265,7 +265,7 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     optimizer.zero_grad()
 
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
-    final, inter_rgb = net(rgb, lab, get_random_cand())
+    final, inter_rgb, inter_lab = net(rgb, lab, get_random_cand())
     # fake_image = torch.cat([lab, final], dim=1)
     # pred_fake = discriminator(fake_image)
     # loss_GAN = criterion_gan(pred_fake, True)
@@ -293,13 +293,13 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # loss6 = criterion_l1(final2, labels)
 
     loss2 = criterion(inter_rgb, labels)
-    # loss4 = criterion(inter_lab, labels_lab)
+    loss4 = criterion(inter_lab, labels_lab)
 
     # loss2_1 = criterion_l1(inter_rgb, labels)
     # loss4_1 = criterion_l1(inter_lab, labels_lab)
 
     loss8 = criterion_perceptual(inter_rgb, labels)
-    # loss10 = criterion_perceptual(inter_lab, labels_lab)
+    loss10 = criterion_perceptual(inter_lab, labels_lab)
     # texture_features = get_features(rgb, vgg)
     # target_features = get_features(labels, vgg)
     # content_loss = torch.mean((texture_features['relu5_4'] - target_features['relu5_4']) ** 2)
@@ -310,8 +310,8 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # loss1_second = criterion(second, labels_64)
     # loss2_second = criterion_l1(second, labels_64)
     # total_loss = 1 * loss0 + 0.25 * loss1
-    total_loss = 1 * loss0 + 0.25 * loss1 + loss2 \
-                 + 0.25 * loss8 \
+    total_loss = 1 * loss0 + 0.25 * loss1 + loss2 + loss4 \
+                 + 0.25 * loss8 + 0.25 * loss10 \
                  + 0.25 * loss7
                  # + 1 * loss0_2 + 0.25 * loss1_2 + 0.25 * loss7_2 \
                  # + loss1_third + 0.25 * loss2_third + loss1_second + 0.25 * loss2_second \

@@ -85,26 +85,19 @@ class Base(nn.Module):
         self.conv3_rgb = nn.Sequential(nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
 
-        # self.block1 = resblock_choice(n_channels=channels[0])
-        # self.block2 = resblock_choice(n_channels=channels[0])
-        # self.block3 = resblock_choice(n_channels=channels[1])
-        # self.block4 = resblock_choice(n_channels=channels[1])
-        # self.block5 = resblock_choice(n_channels=channels[2])
-        # self.block6 = resblock_choice(n_channels=channels[2])
-        # 1, 5, 5, 6, 5, 3
-        self.block1_rgb = sge_layer(16)
-        self.block2_rgb = DoubleAttentionLayer(channels[0], channels[0], channels[0])
-        self.block3_rgb = DoubleAttentionLayer(channels[1], channels[1], channels[1])
-        self.block4_rgb = SELayer(channels[1])
+        self.block1_rgb = SELayer(channels[0])
+        self.block2_rgb = sge_layer(16)
+        self.block3_rgb = sge_layer(16)
+        self.block4_rgb = DoubleAttentionLayer(channels[1], channels[1], channels[1])
         self.block5_rgb = DoubleAttentionLayer(channels[2], channels[2], channels[2])
-        self.block6_rgb = DilConv(channels[2], channels[2], 3, 1, 4, 4, affine=True, upsample=False)
-        # 7, 5, 4, 5, 2, 1
-        # self.block1_lab = sa_layer(channels[0], 16)
-        # self.block2_lab = DoubleAttentionLayer(channels[0], channels[0], channels[0])
-        # self.block3_lab = Conv(channels[1], channels[1], 3, 1, 1, affine=True, upsample=False)
-        # self.block4_lab = DoubleAttentionLayer(channels[1], channels[1], channels[1])
-        # self.block5_lab = eca_layer(3)
-        # self.block6_lab = sge_layer(16)
+        self.block6_rgb = DoubleAttentionLayer(channels[2], channels[2], channels[2])
+
+        self.block1_lab = Conv(channels[0], channels[0], 3, 1, 1, affine=True, upsample=False)
+        self.block2_lab = self.block2_rgb
+        self.block3_lab = DilConv(channels[1], channels[1], 3, 1, 4, 4, affine=True, upsample=False)
+        self.block4_lab = eca_layer(3)
+        self.block5_lab = SELayer(channels[2])
+        self.block6_lab = DilConv(channels[2], channels[2], 3, 1, 4, 4, affine=True, upsample=False)
 
         # self.block1_rgb = resblock(n_channels=128)
         # self.block2_rgb = resblock(n_channels=128)
@@ -120,11 +113,8 @@ class Base(nn.Module):
         # self.block5_lab = resblock_choice(n_channels=512)
         # self.block6_lab = resblock_choice(n_channels=512)
 
-    def forward(self, rgb, hsv, lab):
+    def forward(self, rgb, lab, select):
         x_rgb = self.conv1_rgb(rgb)
-        # x_hsv = self.conv1_hsv(hsv)
-        # x_lab = self.conv1_lab(lab)
-        # 128 * 128
         x_rgb = self.block1_rgb(x_rgb)
         x_rgb = self.block2_rgb(x_rgb)
         x_rgb2 = F.max_pool2d(x_rgb, kernel_size=3, stride=2, padding=1)
@@ -137,29 +127,17 @@ class Base(nn.Module):
         x_rgb3 = self.block6_rgb(x_rgb3)
         # x_rgb3 = F.max_pool2d(x_rgb3, kernel_size=3, stride=2, padding=1)
 
-        # 64 * 64
-        # x_hsv = self.block1(x_hsv, select[6])
-        # x_hsv = self.block2(x_hsv, select[7])
-        # x_hsv2 = F.max_pool2d(x_hsv, kernel_size=3, stride=2, padding=1)
-        # x_hsv2 = self.conv2_hsv(x_hsv2)
-        # x_hsv2 = self.block3(x_hsv2, select[8])
-        # x_hsv2 = self.block4(x_hsv2, select[9])
-        # x_hsv3 = F.max_pool2d(x_hsv2, kernel_size=3, stride=2, padding=1)
-        # x_hsv3 = self.conv3_hsv(x_hsv3)
-        # x_hsv3 = self.block5(x_hsv3, select[10])
-        # x_hsv3 = self.block6(x_hsv3, select[11])
-        # x_hsv3 = F.max_pool2d(x_hsv3, kernel_size=3, stride=2, padding=1)
-
-        # 64 * 64
-        # x_lab = self.block1_lab(x_lab)
-        # x_lab = self.block2_lab(x_lab)
-        # x_lab2 = F.max_pool2d(x_lab, kernel_size=3, stride=2, padding=1)
-        # x_lab2 = self.conv2_lab(x_lab2)
-        # x_lab2 = self.block3_lab(x_lab2)
-        # x_lab2 = self.block4_lab(x_lab2)
-        # x_lab3 = F.max_pool2d(x_lab2, kernel_size=3, stride=2, padding=1)
-        # x_lab3 = self.conv3_lab(x_lab3)
-        # x_lab3 = self.block5_lab(x_lab3)
-        # x_lab3 = self.block6_lab(x_lab3)
-        return x_rgb, x_rgb, x_rgb2, x_rgb2, \
-               x_rgb3, x_rgb3
+        x_lab = self.conv1_lab(lab)
+        x_lab = self.block1_lab(x_lab)
+        x_lab = self.block2_lab(x_lab)
+        x_lab2 = F.max_pool2d(x_lab, kernel_size=3, stride=2, padding=1)
+        x_lab2 = self.conv2_lab(x_lab2)
+        x_lab2 = self.block3_lab(x_lab2)
+        x_lab2 = self.block4_lab(x_lab2)
+        x_lab3 = F.max_pool2d(x_lab2, kernel_size=3, stride=2, padding=1)
+        x_lab3 = self.conv3_lab(x_lab3)
+        x_lab3 = self.block5_lab(x_lab3)
+        x_lab3 = self.block6_lab(x_lab3)
+        # return x_rgb, x_lab, x_rgb2, x_lab2, \
+        #        x_rgb3, x_lab3
+        return x_lab, x_lab2, x_lab3, x_rgb, x_rgb2, x_rgb3
