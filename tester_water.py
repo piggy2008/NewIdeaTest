@@ -113,14 +113,13 @@ def get_cand_err(model, cand, args):
         
         # temp = (1, 1, 0)
 
-        prediction, prediction2, _, _ = model(img_var, lab_var, cand)
-
+        prediction, _, _ = model(img_var, lab_var, cand)
         # prediction = torch.unsqueeze(prediction, 0)
         # print(torch.unique(prediction))
         # precision = to_pil(prediction.data.squeeze(0).cpu())
         # prediction = np.array(precision)
         # prediction = prediction.astype('float')
-        prediction = torch.clamp(prediction2, 0, 1)
+        prediction = torch.clamp(prediction, 0, 1)
         prediction = prediction.permute(0, 2, 3, 1).cpu().detach().numpy()
         prediction = np.squeeze(prediction)
         # prediction = prediction[:, :, ::-1]
