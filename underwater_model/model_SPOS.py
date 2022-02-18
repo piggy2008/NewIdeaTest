@@ -1,12 +1,13 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-# from underwater_model.base import Base
-from underwater_model.base_SPOS import Base
+from underwater_model.base import Base
+# from underwater_model.base_SPOS import Base
 from underwater_model.search_net import Search
 from underwater_model.color_SPOS import Color
 from underwater_model.vit import ViT
 from underwater_model.refine import refine_block
+from underwater_model.cait import CaiT
 
 class RCTConvBlock(nn.Module):
     def __init__(self, input_nc, output_nc, ksize=3, stride=2, pad=1, extra_conv=False):
@@ -173,8 +174,10 @@ class Water(nn.Module):
         # self.vit1 = ViT(image_size=128, patch_size=16, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
         # self.vit2 = ViT(image_size=64, patch_size=8, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
         # self.vit3 = ViT(image_size=56, patch_size=7, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
-        self.refine = refine_block(128, 64)
-
+        # self.refine = refine_block(128, 64)
+        self.refine = CaiT(image_size=64,patch_size=int(64/8), num_classes=1000, dim=128,
+                         depth=1, cls_depth=2, heads=1, mlp_dim=128, channels=128,
+                         dropout=0.1, emb_dropout=0.1, layer_dropout=0.05)
         self.search = Search(channel=de_channels)
         # self.search2 = Search(channel=de_channels)
         # self.color = Color(channel=de_channels)
