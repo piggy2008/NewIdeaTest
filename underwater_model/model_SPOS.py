@@ -212,7 +212,7 @@ class Water(nn.Module):
         third = self.align3(torch.cat([third_rgb, third_lab], dim=1))
         # third = self.align3(third_lab)
 
-        third = self.refine(third)
+        third = self.refine(third, select[12])
         mid_ab_feat, _, _, _ = self.search(third, second, first, select[13:])
 
 
