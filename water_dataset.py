@@ -85,8 +85,8 @@ class WaterImage2Folder(data.Dataset):
         self.target_transform = target_transform
 
     def __getitem__(self, index):
-        img = Image.open(os.path.join(self.root, 'train_input', self.imgs[index])).convert('RGB')
-        target = Image.open(os.path.join(self.root, 'train_gt', self.labels[index])).convert('RGB')
+        img = Image.open(os.path.join(self.root, 'low', self.imgs[index])).convert('RGB')
+        target = Image.open(os.path.join(self.root, 'high', self.labels[index])).convert('RGB')
 
         img_list = []
         gt_list = []
