@@ -238,7 +238,7 @@ class Round1_chosen(nn.Module):
         # self.r1_l3_se = SELayer(channel)
         # self.r1_l3_sa = sa_layer(channel, groups=16)
 
-    def forward(self, x, y, z):
+    def forward(self, x, y, z, select):
         xy = self.r1_l1_sa(x)
         # else:
         #     x = self.r1_l1_ca(x)
@@ -328,7 +328,7 @@ class Round1_chosen_dark(nn.Module):
         # self.r1_l3_se = SELayer(channel)
         # self.r1_l3_sa = sa_layer(channel, groups=16)
 
-    def forward(self, x, y, z):
+    def forward(self, x, y, z, select):
         xy = self.r1_l1_sa(x)
         # else:
         #     x = self.r1_l1_ca(x)
@@ -594,12 +594,12 @@ class Search(nn.Module):
     def __init__(self, channel=128):
         super(Search, self).__init__()
         # round 1(1~3), level 1(1~3), op:1~12
-        self.round = Round1_chosen_dark(channel=channel)
+        self.round = Round1(channel=channel)
         # self.round2 = Round1()
 
     def forward(self, x, y, z, select):
         # print(select)
-        feedback = self.round(x, y, z)
+        feedback = self.round(x, y, z, select)
         # fb_x = F.interpolate(feedback, x.size()[2:], mode='bilinear')
         # fb_y = F.interpolate(feedback, y.size()[2:], mode='bilinear')
         # feedback2 = self.round2(x + fb_x, y + fb_y, z + feedback, select[4:])
