@@ -175,10 +175,10 @@ class Water(nn.Module):
         # self.vit1 = ViT(image_size=128, patch_size=16, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
         # self.vit2 = ViT(image_size=64, patch_size=8, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
         # self.vit3 = ViT(image_size=56, patch_size=7, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
-        # self.refine = refine_block(128, 64)
-        self.refine = CaiT(image_size=64,patch_size=int(64/8), num_classes=1000, dim=128,
-                         depth=2, cls_depth=2, heads=4, mlp_dim=128, channels=128,
-                         dropout=0.1, emb_dropout=0.1, layer_dropout=0.05)
+        self.refine = refine_block(128, 64)
+        # self.refine = CaiT(image_size=64,patch_size=int(64/8), num_classes=1000, dim=128,
+        #                  depth=2, cls_depth=2, heads=4, mlp_dim=128, channels=128,
+        #                  dropout=0.1, emb_dropout=0.1, layer_dropout=0.05)
         self.search = Search(channel=de_channels)
         # self.search2 = Search(channel=de_channels)
         # self.color = Color(channel=de_channels)
