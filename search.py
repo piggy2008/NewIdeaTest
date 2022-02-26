@@ -40,13 +40,13 @@ torch.cuda.set_device(device_id)
 ckpt_path = saving_path
 
 
-exp_name = 'WaterEnhance_2022-02-06 21:59:22'
+exp_name = 'WaterEnhance_2022-02-24 10:34:32'
 
 args = {
     'gnn': True,
-    'snapshot': '140000',  # your snapshot filename (exclude extension name)
+    'snapshot': '200000',  # your snapshot filename (exclude extension name)
     'choice': 8,
-    'layers': 20,
+    'layers': 17,
     'en_channels': [64, 128, 256],
     'de_channels': 128,
     'log_dir': 'log',
@@ -66,11 +66,11 @@ args = {
     # 'image_path': '/mnt/hdd/data/ty2/input_test',
     # 'depth_path': '/mnt/hdd/data/ty2/depth_test',
     # 'gt_path': '/mnt/hdd/data/ty2/gt_test',
-    'image_path': '/home/ty/data/uw/input_test',
+    'image_path': '/home/ty/data/5k/eval/input',
     'depth_path': '/home/ty/data/uw/depth_test',
-    'gt_path': '/home/ty/data/uw/gt_test',
+    'gt_path': '/home/ty/data/5k/eval/gt',
     'segment_path': '/home/ty/data/uw/segment_input_test',
-    'dataset': 'UIEB',
+    'dataset': 'rain',
 }
 
 

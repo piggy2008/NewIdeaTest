@@ -77,26 +77,28 @@ def get_cand_err(model, cand, args):
     image_names = read_testset(args['dataset'], args['image_path'])
     psnr_record = AvgMeter()
     ssim_record = AvgMeter()
-    for name in image_names:
+    for i, name in enumerate(image_names):
+        if i == 100:
+            break
         # img_list = [i_id.strip() for i_id in open(imgs_path)]
-        img = Image.open(os.path.join(args['image_path'], name + '.png')).convert('RGB')
+        img = Image.open(os.path.join(args['image_path'], name + '.jpg')).convert('RGB')
 
         # img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
         img = np.array(img)
         img = cv2.resize(img, (256, 256))
         # depth = Image.open(os.path.join(args['depth_path'], name + '.png_depth_estimate.png')).convert('L')
-        fv = Image.open(os.path.join(args['segment_path'], 'FV', name + '.bmp')).convert('L')
-        hd = Image.open(os.path.join(args['segment_path'], 'HD', name + '.bmp')).convert('L')
-        ri = Image.open(os.path.join(args['segment_path'], 'RI', name + '.bmp')).convert('L')
-        ro = Image.open(os.path.join(args['segment_path'], 'RO', name + '.bmp')).convert('L')
-        wr = Image.open(os.path.join(args['segment_path'], 'WR', name + '.bmp')).convert('L')
-
-        fv = cv2.resize(np.array(fv), (256, 256))
-        hd = cv2.resize(np.array(hd), (256, 256))
-        ri = cv2.resize(np.array(ri), (256, 256))
-        ro = cv2.resize(np.array(ro), (256, 256))
-        wr = cv2.resize(np.array(wr), (256, 256))
-        segmentation = np.stack((fv, hd, ri, ro, wr), axis=-1)
+        # fv = Image.open(os.path.join(args['segment_path'], 'FV', name + '.bmp')).convert('L')
+        # hd = Image.open(os.path.join(args['segment_path'], 'HD', name + '.bmp')).convert('L')
+        # ri = Image.open(os.path.join(args['segment_path'], 'RI', name + '.bmp')).convert('L')
+        # ro = Image.open(os.path.join(args['segment_path'], 'RO', name + '.bmp')).convert('L')
+        # wr = Image.open(os.path.join(args['segment_path'], 'WR', name + '.bmp')).convert('L')
+        #
+        # fv = cv2.resize(np.array(fv), (256, 256))
+        # hd = cv2.resize(np.array(hd), (256, 256))
+        # ri = cv2.resize(np.array(ri), (256, 256))
+        # ro = cv2.resize(np.array(ro), (256, 256))
+        # wr = cv2.resize(np.array(wr), (256, 256))
+        # segmentation = np.stack((fv, hd, ri, ro, wr), axis=-1)
 
 
         hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
@@ -109,7 +111,7 @@ def get_cand_err(model, cand, args):
         hsv_var = Variable(img_transform(hsv).unsqueeze(0), volatile=True).cuda()
         lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
 
-        segmentation_var = Variable(img_transform(segmentation).unsqueeze(0), volatile=True).cuda()
+        # segmentation_var = Variable(img_transform(segmentation).unsqueeze(0), volatile=True).cuda()
         
         # temp = (1, 1, 0)
 
@@ -133,7 +135,7 @@ def get_cand_err(model, cand, args):
         # prediction = MaxMinNormalization(prediction, prediction.max(), prediction.min()) * 255.0
         # prediction = prediction.astype('uint8')
 
-        gt = Image.open(os.path.join(args['gt_path'], name + '.png')).convert('RGB')
+        gt = Image.open(os.path.join(args['gt_path'], name + '.jpg')).convert('RGB')
         gt = np.asarray(gt)
         gt = cv2.resize(gt, (256, 256))
         # print(gt.shape, '-----', prediction.shape)
