@@ -71,7 +71,7 @@ if __name__ == '__main__':
     b = torch.zeros(2, 128, 1, 1)
 
     model = Water(48)
-    r = model(a, a, [1, 7, 6, 5, 4, 5, 5, 1, 3, 5, 5, 6])
+    r = model(a, a, [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5])
     # print(r1.shape, '--', r2.shape, '--', r3.shape)
     c = torch.zeros(2, 128, 16, 16)
     # global_rct = GlobalRCT(128, 128, 8)
