@@ -291,7 +291,11 @@ class Restormer(nn.Module):
         return out_dec_level1
 
 if __name__ == '__main__':
-    input = torch.zeros([2, 3, 128, 128])
+    input = torch.zeros([2, 48, 128, 128])
     model = Restormer()
-    output = model(input)
-    print(output.shape)
+    # output = model(input)
+    model2 = nn.Sequential(*[
+        TransformerBlock(dim=int(48), num_heads=4, ffn_expansion_factor=2.66,
+                         bias=False, LayerNorm_type='WithBias') for i in range(4)])
+    output2 = model2(input)
+    print(output2.shape)
