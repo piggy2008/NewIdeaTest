@@ -45,7 +45,7 @@ class Water(nn.Module):
         # third_lab = self.base(rgb, lab, select[:6])
 
         level1_rgb, level2_rgb, level3_rgb, level4_rgb, \
-        level1_lab, level2_lab, level3_lab, level4_lab = self.base(rgb, lab, select[:8])
+        level1_lab, level2_lab, level3_lab, level4_lab = self.base(rgb, lab, select[:14])
 
         # inter_rgb = F.interpolate(self.de_predict_rgb(third_rgb), rgb.size()[2:], mode='bilinear')
         # inter_lab = F.interpolate(self.de_predict_lab(third_lab), lab.size()[2:], mode='bilinear')
@@ -58,8 +58,8 @@ class Water(nn.Module):
         # third = self.align3(third_lab)
         level4 = self.align4(torch.cat([level4_rgb, level4_lab], dim=1))
 
-        mid_feat = self.search(level4, level3, level2, level1, select[8:])
-        mid_feat = self.refine(mid_feat, select[11])
+        mid_feat = self.search(level4, level3, level2, level1, select[14:17])
+        mid_feat = self.refine(mid_feat, select[17])
 
         final = self.de_predict(mid_feat)
 

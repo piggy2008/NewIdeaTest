@@ -41,6 +41,11 @@ class Base(nn.Module):
         self.block3 = block_choice(n_channels=dim*2**2)
         self.block4 = block_choice(n_channels=dim*2**3)
 
+        self.block1_2 = block_choice(n_channels=dim)
+        self.block2_2 = block_choice(n_channels=dim * 2 ** 1)
+        self.block3_2 = block_choice(n_channels=dim * 2 ** 2)
+
+
         # self.block1 = resblock_choice(n_channels=channels[0])
         # self.block2 = resblock_choice(n_channels=channels[0])
         # self.block3 = resblock_choice(n_channels=channels[1])
@@ -65,29 +70,35 @@ class Base(nn.Module):
     def forward(self, rgb, lab, select):
         x_rgb = self.conv1_rgb(rgb)
         x_rgb = self.block1(x_rgb, select[0])
+        x_rgb = self.block1_2(x_rgb, select[1])
 
         x_rgb2 = self.conv2_rgb(x_rgb)
-        x_rgb2 = self.block2(x_rgb2, select[1])
+        x_rgb2 = self.block2(x_rgb2, select[2])
+        x_rgb2 = self.block2_2(x_rgb2, select[3])
 
         x_rgb3 = self.conv3_rgb(x_rgb2)
-        x_rgb3 = self.block3(x_rgb3, select[2])
+        x_rgb3 = self.block3(x_rgb3, select[4])
+        x_rgb3 = self.block3_2(x_rgb3, select[5])
 
         x_rgb4 = self.conv4_rgb(x_rgb3)
-        x_rgb4 = self.block4(x_rgb4, select[3])
+        x_rgb4 = self.block4(x_rgb4, select[6])
 
         # x_rgb3 = F.max_pool2d(x_rgb3, kernel_size=3, stride=2, padding=1)
 
         x_lab = self.conv1_lab(lab)
-        x_lab = self.block1(x_lab, select[4])
+        x_lab = self.block1(x_lab, select[7])
+        x_lab = self.block1_2(x_lab, select[8])
 
         x_lab2 = self.conv2_lab(x_lab)
-        x_lab2 = self.block2(x_lab2, select[5])
+        x_lab2 = self.block2(x_lab2, select[9])
+        x_lab2 = self.block2_2(x_lab2, select[10])
 
         x_lab3 = self.conv3_lab(x_lab2)
-        x_lab3 = self.block3(x_lab3, select[6])
+        x_lab3 = self.block3(x_lab3, select[11])
+        x_lab3 = self.block3_2(x_lab3, select[12])
 
         x_lab4 = self.conv4_lab(x_lab3)
-        x_lab4 = self.block4(x_lab4, select[7])
+        x_lab4 = self.block4(x_lab4, select[13])
 
         # return x_rgb, x_lab, x_rgb2, x_lab2, \
         #        x_rgb3, x_lab3
