@@ -40,17 +40,17 @@ torch.cuda.set_device(device_id)
 ckpt_path = saving_path
 
 
-exp_name = 'WaterEnhance_2022-02-24 10:34:32'
+exp_name = 'WaterEnhance_2022-02-27 18:19:45'
 
 args = {
     'gnn': True,
     'snapshot': '200000',  # your snapshot filename (exclude extension name)
     'choice': 8,
-    'layers': 17,
+    'layers': 18,
     'en_channels': [64, 128, 256],
-    'de_channels': 128,
+    'dim': 48,
     'log_dir': 'log',
-    'max_epochs': 40,
+    'max_epochs': 30,
     'select_num': 10,
     'population_num': 40,
     'top_k': 20,
@@ -66,11 +66,11 @@ args = {
     # 'image_path': '/mnt/hdd/data/ty2/input_test',
     # 'depth_path': '/mnt/hdd/data/ty2/depth_test',
     # 'gt_path': '/mnt/hdd/data/ty2/gt_test',
-    'image_path': '/home/ty/data/5k/eval/input',
+    'image_path': '/home/ty/data/uw/input_test',
     'depth_path': '/home/ty/data/uw/depth_test',
-    'gt_path': '/home/ty/data/5k/eval/gt',
+    'gt_path': '/home/ty/data/uw/gt_test',
     'segment_path': '/home/ty/data/uw/segment_input_test',
-    'dataset': 'rain',
+    'dataset': 'UIEB',
 }
 
 
@@ -89,7 +89,7 @@ class EvolutionSearcher(object):
         self.mutation_num = args['mutation_num']
         self.flops_limit = args['flops_limit']
 
-        self.model = Water(en_channels=args['en_channels'], de_channels=args['de_channels'])
+        self.model = Water(dim=args['dim'])
         # self.model = torch.nn.DataParallel(self.model).cuda()
         # supernet_state_dict = torch.load(
         #     '../Supernet/models/checkpoint-latest.pth.tar')['state_dict']

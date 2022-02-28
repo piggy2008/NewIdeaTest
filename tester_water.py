@@ -78,10 +78,10 @@ def get_cand_err(model, cand, args):
     psnr_record = AvgMeter()
     ssim_record = AvgMeter()
     for i, name in enumerate(image_names):
-        if i == 100:
-            break
+        # if i == 100:
+        #     break
         # img_list = [i_id.strip() for i_id in open(imgs_path)]
-        img = Image.open(os.path.join(args['image_path'], name + '.jpg')).convert('RGB')
+        img = Image.open(os.path.join(args['image_path'], name + '.png')).convert('RGB')
 
         # img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
         img = np.array(img)
@@ -115,7 +115,7 @@ def get_cand_err(model, cand, args):
         
         # temp = (1, 1, 0)
 
-        prediction, _, _ = model(img_var, lab_var, cand)
+        prediction = model(img_var, lab_var, cand)
         # prediction = torch.unsqueeze(prediction, 0)
         # print(torch.unique(prediction))
         # precision = to_pil(prediction.data.squeeze(0).cpu())
@@ -135,7 +135,7 @@ def get_cand_err(model, cand, args):
         # prediction = MaxMinNormalization(prediction, prediction.max(), prediction.min()) * 255.0
         # prediction = prediction.astype('uint8')
 
-        gt = Image.open(os.path.join(args['gt_path'], name + '.jpg')).convert('RGB')
+        gt = Image.open(os.path.join(args['gt_path'], name + '.png')).convert('RGB')
         gt = np.asarray(gt)
         gt = cv2.resize(gt, (256, 256))
         # print(gt.shape, '-----', prediction.shape)

@@ -30,11 +30,11 @@ torch.cuda.set_device(device_id)
 ckpt_path = saving_path
 
 
-exp_name = 'WaterEnhance_2022-02-06 21:59:22'
+exp_name = 'WaterEnhance_2022-02-22 22:30:29'
 
 args = {
     'gnn': True,
-    'snapshot': '140000',  # your snapshot filename (exclude extension name)
+    'snapshot': '100000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
     'en_channels': [64, 128, 256],
@@ -43,12 +43,12 @@ args = {
     # 'image_path': '/mnt/hdd/data/ty2/input_test',
     # 'depth_path': '/mnt/hdd/data/ty2/depth_test',
     # 'gt_path': '/mnt/hdd/data/ty2/gt_test',
-    'image_path': '/home/ty/data/uw/input_test',
-    'depth_path': '/home/ty/data/uw/depth_test',
-    'gt_path': '/home/ty/data/uw/gt_test',
+    'image_path': '/home/ty/data/5k/eval/input',
+    'depth_path': '/home/ty/data/LSUI/depth_test',
+    'gt_path': '/home/ty/data/5k/eval/gt',
     'segment_path': '/home/ty/data/uw/segment_input_test',
-    'dataset': 'UIEB',
-    'start': 0
+    'dataset': '5k',
+    'start': 52000
 }
 
 img_transform = transforms.Compose([
@@ -76,8 +76,7 @@ def read_testset(dataset, image_path):
         images = os.listdir(image_path)
         s1000 = []
         for img in images:
-            if img.find('deep') > 0:
-                s1000.append(img[:-4])
+            s1000.append(img[:-4])
         return s1000
 
 def main(snapshot):
@@ -108,40 +107,40 @@ def main(snapshot):
 
             # img_list = [i_id.strip() for i_id in open(imgs_path)]
 
-            img = Image.open(os.path.join(args['image_path'], name + '.png')).convert('RGB')
+            img = Image.open(os.path.join(args['image_path'], name + '.jpg')).convert('RGB')
             img = np.array(img)
 
             # img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
-            fv = Image.open(os.path.join(args['segment_path'], 'FV', name + '.bmp')).convert('L')
-            hd = Image.open(os.path.join(args['segment_path'], 'HD', name + '.bmp')).convert('L')
-            ri = Image.open(os.path.join(args['segment_path'], 'RI', name + '.bmp')).convert('L')
-            ro = Image.open(os.path.join(args['segment_path'], 'RO', name + '.bmp')).convert('L')
-            wr = Image.open(os.path.join(args['segment_path'], 'WR', name + '.bmp')).convert('L')
-
-            fv = cv2.resize(np.array(fv), (224, 224))
-            hd = cv2.resize(np.array(hd), (224, 224))
-            ri = cv2.resize(np.array(ri), (224, 224))
-            ro = cv2.resize(np.array(ro), (224, 224))
-            wr = cv2.resize(np.array(wr), (224, 224))
-            segmentation = np.stack((fv, hd, ri, ro, wr), axis=-1)
+            # fv = Image.open(os.path.join(args['segment_path'], 'FV', name + '.bmp')).convert('L')
+            # hd = Image.open(os.path.join(args['segment_path'], 'HD', name + '.bmp')).convert('L')
+            # ri = Image.open(os.path.join(args['segment_path'], 'RI', name + '.bmp')).convert('L')
+            # ro = Image.open(os.path.join(args['segment_path'], 'RO', name + '.bmp')).convert('L')
+            # wr = Image.open(os.path.join(args['segment_path'], 'WR', name + '.bmp')).convert('L')
+            #
+            # fv = cv2.resize(np.array(fv), (256, 256))
+            # hd = cv2.resize(np.array(hd), (256, 256))
+            # ri = cv2.resize(np.array(ri), (256, 256))
+            # ro = cv2.resize(np.array(ro), (256, 256))
+            # wr = cv2.resize(np.array(wr), (256, 256))
+            # segmentation = np.stack((fv, hd, ri, ro, wr), axis=-1)
             w = img.shape[0]
             h = img.shape[1]
-            img = cv2.resize(img, (224, 224))
+            img = cv2.resize(img, (256, 256))
             hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
 
             lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
             img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
             hsv_var = Variable(img_transform(hsv).unsqueeze(0), volatile=True).cuda()
             lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
-            segmentation = Variable(img_transform(segmentation).unsqueeze(0), volatile=True).cuda()
-            prediction, prediction2, hsv_side, lab_side, _, _ = net(img_var, hsv_var, lab_var, segmentation, [3, 5, 4, 6, 2, 5, 7, 0, 3, 2, 5, 5, 4, 3, 4, 0, 5, 4, 3, 3])
+            # segmentation = Variable(img_transform(segmentation).unsqueeze(0), volatile=True).cuda()
+            prediction, _, _ = net(img_var, lab_var, [4, 2, 1, 6, 7, 7, 6, 0, 1, 5, 1, 5, 0, 1, 4, 3, 0])
 
             # prediction = torch.unsqueeze(prediction, 0)
             # print(torch.unique(prediction))
             # precision = to_pil(prediction.data.squeeze(0).cpu())
             # prediction = np.array(precision)
             # prediction = prediction.astype('float')
-            prediction = torch.clamp(prediction2, 0, 1)
+            prediction = torch.clamp(prediction, 0, 1)
             prediction = prediction.permute(0, 2, 3, 1).cpu().detach().numpy()
             prediction = np.squeeze(prediction)
             # prediction = prediction[:, :, ::-1]
@@ -154,8 +153,8 @@ def main(snapshot):
 
             # prediction = MaxMinNormalization(prediction, prediction.max(), prediction.min()) * 255.0
             # prediction = prediction.astype('uint8')
-            prediction = cv2.resize(prediction, (256, 256))
-            gt = Image.open(os.path.join(args['gt_path'], name + '.png')).convert('RGB')
+            # prediction = cv2.resize(prediction, (h, w))
+            gt = Image.open(os.path.join(args['gt_path'], name + '.jpg')).convert('RGB')
             gt = np.asarray(gt)
             gt = cv2.resize(gt, (256, 256))
             print(gt.shape, '-----', prediction.shape)
