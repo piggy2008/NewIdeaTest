@@ -156,20 +156,20 @@ def main():
     #     param.requires_grad_(False)
     # vgg.to(device_id).eval()
     # net = warp().cuda(device_id).train()
-    remains = [], bkbone = []
+    remains = []
     for name, param in net.named_parameters():
-        if 'base' in name:
-            # param.requires_grad = False
-            bkbone.append(param)
+        # if 'base' in name:
+        #     # param.requires_grad = False
+        #     bkbone.append(param)
+        # # # elif 'flow' in name or 'linearf' in name or 'decoder' in name:
+        # # #     print('flow related:', name)
+        # # #     flow_modules.append(param)
         # # elif 'flow' in name or 'linearf' in name or 'decoder' in name:
-        # #     print('flow related:', name)
+        # #     print('decoder related:', name)
         # #     flow_modules.append(param)
-        # elif 'flow' in name or 'linearf' in name or 'decoder' in name:
-        #     print('decoder related:', name)
-        #     flow_modules.append(param)
-        else:
-            print('remains:', name)
-            remains.append(param)
+        # else:
+        # print('remains:', name)
+        remains.append(param)
     # fix_parameters(net.named_parameters())
     # optimizer = optim.SGD([
     #     {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
@@ -178,7 +178,7 @@ def main():
     #      'lr': args['lr'], 'weight_decay': args['weight_decay']}
     # ], momentum=args['momentum'])
 
-    optimizer = optim.Adam([{'params': remains, 'lr': args['lr']}, {'params': bkbone, 'lr': args['lr']}],
+    optimizer = optim.Adam([{'params': remains, 'lr': args['lr']}],
                          betas=(0.9, 0.999))
     # optimizer_d = optim.Adam([{'params': discriminator.parameters()}],
     #                        lr=args['lr'], betas=(0.9, 0.999))
@@ -212,8 +212,8 @@ def train(net, discriminator, optimizer, optimizer_d):
 
             optimizer.param_groups[0]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
                                                                   ) ** args['lr_decay']
-            optimizer.param_groups[1]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
-                                                            ) ** args['lr_decay']
+            # optimizer.param_groups[1]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
+            #                                                 ) ** args['lr_decay']
             # optimizer.param_groups[2]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
             #                                                 ) ** args['lr_decay']
             #
