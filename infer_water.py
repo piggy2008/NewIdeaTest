@@ -101,23 +101,22 @@ def main(snapshot):
         for name in image_names:
             # precision_record, recall_record, = [AvgMeter() for _ in range(256)], [AvgMeter() for _ in range(256)]
 
-
             # img_list = [i_id.strip() for i_id in open(imgs_path)]
             img = Image.open(os.path.join(args['image_path'], name + '.png')).convert('RGB')
             img = np.array(img)
             # img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
-            fv = Image.open(os.path.join(args['segment_path'], 'FV', name + '.bmp')).convert('L')
-            hd = Image.open(os.path.join(args['segment_path'], 'HD', name + '.bmp')).convert('L')
-            ri = Image.open(os.path.join(args['segment_path'], 'RI', name + '.bmp')).convert('L')
-            ro = Image.open(os.path.join(args['segment_path'], 'RO', name + '.bmp')).convert('L')
-            wr = Image.open(os.path.join(args['segment_path'], 'WR', name + '.bmp')).convert('L')
+            # fv = Image.open(os.path.join(args['segment_path'], 'FV', name + '.bmp')).convert('L')
+            # hd = Image.open(os.path.join(args['segment_path'], 'HD', name + '.bmp')).convert('L')
+            # ri = Image.open(os.path.join(args['segment_path'], 'RI', name + '.bmp')).convert('L')
+            # ro = Image.open(os.path.join(args['segment_path'], 'RO', name + '.bmp')).convert('L')
+            # wr = Image.open(os.path.join(args['segment_path'], 'WR', name + '.bmp')).convert('L')
 
-            fv = cv2.resize(np.array(fv), (224, 224))
-            hd = cv2.resize(np.array(hd), (224, 224))
-            ri = cv2.resize(np.array(ri), (224, 224))
-            ro = cv2.resize(np.array(ro), (224, 224))
-            wr = cv2.resize(np.array(wr), (224, 224))
-            segmentation = np.stack((fv, hd, ri, ro, wr), axis=-1)
+            # fv = cv2.resize(np.array(fv), (224, 224))
+            # hd = cv2.resize(np.array(hd), (224, 224))
+            # ri = cv2.resize(np.array(ri), (224, 224))
+            # ro = cv2.resize(np.array(ro), (224, 224))
+            # wr = cv2.resize(np.array(wr), (224, 224))
+            # segmentation = np.stack((fv, hd, ri, ro, wr), axis=-1)
             w = img.shape[0]
             h = img.shape[1]
             img = cv2.resize(img, (256, 256))
@@ -127,8 +126,8 @@ def main(snapshot):
             img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
             hsv_var = Variable(img_transform(hsv).unsqueeze(0), volatile=True).cuda()
             lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
-            segmentation = Variable(img_transform(segmentation).unsqueeze(0), volatile=True).cuda()
-            prediction, prediction2, hsv_side, lab_side, _, _ = net(img_var, hsv_var, lab_var, segmentation, [3, 3, 3, 3])
+            # segmentation = Variable(img_transform(segmentation).unsqueeze(0), volatile=True).cuda()
+            prediction, prediction2, hsv_side, lab_side, _, _ = net(img_var, lab_var, [3, 3, 3, 3])
             # prediction = torch.unsqueeze(prediction, 0)
             # print(torch.unique(prediction))
             # precision = to_pil(prediction.data.squeeze(0).cpu())
