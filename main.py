@@ -32,29 +32,46 @@ if __name__ == '__main__':
     from PIL import Image, ImageCms
     from matplotlib import pyplot as plt
     import numpy as np
-    path = '/home/ty/data/uw/input_train'
-    gt_path = '/home/ty/data/uw/gt_train'
-    depth_path = '/home/ty/data/uw/depth_train'
-    save_input_root = '/home/ty/data/uw/input_train_uw'
-    save_gt_root = '/home/ty/data/uw/gt_train_uw'
-    save_depth_root = '/home/ty/data/uw/depth_train_uw'
-    if not os.path.exists(save_input_root):
-        os.makedirs(save_input_root)
-    if not os.path.exists(save_gt_root):
-        os.makedirs(save_gt_root)
-    if not os.path.exists(save_depth_root):
-            os.makedirs(save_depth_root)
-    image_names = pickup_image(path, 'UIEB')
-    for img in image_names:
-        image = Image.open(os.path.join(path, img + '.png'))
-        image.save(os.path.join(save_input_root, img + '.png'))
+    # path = '/home/ty/data/uw/input_train'
+    # gt_path = '/home/ty/data/uw/gt_train'
+    # depth_path = '/home/ty/data/uw/depth_train'
+    # save_input_root = '/home/ty/data/uw/input_train_uw'
+    # save_gt_root = '/home/ty/data/uw/gt_train_uw'
+    # save_depth_root = '/home/ty/data/uw/depth_train_uw'
+    # if not os.path.exists(save_input_root):
+    #     os.makedirs(save_input_root)
+    # if not os.path.exists(save_gt_root):
+    #     os.makedirs(save_gt_root)
+    # if not os.path.exists(save_depth_root):
+    #         os.makedirs(save_depth_root)
+    # image_names = pickup_image(path, 'UIEB')
+    # for img in image_names:
+    #     image = Image.open(os.path.join(path, img + '.png'))
+    #     image.save(os.path.join(save_input_root, img + '.png'))
+    #
+    #     image = Image.open(os.path.join(gt_path, img + '.png'))
+    #     image.save(os.path.join(save_gt_root, img + '.png'))
+    #
+    #     image = Image.open(os.path.join(depth_path, img + '.png'))
+    #     image.save(os.path.join(save_depth_root, img + '.png'))
+    path = '/Users/tangyi/Downloads/segment_train_uw'
+    image_name = '3_img_.bmp'
 
-        image = Image.open(os.path.join(gt_path, img + '.png'))
-        image.save(os.path.join(save_gt_root, img + '.png'))
+    fv = cv2.imread(os.path.join(path, 'FV', image_name), 0)
+    hd = cv2.imread(os.path.join(path, 'HD', image_name), 0)
+    ri = cv2.imread(os.path.join(path, 'RI', image_name), 0)
+    ro = cv2.imread(os.path.join(path, 'RO', image_name), 0)
+    wr = cv2.imread(os.path.join(path, 'WR', image_name), 0)
+    con = np.stack((fv, hd, ri ,ro, wr), axis=0)
+    con2 = cv2.resize(fv[:, :, np.newaxis], (112, 112))
 
-        image = Image.open(os.path.join(depth_path, img + '.png'))
-        image.save(os.path.join(save_depth_root, img + '.png'))
-
+    print(con2.shape, '--', con2.ndim)
+    # con2 = np.flip(con, -1)
+    # plt.subplot(1, 2, 1)
+    # plt.imshow(con2[0, :, :])
+    # plt.subplot(1, 2, 2)
+    # plt.imshow(fv)
+    # plt.show()
     # plt.style.use('classic')
     # img = Image.open('/Users/tangyi/Downloads/Ucolor_final_model_corrected/input_test/15704.png')
     # img_gt = Image.open('/Users/tangyi/Downloads/Ucolor_final_model_corrected/gt_test/15704.png')

@@ -88,7 +88,7 @@ imgs_file = os.path.join(datasets_root, args['imgs_file'])
 # imgs_file = os.path.join(datasets_root, 'video_saliency/train_all_DAFB3_seq_5f.txt')
 
 joint_transform = joint_transforms.Compose([
-    joint_transforms.ImageResize(args['image_size']),
+    # joint_transforms.ImageResize(args['image_size']),
     joint_transforms.RandomCrop(args['crop_size']),
     joint_transforms.RandomHorizontallyFlip(),
 ])

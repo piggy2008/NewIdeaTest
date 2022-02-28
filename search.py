@@ -47,7 +47,7 @@ args = {
     'choice': 8,
     'layers': 20,
     'en_channels': [64, 128, 256],
-    'de_channels': 128,
+    'dim': 48,
     'log_dir': 'log',
     'max_epochs': 40,
     'select_num': 10,
