@@ -83,31 +83,6 @@ args = {
     # 'self_distill': 0.1,
     # 'teacher_distill': 0.6
 }
-
-imgs_file = os.path.join(datasets_root, args['imgs_file'])
-# imgs_file = os.path.join(datasets_root, 'video_saliency/train_all_DAFB3_seq_5f.txt')
-
-joint_transform = joint_transforms.Compose([
-    # joint_transforms.ImageResize(args['image_size']),
-    joint_transforms.RandomCrop(args['crop_size']),
-    joint_transforms.RandomHorizontallyFlip(),
-])
-
-
-
-# joint_transform = joint_transforms.Compose_single([
-#     joint_transforms.ImageResize_numpy(args['image_size']),
-#     joint_transforms.RandomCrop_numpy(args['crop_size']),
-#     joint_transforms.RandomHorizontallyFlip_numpy(),
-# ])
-
-input_size = (473, 473)
-
-img_transform = transforms.Compose([
-    transforms.ToTensor(),
-    # transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-])
-target_transform = transforms.ToTensor()
 # if train_set2 is not None:
 #     train_loader2 = DataLoader(train_set2, batch_size=args['train_batch_size'], num_workers=4, shuffle=True)
 
@@ -141,6 +116,26 @@ def weights_init(m):
         torch.nn.init.constant_(m.bias.data, 0.0)
 
 def main():
+    # imgs_file = os.path.join(datasets_root, args['imgs_file'])
+    # imgs_file = os.path.join(datasets_root, 'video_saliency/train_all_DAFB3_seq_5f.txt')
+
+    joint_transform = joint_transforms.Compose([
+        # joint_transforms.ImageResize(args['image_size']),
+        joint_transforms.RandomCrop(args['crop_size']),
+        joint_transforms.RandomHorizontallyFlip(),
+    ])
+
+    # joint_transform = joint_transforms.Compose_single([
+    #     joint_transforms.ImageResize_numpy(args['image_size']),
+    #     joint_transforms.RandomCrop_numpy(args['crop_size']),
+    #     joint_transforms.RandomHorizontallyFlip_numpy(),
+    # ])
+
+    img_transform = transforms.Compose([
+        transforms.ToTensor(),
+        # transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+    target_transform = transforms.ToTensor()
     # train_set = ImageFolder(msra10k_path, joint_transform, img_transform, target_transform)
     train_set = WaterImage2Folder(args['imgs_file'], joint_transform, img_transform, target_transform)
     # train_set = WaterImage4Folder(args['imgs_file'], 256)
