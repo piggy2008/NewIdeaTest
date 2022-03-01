@@ -108,11 +108,6 @@ img_transform = transforms.Compose([
     # transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 target_transform = transforms.ToTensor()
-
-# train_set = ImageFolder(msra10k_path, joint_transform, img_transform, target_transform)
-train_set = WaterImage2Folder(args['imgs_file'], joint_transform, img_transform, target_transform)
-# train_set = WaterImage4Folder(args['imgs_file'], 256)
-train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=0, shuffle=True)
 # if train_set2 is not None:
 #     train_loader2 = DataLoader(train_set2, batch_size=args['train_batch_size'], num_workers=4, shuffle=True)
 
@@ -146,6 +141,10 @@ def weights_init(m):
         torch.nn.init.constant_(m.bias.data, 0.0)
 
 def main():
+    # train_set = ImageFolder(msra10k_path, joint_transform, img_transform, target_transform)
+    train_set = WaterImage2Folder(args['imgs_file'], joint_transform, img_transform, target_transform)
+    # train_set = WaterImage4Folder(args['imgs_file'], 256)
+    train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=8, shuffle=True)
 
     net = Water(dim=args['dim']).cuda(device_id).train()
     net.apply(weights_init)
@@ -199,10 +198,10 @@ def main():
     check_mkdir(ckpt_path)
     check_mkdir(os.path.join(ckpt_path, exp_name))
     open(log_path, 'w').write(str(args) + '\n\n')
-    train(net, None, optimizer, None)
+    train(net, None, optimizer, None, train_loader)
 
 
-def train(net, discriminator, optimizer, optimizer_d):
+def train(net, discriminator, optimizer, optimizer_d, train_loader):
     curr_iter = args['last_iter']
     while True:
 
