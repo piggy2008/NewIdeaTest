@@ -112,7 +112,7 @@ target_transform = transforms.ToTensor()
 # train_set = ImageFolder(msra10k_path, joint_transform, img_transform, target_transform)
 train_set = WaterImage2Folder(args['imgs_file'], joint_transform, img_transform, target_transform)
 # train_set = WaterImage4Folder(args['imgs_file'], 256)
-train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=2, shuffle=True)
+train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=0, shuffle=True)
 # if train_set2 is not None:
 #     train_loader2 = DataLoader(train_set2, batch_size=args['train_batch_size'], num_workers=4, shuffle=True)
 
