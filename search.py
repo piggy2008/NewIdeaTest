@@ -39,13 +39,13 @@ torch.cuda.set_device(device_id)
 # you should have the pth file in the folder './$ckpt_path$/$exp_name$'
 ckpt_path = saving_path
 
-exp_name = 'WaterEnhance_2022-02-04 15:03:03'
+exp_name = 'WaterEnhance_2022-03-01 08:52:50'
 
 args = {
     'gnn': True,
-    'snapshot': '240000',  # your snapshot filename (exclude extension name)
+    'snapshot': '300000',  # your snapshot filename (exclude extension name)
     'choice': 8,
-    'layers': 20,
+    'layers': 12,
     'en_channels': [64, 128, 256],
     'dim': 48,
     'log_dir': 'log',
@@ -65,9 +65,9 @@ args = {
     # 'image_path': '/mnt/hdd/data/ty2/input_test',
     # 'depth_path': '/mnt/hdd/data/ty2/depth_test',
     # 'gt_path': '/mnt/hdd/data/ty2/gt_test',
-    'image_path': '/home/ty/data/uw/input_test',
+    'image_path': '/home/user/ubuntu/data/uw/input_test',
     'depth_path': '/home/ty/data/uw/depth_test',
-    'gt_path': '/home/ty/data/uw/gt_test',
+    'gt_path': '/home/user/ubuntu/data/uw/gt_test',
     'segment_path': '/home/ty/data/uw/segment_input_test',
     'dataset': 'UIEB',
 }
