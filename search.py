@@ -88,7 +88,7 @@ class EvolutionSearcher(object):
         self.mutation_num = args['mutation_num']
         self.flops_limit = args['flops_limit']
 
-        self.model = Water(en_channels=args['en_channels'], de_channels=args['de_channels'])
+        self.model = Water(dim=args['dim'])
         # self.model = torch.nn.DataParallel(self.model).cuda()
         # supernet_state_dict = torch.load(
         #     '../Supernet/models/checkpoint-latest.pth.tar')['state_dict']
