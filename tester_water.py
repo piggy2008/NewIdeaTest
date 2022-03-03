@@ -84,21 +84,21 @@ def get_cand_err(model, cand, args):
         img = Image.open(os.path.join(args['image_path'], name + '.png')).convert('RGB')
         img = np.array(img)
         # depth = Image.open(os.path.join(args['depth_path'], name + '.png_depth_estimate.png')).convert('L')
-        img = cv2.resize(img, (256, 256))
+        # img = cv2.resize(img, (256, 256))
         lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
         img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
         lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
 
-        # h, w = img_var.shape[2], img_var.shape[3]
-        # H, W = ((h + factor) // factor) * factor, ((w + factor) // factor) * factor
-        # padh = H - h if h % factor != 0 else 0
-        # padw = W - w if w % factor != 0 else 0
-        # img_var = F.pad(img_var, (0, padw, 0, padh), 'reflect')
-        # lab_var = F.pad(lab_var, (0, padw, 0, padh), 'reflect')
+        h, w = img_var.shape[2], img_var.shape[3]
+        H, W = ((h + factor) // factor) * factor, ((w + factor) // factor) * factor
+        padh = H - h if h % factor != 0 else 0
+        padw = W - w if w % factor != 0 else 0
+        img_var = F.pad(img_var, (0, padw, 0, padh), 'reflect')
+        lab_var = F.pad(lab_var, (0, padw, 0, padh), 'reflect')
 
         # temp = (1, 1, 0)
         prediction = model(img_var, lab_var, cand)
-        # prediction = prediction[:, :, :h, :w]
+        prediction = prediction[:, :, :h, :w]
         # prediction = torch.unsqueeze(prediction, 0)
         # print(torch.unique(prediction))
         # precision = to_pil(prediction.data.squeeze(0).cpu())
@@ -120,7 +120,7 @@ def get_cand_err(model, cand, args):
 
         gt = Image.open(os.path.join(args['gt_path'], name + '.png')).convert('RGB')
         gt = np.asarray(gt)
-        gt = cv2.resize(gt, (256, 256))
+        # gt = cv2.resize(gt, (256, 256))
         # print(gt.shape, '-----', prediction.shape)
         psnr = calculate_psnr(prediction * 255.0, gt)
         ssim = calculate_ssim(prediction * 255.0, gt)
