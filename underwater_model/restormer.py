@@ -125,6 +125,29 @@ class Attention(nn.Module):
         out = self.project_out(out)
         return out
 
+# ECA attention module
+class Attention_eca(nn.Module):
+    def __init__(self, k_size, num_heads, bias):
+        super(Attention_eca, self).__init__()
+        self.num_heads = num_heads
+
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.conv = nn.Conv1d(1, 1, kernel_size=k_size, padding=(k_size - 1) // 2, bias=bias)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        heads = x.chunk(self.num_heads, dim=1)
+        outputs = []
+        for head in heads:
+            y = self.avg_pool(head)
+            y = self.conv(y.squeeze(-1).transpose(-1, -2)).transpose(-1, -2).unsqueeze(-1)
+            y = self.sigmoid(y)
+            out = head * y.expand_as(head)
+            outputs.append(out)
+        # Two different branches of ECA module
+        output = torch.cat(outputs, dim=1)
+
+        return output
 
 ##########################################################################
 class TransformerBlock(nn.Module):
@@ -292,10 +315,11 @@ class Restormer(nn.Module):
 
 if __name__ == '__main__':
     input = torch.zeros([2, 48, 128, 128])
-    model = Restormer()
+    # model = Restormer()
     # output = model(input)
-    model2 = nn.Sequential(*[
-        TransformerBlock(dim=int(48), num_heads=4, ffn_expansion_factor=2.66,
-                         bias=False, LayerNorm_type='WithBias') for i in range(4)])
-    output2 = model2(input)
+    # model2 = nn.Sequential(*[
+    #     TransformerBlock(dim=int(48), num_heads=4, ffn_expansion_factor=2.66,
+    #                      bias=False, LayerNorm_type='WithBias') for i in range(4)])
+    model3 = Attention_eca(3, 4, False)
+    output2 = model3(input)
     print(output2.shape)

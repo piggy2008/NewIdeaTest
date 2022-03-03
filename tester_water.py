@@ -107,7 +107,7 @@ def get_cand_err(model, cand, args):
         prediction = torch.clamp(prediction, 0, 1)
         prediction = prediction.permute(0, 2, 3, 1).cpu().detach().numpy()
         prediction = np.squeeze(prediction)
-        prediction = prediction[:, :, ::-1]
+        # prediction = prediction[:, :, ::-1]
         # plt.style.use('classic')
         # plt.subplot(1, 2, 1)
         # plt.imshow(prediction)
