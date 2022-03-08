@@ -35,15 +35,15 @@ class Water(nn.Module):
 
         self.de_predict = nn.Sequential(nn.Conv2d(dim * 2 ** 1, 3, kernel_size=1, stride=1))
 
-        # self.de_predict_rgb = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
+        self.de_predict_rgb = nn.Sequential(nn.Conv2d(dim * 2 ** 3, 3, kernel_size=1, stride=1))
 
-        # self.de_predict_lab = nn.Sequential(nn.Conv2d(en_channels[2], 3, kernel_size=1, stride=1))
+        self.de_predict_lab = nn.Sequential(nn.Conv2d(dim * 2 ** 3, 3, kernel_size=1, stride=1))
 
     def forward(self, rgb, lab, select):
 
         # first_rgb, first_lab, second_rgb, second_lab, third_rgb, \
         # third_lab = self.base(rgb, lab, select[:6])
-
+        # select = [5, 2, 6, 0, 5, 1, 0, 7, 5, 5, 3, 7]
         level1_rgb, level2_rgb, level3_rgb, level4_rgb, \
         level1_lab, level2_lab, level3_lab, level4_lab = self.base(rgb, lab, select[:8])
 
@@ -61,22 +61,28 @@ class Water(nn.Module):
         mid_feat = self.search(level4, level3, level2, level1, select[8:11])
         mid_feat = self.refine(mid_feat, select[11])
 
+        mid_rgb = self.de_predict_rgb(level4)
+        mid_lab = self.de_predict_rgb(level4)
+
         final = self.de_predict(mid_feat)
 
 
-        return final
+        return final, mid_rgb, mid_lab
 
 if __name__ == '__main__':
     a = torch.zeros(2, 3, 256, 256)
     b = torch.zeros(2, 128, 1, 1)
 
     model = Water(48)
-    r = model(a, a, [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5])
+    # r = model(a, a, [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5])
     # print(r1.shape, '--', r2.shape, '--', r3.shape)
-    c = torch.zeros(2, 128, 16, 16)
+    # c = torch.zeros(2, 128, 16, 16)
     # global_rct = GlobalRCT(128, 128, 8)
+    from torchstat import stat
 
-    print(r.shape)
+    stat(model, (3, 256, 256))
+
+    # print(r.shape)
 
 
 

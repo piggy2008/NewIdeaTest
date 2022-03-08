@@ -43,4 +43,4 @@ class block_choice(nn.Module):
         elif select == 7:
             out = self.resblock_sa(x)
         # out = self.conv3(out)
-        return out
+        return out + x
