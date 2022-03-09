@@ -60,5 +60,15 @@ class block_choice(nn.Module):
             out = self.resblock_se(x)
         elif select == 7:
             out = self.resblock_sa(x)
+        elif select == 8:
+            out = self.resblock_trans_normal(x)
+        elif select == 9:
+            out = self.resblock_trans_dual(x)
+        elif select == 10:
+            out = self.resblock_trans_eca(x)
+        elif select == 11:
+            out = self.resblock_trans_sa(x)
+        elif select == 12:
+            out = self.resblock_trans_sge(x)
         # out = self.conv3(out)
         return out + x
