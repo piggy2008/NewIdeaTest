@@ -14,9 +14,9 @@ class block_choice(nn.Module):
         self.resblock_conv = Conv(n_channels, n_channels, 3, 1, 1, affine=True, upsample=False)
         # self.resblock_vit = ViT(image_size=vit_image_size, patch_size=vit_patch_size, dim=128, depth=1, heads=1, mlp_dim=128, channels=128)
         # self.resblock_convdouble = ConvDouble(n_channels, n_channels, 3, 1, 1, affine=True, upsample=False)
-        self.resblock_da = DoubleAttentionLayer(n_channels, n_channels, n_channels)
-        # self.resblock_da = nn.Sequential(*[TransformerBlock(dim=int(n_channels), num_heads=1, ffn_expansion_factor=2.66,
-        #                  bias=False, LayerNorm_type='WithBias') for i in range(1)])
+        # self.resblock_da = DoubleAttentionLayer(n_channels, n_channels, n_channels)
+        self.resblock_da = nn.Sequential(*[TransformerBlock(dim=int(n_channels), num_heads=1, ffn_expansion_factor=2.66,
+                         bias=False, LayerNorm_type='WithBias') for i in range(1)])
         self.resblock_se = SELayer(n_channels)
         self.resblock_sa = sa_layer(n_channels, 16)
         # self.conv3 = nn.Conv2d(n_channels, n_channels, kernel_size=3, stride=1, padding=1)
@@ -43,4 +43,4 @@ class block_choice(nn.Module):
         elif select == 7:
             out = self.resblock_sa(x)
         # out = self.conv3(out)
-        return out
+        return out + x

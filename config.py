@@ -2,8 +2,11 @@
 import os
 
 # szu 169 sever
+
 datasets_root = '/home/ty/data'
-save_root = '/home/ty/code/NewIdeaTest'
+
+save_root = './'
+
 # local pc
 # datasets_root = '/home/qub/data/saliency'
 

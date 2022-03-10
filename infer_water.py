@@ -5,6 +5,7 @@ import torch
 from PIL import Image, ImageCms
 from torch.autograd import Variable
 from torchvision import transforms
+import torch.nn.functional as F
 
 from config import ecssd_path, hkuis_path, pascals_path, sod_path, dutomron_path, \
     davis_path, fbms_path, mcl_path, uvsd_path, visal_path, vos_path, segtrack_path, davsod_path, saving_path
@@ -30,25 +31,26 @@ torch.cuda.set_device(device_id)
 ckpt_path = saving_path
 
 
-exp_name = 'WaterEnhance_2022-02-22 22:30:29'
+exp_name = 'WaterEnhance_2022-03-08 07:09:51'
 
 args = {
     'gnn': True,
-    'snapshot': '100000',  # your snapshot filename (exclude extension name)
+    'snapshot': '200000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
     'en_channels': [64, 128, 256],
     'de_channels': 128,
+    'dim': 48,
     # 'input_size': (380, 380),
     # 'image_path': '/mnt/hdd/data/ty2/input_test',
     # 'depth_path': '/mnt/hdd/data/ty2/depth_test',
     # 'gt_path': '/mnt/hdd/data/ty2/gt_test',
-    'image_path': '/home/ty/data/5k/eval/input',
+    'image_path': '/home/ty/data/uw/input_test',
     'depth_path': '/home/ty/data/LSUI/depth_test',
-    'gt_path': '/home/ty/data/5k/eval/gt',
+    'gt_path': '/home/ty/data/uw/gt_test',
     'segment_path': '/home/ty/data/uw/segment_input_test',
-    'dataset': '5k',
-    'start': 52000
+    'dataset': 'UIEB',
+    'start': 0
 }
 
 img_transform = transforms.Compose([
@@ -82,7 +84,7 @@ def read_testset(dataset, image_path):
 def main(snapshot):
     # net = R3Net(motion='', se_layer=False, dilation=False, basic_model='resnet50')
 
-    net = Water(en_channels=args['en_channels'], de_channels=args['de_channels'])
+    net = Water(dim=args['dim'])
     # net = warp()
     if snapshot is None:
         print ('load snapshot \'%s\' for testing' % args['snapshot'])
@@ -97,6 +99,7 @@ def main(snapshot):
     net.eval()
     net.cuda()
     results = {}
+    factor = 8
     image_names = read_testset(args['dataset'], args['image_path'])
     with torch.no_grad():
         psnr_record = AvgMeter()
@@ -104,36 +107,32 @@ def main(snapshot):
         for name in image_names:
             # precision_record, recall_record, = [AvgMeter() for _ in range(256)], [AvgMeter() for _ in range(256)]
 
-
             # img_list = [i_id.strip() for i_id in open(imgs_path)]
 
-            img = Image.open(os.path.join(args['image_path'], name + '.jpg')).convert('RGB')
+            img = Image.open(os.path.join(args['image_path'], name + '.png')).convert('RGB')
             img = np.array(img)
 
-            # img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
-            # fv = Image.open(os.path.join(args['segment_path'], 'FV', name + '.bmp')).convert('L')
-            # hd = Image.open(os.path.join(args['segment_path'], 'HD', name + '.bmp')).convert('L')
-            # ri = Image.open(os.path.join(args['segment_path'], 'RI', name + '.bmp')).convert('L')
-            # ro = Image.open(os.path.join(args['segment_path'], 'RO', name + '.bmp')).convert('L')
-            # wr = Image.open(os.path.join(args['segment_path'], 'WR', name + '.bmp')).convert('L')
-            #
-            # fv = cv2.resize(np.array(fv), (256, 256))
-            # hd = cv2.resize(np.array(hd), (256, 256))
-            # ri = cv2.resize(np.array(ri), (256, 256))
-            # ro = cv2.resize(np.array(ro), (256, 256))
-            # wr = cv2.resize(np.array(wr), (256, 256))
-            # segmentation = np.stack((fv, hd, ri, ro, wr), axis=-1)
+
             w = img.shape[0]
             h = img.shape[1]
-            img = cv2.resize(img, (256, 256))
-            hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+            # img = cv2.resize(img, (256, 256))
+            # hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
 
             lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
             img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
-            hsv_var = Variable(img_transform(hsv).unsqueeze(0), volatile=True).cuda()
+            # hsv_var = Variable(img_transform(hsv).unsqueeze(0), volatile=True).cuda()
             lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
             # segmentation = Variable(img_transform(segmentation).unsqueeze(0), volatile=True).cuda()
-            prediction, _, _ = net(img_var, lab_var, [4, 2, 1, 6, 7, 7, 6, 0, 1, 5, 1, 5, 0, 1, 4, 3, 0])
+
+            h, w = img_var.shape[2], img_var.shape[3]
+            H, W = ((h + factor) // factor) * factor, ((w + factor) // factor) * factor
+            padh = H - h if h % factor != 0 else 0
+            padw = W - w if w % factor != 0 else 0
+            img_var = F.pad(img_var, (0, padw, 0, padh), 'reflect')
+            lab_var = F.pad(lab_var, (0, padw, 0, padh), 'reflect')
+
+            prediction = net(img_var, lab_var, [6, 0, 5, 4, 0, 2, 6, 7, 3, 0, 1, 5])
+            prediction = prediction[:, :, :h, :w]
 
             # prediction = torch.unsqueeze(prediction, 0)
             # print(torch.unique(prediction))
@@ -154,9 +153,9 @@ def main(snapshot):
             # prediction = MaxMinNormalization(prediction, prediction.max(), prediction.min()) * 255.0
             # prediction = prediction.astype('uint8')
             # prediction = cv2.resize(prediction, (h, w))
-            gt = Image.open(os.path.join(args['gt_path'], name + '.jpg')).convert('RGB')
+            gt = Image.open(os.path.join(args['gt_path'], name + '.png')).convert('RGB')
             gt = np.asarray(gt)
-            gt = cv2.resize(gt, (256, 256))
+            # gt = cv2.resize(gt, (256, 256))
             print(gt.shape, '-----', prediction.shape)
             # prediction = cv2.cvtColor(prediction * 255.0, cv2.COLOR_LAB2RGB)
             # print(np.unique(prediction))

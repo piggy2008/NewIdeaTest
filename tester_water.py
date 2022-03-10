@@ -13,6 +13,7 @@ from torch.autograd import Variable
 import numpy as np
 from infer_water import read_testset
 import cv2
+import torch.nn.functional as F
 
 
 # assert torch.cuda.is_available()
@@ -77,45 +78,34 @@ def get_cand_err(model, cand, args):
     image_names = read_testset(args['dataset'], args['image_path'])
     psnr_record = AvgMeter()
     ssim_record = AvgMeter()
-    for i, name in enumerate(image_names):
-        # if i == 100:
-        #     break
+
+    factor = 8
+    for name in image_names:
+
         # img_list = [i_id.strip() for i_id in open(imgs_path)]
         img = Image.open(os.path.join(args['image_path'], name + '.png')).convert('RGB')
 
         # img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
         img = np.array(img)
         img = cv2.resize(img, (256, 256))
-        # depth = Image.open(os.path.join(args['depth_path'], name + '.png_depth_estimate.png')).convert('L')
-        # fv = Image.open(os.path.join(args['segment_path'], 'FV', name + '.bmp')).convert('L')
-        # hd = Image.open(os.path.join(args['segment_path'], 'HD', name + '.bmp')).convert('L')
-        # ri = Image.open(os.path.join(args['segment_path'], 'RI', name + '.bmp')).convert('L')
-        # ro = Image.open(os.path.join(args['segment_path'], 'RO', name + '.bmp')).convert('L')
-        # wr = Image.open(os.path.join(args['segment_path'], 'WR', name + '.bmp')).convert('L')
-        #
-        # fv = cv2.resize(np.array(fv), (256, 256))
-        # hd = cv2.resize(np.array(hd), (256, 256))
-        # ri = cv2.resize(np.array(ri), (256, 256))
-        # ro = cv2.resize(np.array(ro), (256, 256))
-        # wr = cv2.resize(np.array(wr), (256, 256))
-        # segmentation = np.stack((fv, hd, ri, ro, wr), axis=-1)
 
-
-        hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
-        # srgb_profile = ImageCms.createProfile("sRGB")
-        # lab_profile = ImageCms.createProfile("LAB")
-        # rgb2lab_transform = ImageCms.buildTransformFromOpenProfiles(srgb_profile, lab_profile, "RGB", "LAB")
         lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
         
         img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
-        hsv_var = Variable(img_transform(hsv).unsqueeze(0), volatile=True).cuda()
         lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
 
-        # segmentation_var = Variable(img_transform(segmentation).unsqueeze(0), volatile=True).cuda()
-        
-        # temp = (1, 1, 0)
 
+        # h, w = img_var.shape[2], img_var.shape[3]
+        # H, W = ((h + factor) // factor) * factor, ((w + factor) // factor) * factor
+        # padh = H - h if h % factor != 0 else 0
+        # padw = W - w if w % factor != 0 else 0
+        # img_var = F.pad(img_var, (0, padw, 0, padh), 'reflect')
+        # lab_var = F.pad(lab_var, (0, padw, 0, padh), 'reflect')
+        #
+        # # temp = (1, 1, 0)
         prediction = model(img_var, lab_var, cand)
+        # prediction = prediction[:, :, :h, :w]
+
         # prediction = torch.unsqueeze(prediction, 0)
         # print(torch.unique(prediction))
         # precision = to_pil(prediction.data.squeeze(0).cpu())

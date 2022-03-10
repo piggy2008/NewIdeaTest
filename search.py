@@ -40,13 +40,13 @@ torch.cuda.set_device(device_id)
 ckpt_path = saving_path
 
 
-exp_name = 'WaterEnhance_2022-02-27 18:19:45'
+exp_name = 'WaterEnhance_2022-03-09 05:43:49'
 
 args = {
     'gnn': True,
     'snapshot': '200000',  # your snapshot filename (exclude extension name)
     'choice': 8,
-    'layers': 18,
+    'layers': 12,
     'en_channels': [64, 128, 256],
     'dim': 48,
     'log_dir': 'log',

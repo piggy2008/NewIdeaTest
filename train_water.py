@@ -49,7 +49,7 @@ args = {
     'gnn': True,
     'choice': 8,
     # 'choice2': 4,
-    'layers': 18,
+    'layers': 12,
     # 'layers2': 3,
     'en_channels': [64, 128, 256],
     'dim': 48,
@@ -57,10 +57,11 @@ args = {
     'L2': False,
     'KL': True,
     'structure': True,
-    'iter_num': 200000,
+    'iter_num': 300000,
     'iter_save': 4000,
     'iter_start_seq': 0,
-    'train_batch_size': 6,
+    'train_batch_size': 2,
+
     'last_iter': 0,
     'lr': 1e-4,
     'lr_decay': 0.9,
@@ -87,7 +88,7 @@ imgs_file = os.path.join(datasets_root, args['imgs_file'])
 # imgs_file = os.path.join(datasets_root, 'video_saliency/train_all_DAFB3_seq_5f.txt')
 
 joint_transform = joint_transforms.Compose([
-    joint_transforms.ImageResize(args['image_size']),
+    # joint_transforms.ImageResize(args['image_size']),
     joint_transforms.RandomCrop(args['crop_size']),
     joint_transforms.RandomHorizontallyFlip(),
 ])
@@ -156,20 +157,19 @@ def main():
     # vgg.to(device_id).eval()
     # net = warp().cuda(device_id).train()
     remains = []
-    bkbone = []
     for name, param in net.named_parameters():
-        if 'base' in name:
-            # param.requires_grad = False
-            bkbone.append(param)
+        # if 'base' in name:
+        #     # param.requires_grad = False
+        #     bkbone.append(param)
+        # # # elif 'flow' in name or 'linearf' in name or 'decoder' in name:
+        # # #     print('flow related:', name)
+        # # #     flow_modules.append(param)
         # # elif 'flow' in name or 'linearf' in name or 'decoder' in name:
-        # #     print('flow related:', name)
+        # #     print('decoder related:', name)
         # #     flow_modules.append(param)
-        # elif 'flow' in name or 'linearf' in name or 'decoder' in name:
-        #     print('decoder related:', name)
-        #     flow_modules.append(param)
-        else:
-            print('remains:', name)
-            remains.append(param)
+        # else:
+        # print('remains:', name)
+        remains.append(param)
     # fix_parameters(net.named_parameters())
     # optimizer = optim.SGD([
     #     {'params': [param for name, param in net.named_parameters() if name[-4:] == 'bias'],
@@ -178,7 +178,7 @@ def main():
     #      'lr': args['lr'], 'weight_decay': args['weight_decay']}
     # ], momentum=args['momentum'])
 
-    optimizer = optim.Adam([{'params': remains, 'lr': args['lr']}, {'params': bkbone, 'lr': args['lr']}],
+    optimizer = optim.Adam([{'params': remains, 'lr': args['lr']}],
                          betas=(0.9, 0.999))
     # optimizer_d = optim.Adam([{'params': discriminator.parameters()}],
     #                        lr=args['lr'], betas=(0.9, 0.999))
@@ -212,8 +212,8 @@ def train(net, discriminator, optimizer, optimizer_d):
 
             optimizer.param_groups[0]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
                                                                   ) ** args['lr_decay']
-            optimizer.param_groups[1]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
-                                                            ) ** args['lr_decay']
+            # optimizer.param_groups[1]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
+            #                                                 ) ** args['lr_decay']
             # optimizer.param_groups[2]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
             #                                                 ) ** args['lr_decay']
             #

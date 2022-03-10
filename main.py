@@ -41,7 +41,14 @@ def pickup_image(path, dataset):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     print_hi('PyCharm')
+<<<<<<< HEAD
 
+=======
+    import cv2
+    from PIL import Image, ImageCms
+    from matplotlib import pyplot as plt
+    import numpy as np
+>>>>>>> 787313056122dcde63b5b1a912e143554af41a80
     # path = '/home/ty/data/uw/input_train'
     # gt_path = '/home/ty/data/uw/gt_train'
     # depth_path = '/home/ty/data/uw/depth_train'
@@ -62,6 +69,7 @@ if __name__ == '__main__':
     #     image = Image.open(os.path.join(gt_path, img + '.png'))
     #     image.save(os.path.join(save_gt_root, img + '.png'))
     #
+<<<<<<< HEAD
     #     image = Image.open(os.path.join(depth_path, img + '.png_depth_estimate.png'))
     #     image.save(os.path.join(save_depth_root, img + '.png_depth_estimate.png'))
 
@@ -69,7 +77,28 @@ if __name__ == '__main__':
     gt_path = '/home/ty/data/rain/search_gt'
     rain_data(path, gt_path)
 
+=======
+    #     image = Image.open(os.path.join(depth_path, img + '.png'))
+    #     image.save(os.path.join(save_depth_root, img + '.png'))
+    path = '/Users/tangyi/Downloads/segment_train_uw'
+    image_name = '3_img_.bmp'
 
+    fv = cv2.imread(os.path.join(path, 'FV', image_name), 0)
+    hd = cv2.imread(os.path.join(path, 'HD', image_name), 0)
+    ri = cv2.imread(os.path.join(path, 'RI', image_name), 0)
+    ro = cv2.imread(os.path.join(path, 'RO', image_name), 0)
+    wr = cv2.imread(os.path.join(path, 'WR', image_name), 0)
+    con = np.stack((fv, hd, ri ,ro, wr), axis=0)
+    con2 = cv2.resize(fv[:, :, np.newaxis], (112, 112))
+>>>>>>> 787313056122dcde63b5b1a912e143554af41a80
+
+    print(con2.shape, '--', con2.ndim)
+    # con2 = np.flip(con, -1)
+    # plt.subplot(1, 2, 1)
+    # plt.imshow(con2[0, :, :])
+    # plt.subplot(1, 2, 2)
+    # plt.imshow(fv)
+    # plt.show()
     # plt.style.use('classic')
     # img = Image.open('/Users/tangyi/Downloads/Ucolor_final_model_corrected/input_test/15704.png')
     # img_gt = Image.open('/Users/tangyi/Downloads/Ucolor_final_model_corrected/gt_test/15704.png')
