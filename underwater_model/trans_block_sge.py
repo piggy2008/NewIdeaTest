@@ -131,7 +131,7 @@ class TransformerBlock_sge(nn.Module):
         super(TransformerBlock_sge, self).__init__()
 
         self.norm1 = LayerNorm(dim, LayerNorm_type)
-        self.attn = Attention_sge(num_heads, 16)
+        self.attn = Attention_sge(num_heads, 8)
         self.norm2 = LayerNorm(dim, LayerNorm_type)
         self.ffn = FeedForward(dim, ffn_expansion_factor, bias)
 
@@ -146,7 +146,7 @@ if __name__ == '__main__':
     # model = Restormer()
     # output = model(input)
     model2 = nn.Sequential(*[
-        TransformerBlock_sge(dim=int(48), num_heads=1, ffn_expansion_factor=2.66,
+        TransformerBlock_sge(dim=int(48), num_heads=2, ffn_expansion_factor=2.66,
                          bias=False, LayerNorm_type='WithBias') for i in range(1)])
     # model3 = Attention_sa(1, 16, 48)
     output2 = model2(input)

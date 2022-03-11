@@ -134,7 +134,7 @@ if __name__ == '__main__':
     # model = Restormer()
     # output = model(input)
     model2 = nn.Sequential(*[
-        TransformerBlock_eca(dim=int(48), num_heads=1, ffn_expansion_factor=2.66,
+        TransformerBlock_eca(dim=int(48), num_heads=2, ffn_expansion_factor=2.66,
                          bias=False, LayerNorm_type='WithBias') for i in range(1)])
     # model3 = Attention_sa(1, 16, 48)
     output2 = model2(input)
