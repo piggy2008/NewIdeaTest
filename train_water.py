@@ -47,7 +47,7 @@ exp_name = 'WaterEnhance' + '_' + time_str
 
 args = {
     'gnn': True,
-    'choice': 13,
+    'choice': 10,
     # 'choice2': 4,
     'layers': 12,
     # 'layers2': 3,
@@ -233,13 +233,13 @@ def train(net, discriminator, optimizer, optimizer_d):
             if curr_iter % args['iter_save'] == 0:
                 print('taking snapshot ...')
                 torch.save(net.state_dict(), os.path.join(ckpt_path, exp_name, '%d.pth' % curr_iter))
-                torch.save(optimizer.state_dict(),
-                           os.path.join(ckpt_path, exp_name, '%d_optim.pth' % curr_iter))
+                # torch.save(optimizer.state_dict(),
+                #            os.path.join(ckpt_path, exp_name, '%d_optim.pth' % curr_iter))
 
             if curr_iter == args['iter_num']:
                 torch.save(net.state_dict(), os.path.join(ckpt_path, exp_name, '%d.pth' % curr_iter))
-                torch.save(optimizer.state_dict(),
-                           os.path.join(ckpt_path, exp_name, '%d_optim.pth' % curr_iter))
+                # torch.save(optimizer.state_dict(),
+                #            os.path.join(ckpt_path, exp_name, '%d_optim.pth' % curr_iter))
                 return
 
 
