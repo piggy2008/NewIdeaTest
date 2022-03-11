@@ -88,7 +88,6 @@ def get_cand_err(model, cand, args):
         # img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
         img = np.array(img)
         img = cv2.resize(img, (256, 256))
-
         lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
         
         img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
@@ -103,7 +102,7 @@ def get_cand_err(model, cand, args):
         # lab_var = F.pad(lab_var, (0, padw, 0, padh), 'reflect')
         #
         # # temp = (1, 1, 0)
-        prediction = model(img_var, lab_var, cand)
+        prediction, _, _ = model(img_var, lab_var, cand)
         # prediction = prediction[:, :, :h, :w]
 
         # prediction = torch.unsqueeze(prediction, 0)

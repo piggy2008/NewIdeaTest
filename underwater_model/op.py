@@ -478,3 +478,9 @@ class SELayer(nn.Module):
         y = self.fc(y).view(b, c, 1, 1)
         temp = x * y.expand_as(x) + x
         return temp
+
+if __name__ == '__main__':
+    model = sa_layer(32, 4)
+    input = torch.zeros(2, 32, 32, 32)
+    output = model(input)
+    print(output.shape)

@@ -47,7 +47,7 @@ exp_name = 'WaterEnhance' + '_' + time_str
 
 args = {
     'gnn': True,
-    'choice': 8,
+    'choice': 13,
     # 'choice2': 4,
     'layers': 12,
     # 'layers2': 3,
@@ -57,11 +57,10 @@ args = {
     'L2': False,
     'KL': True,
     'structure': True,
-    'iter_num': 300000,
+    'iter_num': 200000,
     'iter_save': 4000,
     'iter_start_seq': 0,
-    'train_batch_size': 2,
-
+    'train_batch_size': 10,
     'last_iter': 0,
     'lr': 1e-4,
     'lr_decay': 0.9,
@@ -71,7 +70,7 @@ args = {
     'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
     # 'imgs_file': '/mnt/hdd/data/ty2',
-    'imgs_file': '/home/ty/data/uw',
+    'imgs_file': '/home/user/ubuntu/data/uw',
     # 'imgs_file': 'Pre-train/pretrain_all_seq_DAFB2_DAVSOD_flow.txt',
     # 'imgs_file2': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB2_DAVSOD_5f.txt',
@@ -267,7 +266,7 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     optimizer.zero_grad()
 
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
-    final = net(rgb, lab, get_random_cand())
+    final, mid_rgb, mid_lab = net(rgb, lab, get_random_cand())
     # fake_image = torch.cat([lab, final], dim=1)
     # pred_fake = discriminator(fake_image)
     # loss_GAN = criterion_gan(pred_fake, True)
@@ -275,20 +274,23 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     loss0 = criterion(final, labels)
     loss1 = criterion_l1(final, labels)
 
-    # loss0_2 = criterion(final2, labels)
-    # loss1_2 = criterion_l1(final2, labels)
+    labels_rgb = F.interpolate(labels, size=mid_rgb.shape[2:], mode='bilinear')
+    labels_lab = F.interpolate(labels_lab, size=mid_rgb.shape[2:], mode='bilinear')
+
+    loss0_2 = criterion(mid_rgb, labels_rgb)
+    loss1_2 = criterion_l1(mid_rgb, labels_rgb)
 
     # loss_mid_ab = criterion(mid_ab, labels_lab)
     # loss_mid_ab = criterion_l1(mid_ab, labels_lab)
 
-    # loss0_lab = criterion(final_lab, labels_lab)
-    # loss1_lab = criterion_l1(final_lab, labels_lab)
+    loss0_lab = criterion(mid_lab, labels_lab)
+    loss1_lab = criterion_l1(mid_lab, labels_lab)
     #
     # loss0_lab3 = criterion(final_lab3, labels_lab3)
     # loss1_lab3 = criterion_l1(final_lab3, labels_lab3)
 
     loss7 = criterion_perceptual(final, labels)
-    # loss7_2 = criterion_perceptual(final2, labels)
+    loss7_2 = criterion_perceptual(mid_rgb, labels_rgb)
     # loss11 = criterion_tv(final)
 
     # loss5 = criterion(final2, labels)
@@ -313,8 +315,9 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # loss2_second = criterion_l1(second, labels_64)
     # total_loss = 1 * loss0 + 0.25 * loss1
     total_loss = 1 * loss0 + 0.25 * loss1  \
-                 + 0.2 * loss7
-                 # + 1 * loss0_2 + 0.25 * loss1_2 + 0.25 * loss7_2 \
+                 + 0.2 * loss7 \
+                 + 1 * loss0_2 + 0.25 * loss1_2 + 0.2 * loss7_2 \
+                 + 1 * loss0_lab + 0.25 * loss1_lab # lab
                  # + loss1_third + 0.25 * loss2_third + loss1_second + 0.25 * loss2_second \
                  # + 0.5 * loss_GAN
     # total_loss = 1 * loss0 + 0.25 * loss1  \
