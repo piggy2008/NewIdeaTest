@@ -121,8 +121,8 @@ def eme(ch, blocksize=8):
 
             block = ch[xlb:xrb, ylb:yrb]
 
-            blockmin = np.float(np.min(block))
-            blockmax = np.float(np.max(block))
+            blockmin = np.float64(np.min(block))
+            blockmax = np.float64(np.max(block))
 
             # # old version
             # if blockmin == 0.0: eme += 0
@@ -171,8 +171,8 @@ def logamee(ch, blocksize=8):
                 yrb = ch.shape[1]
 
             block = ch[xlb:xrb, ylb:yrb]
-            blockmin = np.float(np.min(block))
-            blockmax = np.float(np.max(block))
+            blockmin = np.float64(np.min(block))
+            blockmax = np.float64(np.max(block))
 
             top = plipsub(blockmax, blockmin)
             bottom = plipsum(blockmax, blockmin)
@@ -187,7 +187,7 @@ def logamee(ch, blocksize=8):
 
 
 def main():
-    result_path = sys.argv[1]
+    result_path = 'ckpt/WaterEnhance_2022-03-08 07:09:51/200000/UIEB'
 
     result_dirs = os.listdir(result_path)
 
@@ -213,7 +213,7 @@ def main():
 
     with open(os.path.join(result_path, 'metrics.txt'), 'a') as f:
         f.write('Average: uiqm={} uciqe={}\n'.format(muiqm, muciqe))
-
+    print('Average: uiqm={} uciqe={}\n'.format(muiqm, muciqe))
 
 if __name__ == '__main__':
     main()
