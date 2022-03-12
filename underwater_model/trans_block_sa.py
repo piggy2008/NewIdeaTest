@@ -155,13 +155,12 @@ class TransformerBlock_sa(nn.Module):
         super(TransformerBlock_sa, self).__init__()
 
         self.norm1 = LayerNorm(dim, LayerNorm_type)
-        self.attn = Attention_sa(num_heads, 16, dim)
+        self.attn = Attention_sa(num_heads, 8, int(dim / num_heads))
         self.norm2 = LayerNorm(dim, LayerNorm_type)
         self.ffn = FeedForward(dim, ffn_expansion_factor, bias)
 
     def forward(self, x):
         x = x + self.attn(self.norm1(x))
-        x = x + self.ffn(self.norm2(x))
 
         return x
 
@@ -170,7 +169,7 @@ if __name__ == '__main__':
     # model = Restormer()
     # output = model(input)
     model2 = nn.Sequential(*[
-        TransformerBlock_sa(dim=int(48), num_heads=1, ffn_expansion_factor=2.66,
+        TransformerBlock_sa(dim=int(48), num_heads=2, ffn_expansion_factor=2.66,
                          bias=False, LayerNorm_type='WithBias') for i in range(1)])
     # model3 = Attention_sa(1, 16, 48)
     output2 = model2(input)
