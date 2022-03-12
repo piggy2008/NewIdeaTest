@@ -12,6 +12,7 @@ import sys
 from skimage import io, color, filters
 import os
 import math
+import cv2
 
 
 def nmetrics(a):
@@ -185,6 +186,45 @@ def logamee(ch, blocksize=8):
 
     return plipmult(w, s)
 
+def compute_uiqm(img):
+    # img = cv2.imread('MSRCR_retinex.tif')  # 读取图像
+    b, r, g = cv2.split(img)
+    RG = r - g
+    YB = (r + g) / 2 - b
+    m, n, o = np.shape(img)  # img为三维 rbg为二维 o并未用到
+    K = m * n
+    alpha_L = 0.1
+    alpha_R = 0.1  # 参数α 可调
+    T_alpha_L = math.ceil(alpha_L * K)  # 向上取整 #表示去除区间
+    T_alpha_R = math.floor(alpha_R * K)  # 向下取整
+
+    RG_list = RG.flatten()  # 二维数组转一维（方便计算）
+    RG_list = sorted(RG_list)  # 排序
+    sum_RG = 0  # 计算平均值
+    for i in range(T_alpha_L + 1, K - T_alpha_R):
+        sum_RG = sum_RG + RG_list[i]
+    U_RG = sum_RG / (K - T_alpha_R - T_alpha_L)
+    squ_RG = 0  # 计算方差
+    for i in range(K):
+        squ_RG = squ_RG + np.square(RG_list[i] - U_RG)
+    sigma2_RG = squ_RG / K
+
+    # YB和RG计算一样
+    YB_list = YB.flatten()
+    YB_list = sorted(YB_list)
+    sum_YB = 0
+    for i in range(T_alpha_L + 1, K - T_alpha_R):
+        sum_YB = sum_YB + YB_list[i]
+    U_YB = sum_YB / (K - T_alpha_R - T_alpha_L)
+    squ_YB = 0
+    for i in range(K):
+        squ_YB = squ_YB + np.square(YB_list[i] - U_YB)
+    sigma2_YB = squ_YB / K
+
+    uicm = -0.0268 * np.sqrt(np.square(U_RG) + np.square(U_YB)) + 0.1586 * np.sqrt(sigma2_RG + sigma2_YB)
+    print(uicm)
+    return uicm
+
 
 def main():
     result_path = 'ckpt/WaterEnhance_2022-03-08 07:09:51/200000/UIEB'
@@ -192,17 +232,19 @@ def main():
     result_dirs = os.listdir(result_path)
 
     sumuiqm, sumuciqe = 0., 0.
-
+    sumuicm = 0.
     N = 0
     for imgdir in result_dirs:
         if '.png' in imgdir:
             # corrected image
-            corrected = io.imread(os.path.join(result_path, imgdir))
+            corrected = cv2.imread(os.path.join(result_path, imgdir))
 
             uiqm, uciqe = nmetrics(corrected)
+            uicm = compute_uiqm(corrected)
 
             sumuiqm += uiqm
             sumuciqe += uciqe
+            sumuicm += uicm
             N += 1
 
             with open(os.path.join(result_path, 'metrics.txt'), 'a') as f:
@@ -210,10 +252,13 @@ def main():
 
     muiqm = sumuiqm / N
     muciqe = sumuciqe / N
+    muicm = sumuicm / N
 
-    with open(os.path.join(result_path, 'metrics.txt'), 'a') as f:
-        f.write('Average: uiqm={} uciqe={}\n'.format(muiqm, muciqe))
-    print('Average: uiqm={} uciqe={}\n'.format(muiqm, muciqe))
+    # with open(os.path.join(result_path, 'metrics.txt'), 'a') as f:
+    #     f.write('Average: uiqm={} uciqe={}\n'.format(muiqm, muciqe))
+
+
+    print('Average: uiqm={} uciqe={}, uicm={}\n'.format(muiqm, muciqe, muicm))
 
 if __name__ == '__main__':
     main()
