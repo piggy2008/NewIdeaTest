@@ -25,19 +25,19 @@ class block_choice(nn.Module):
         self.resblock_se = SELayer(n_channels)
         # self.resblock_sa = sa_layer(n_channels, 16)
         # self.conv3 = nn.Conv2d(n_channels, n_channels, kernel_size=3, stride=1, padding=1)
-        self.resblock_trans_normal = nn.Sequential(*[TransformerBlock(dim=int(n_channels), num_heads=1, ffn_expansion_factor=2.66,
+        self.resblock_trans_normal = nn.Sequential(*[TransformerBlock(dim=int(n_channels), num_heads=2, ffn_expansion_factor=2.66,
                          bias=False, LayerNorm_type='WithBias') for i in range(1)])
         self.resblock_trans_dual = nn.Sequential(
-            *[TransformerBlock_dual(dim=int(n_channels), num_heads=1, ffn_expansion_factor=2.66,
+            *[TransformerBlock_dual(dim=int(n_channels), num_heads=2, ffn_expansion_factor=2.66,
                                bias=False, LayerNorm_type='WithBias') for i in range(1)])
         self.resblock_trans_eca = nn.Sequential(
-            *[TransformerBlock_eca(dim=int(n_channels), num_heads=1, ffn_expansion_factor=2.66,
+            *[TransformerBlock_eca(dim=int(n_channels), num_heads=2, ffn_expansion_factor=2.66,
                                     bias=False, LayerNorm_type='WithBias') for i in range(1)])
         self.resblock_trans_sa = nn.Sequential(
-            *[TransformerBlock_sa(dim=int(n_channels), num_heads=1, ffn_expansion_factor=2.66,
+            *[TransformerBlock_sa(dim=int(n_channels), num_heads=2, ffn_expansion_factor=2.66,
                                     bias=False, LayerNorm_type='WithBias') for i in range(1)])
         self.resblock_trans_sge = nn.Sequential(
-            *[TransformerBlock_sge(dim=int(n_channels), num_heads=1, ffn_expansion_factor=2.66,
+            *[TransformerBlock_sge(dim=int(n_channels), num_heads=2, ffn_expansion_factor=2.66,
                                     bias=False, LayerNorm_type='WithBias') for i in range(1)])
 
     def forward(self, x, select):
