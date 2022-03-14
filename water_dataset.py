@@ -87,7 +87,7 @@ class WaterImage2Folder(data.Dataset):
     def __getitem__(self, index):
         img = Image.open(os.path.join(self.root, 'input', self.imgs[index])).convert('RGB')
         target = Image.open(os.path.join(self.root, 'expertC_gt', self.labels[index])).convert('RGB')
-        print(self.imgs[index], '--', self.labels[index])
+        # print(self.imgs[index], '--', self.labels[index])
         img_list = []
         gt_list = []
         img_list.append(img)
