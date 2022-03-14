@@ -76,18 +76,18 @@ class WaterImage2Folder(data.Dataset):
     # image and gt should be in the same folder and have same filename except extended name (jpg and png respectively)
     def __init__(self, root, joint_transform=None, transform=None, target_transform=None):
         self.root = root
-        self.imgs = os.listdir(os.path.join(root, 'input_train_uw'))
+        self.imgs = os.listdir(os.path.join(root, 'input'))
         self.imgs.sort()
-        self.labels = os.listdir(os.path.join(root, 'gt_train_uw'))
+        self.labels = os.listdir(os.path.join(root, 'expertC_gt'))
         self.labels.sort()
         self.joint_transform = joint_transform
         self.transform = transform
         self.target_transform = target_transform
 
     def __getitem__(self, index):
-        img = Image.open(os.path.join(self.root, 'input_train_uw', self.imgs[index])).convert('RGB')
-        target = Image.open(os.path.join(self.root, 'gt_train_uw', self.labels[index])).convert('RGB')
-
+        img = Image.open(os.path.join(self.root, 'input', self.imgs[index])).convert('RGB')
+        target = Image.open(os.path.join(self.root, 'expertC_gt', self.labels[index])).convert('RGB')
+        print(self.imgs[index], '--', self.labels[index])
         img_list = []
         gt_list = []
         img_list.append(img)
@@ -244,7 +244,7 @@ if __name__ == '__main__':
     target_transform = transforms.ToTensor()
     input_size = (200, 200)
 
-    train_set2 = WaterImage3Folder('/home/ty/data/uw',
+    train_set2 = WaterImage3Folder('/home/user/ubuntu/data/5k/train',
                                   joint_transform, img_transform, target_transform)
 
     train_loader = DataLoader(train_set2, batch_size=6, num_workers=1, shuffle=True)
@@ -259,8 +259,8 @@ if __name__ == '__main__':
         # data1, data2 = data
         # inputs, flows, labels, inputs2, labels2 = data
         # data2 = next(dataloader_iterator)
-        rgb, hsv, lab, target, target_lab, segmentation = data
-        print(segmentation.shape)
+        rgb, hsv, lab, target, lab_target = data
+        print(rgb.shape)
         # texture_features = get_features(rgb, vgg)
         # target_features = get_features(target, vgg)
         #
