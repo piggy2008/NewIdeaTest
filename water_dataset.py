@@ -232,10 +232,10 @@ if __name__ == '__main__':
 
     import joint_transforms
     from torch.utils.data import DataLoader
-    joint_transform = joint_transforms.Compose_single([
-        joint_transforms.ImageResize_numpy(256),
-        joint_transforms.RandomCrop_numpy(224),
-        joint_transforms.RandomHorizontallyFlip_numpy(),
+    joint_transform = joint_transforms.Compose([
+        # joint_transforms.ImageResize(256),
+        joint_transforms.RandomCrop(256),
+        joint_transforms.RandomHorizontallyFlip(),
     ])
 
     img_transform = transforms.Compose([
