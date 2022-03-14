@@ -244,7 +244,7 @@ if __name__ == '__main__':
     target_transform = transforms.ToTensor()
     input_size = (200, 200)
 
-    train_set2 = WaterImage3Folder('/home/user/ubuntu/data/5k/train',
+    train_set2 = WaterImage2Folder('/home/user/ubuntu/data/5k/train',
                                   joint_transform, img_transform, target_transform)
 
     train_loader = DataLoader(train_set2, batch_size=6, num_workers=1, shuffle=True)
