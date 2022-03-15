@@ -57,7 +57,8 @@ args = {
     'L2': False,
     'KL': True,
     'structure': True,
-    'iter_num': 200000,
+    'iter_num': 100000,
+    'iter_num2': 200000,
     'iter_save': 4000,
     'iter_start_seq': 0,
     'train_batch_size': 10,
@@ -79,7 +80,7 @@ args = {
     # 'train_loader': 'flow_image3',
     # 'train_loader': 'video_sequence'
     'image_size': 320,
-    'crop_size': 256,
+    'crop_size': [256, 320],
     # 'self_distill': 0.1,
     # 'teacher_distill': 0.6
 }
@@ -89,19 +90,20 @@ imgs_file = os.path.join(datasets_root, args['imgs_file'])
 
 joint_transform = joint_transforms.Compose([
     # joint_transforms.ImageResize(args['image_size']),
-    joint_transforms.RandomCrop(args['crop_size']),
+    joint_transforms.RandomCrop(args['crop_size'][0]),
     joint_transforms.RandomHorizontallyFlip(),
 ])
 
-
-
+joint_transform2 = joint_transforms.Compose([
+    # joint_transforms.ImageResize(args['image_size']),
+    joint_transforms.RandomCrop(args['crop_size'][1]),
+    joint_transforms.RandomHorizontallyFlip(),
+])
 # joint_transform = joint_transforms.Compose_single([
 #     joint_transforms.ImageResize_numpy(args['image_size']),
 #     joint_transforms.RandomCrop_numpy(args['crop_size']),
 #     joint_transforms.RandomHorizontallyFlip_numpy(),
 # ])
-
-input_size = (473, 473)
 
 img_transform = transforms.Compose([
     transforms.ToTensor(),
@@ -111,8 +113,10 @@ target_transform = transforms.ToTensor()
 
 # train_set = ImageFolder(msra10k_path, joint_transform, img_transform, target_transform)
 train_set = WaterImage2Folder(args['imgs_file'], joint_transform, img_transform, target_transform)
-# train_set = WaterImage4Folder(args['imgs_file'], 256)
 train_loader = DataLoader(train_set, batch_size=args['train_batch_size'], num_workers=4, shuffle=True)
+
+train_set2 = WaterImage2Folder(args['imgs_file'], joint_transform2, img_transform, target_transform)
+train_loader2 = DataLoader(train_set2, batch_size=args['train_batch_size']-2, num_workers=4, shuffle=True)
 # if train_set2 is not None:
 #     train_loader2 = DataLoader(train_set2, batch_size=args['train_batch_size'], num_workers=4, shuffle=True)
 
@@ -200,14 +204,12 @@ def main():
     check_mkdir(os.path.join(ckpt_path, exp_name))
     open(log_path, 'w').write(str(args) + '\n\n')
     train(net, None, optimizer, None)
+    train2(net, None, optimizer, None)
 
 
 def train(net, discriminator, optimizer, optimizer_d):
     curr_iter = args['last_iter']
     while True:
-
-        # loss3_record = AvgMeter()
-        # dataloader_iterator = iter(train_loader2)
         for i, data in enumerate(train_loader):
 
             optimizer.param_groups[0]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
@@ -215,19 +217,8 @@ def train(net, discriminator, optimizer, optimizer_d):
             # optimizer.param_groups[1]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
             #                                                 ) ** args['lr_decay']
             # optimizer.param_groups[2]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
-            #                                                 ) ** args['lr_decay']
-            #
-            # optimizer.param_groups[3]['lr'] = 0.1 * args['lr'] * (1 - float(curr_iter) / args['iter_num']
-            #                                                 ) ** args['lr_decay']
-            #
-            # inputs, flows, labels, pre_img, pre_lab, cur_img, cur_lab, next_img, next_lab = data
+
             rgb, hsv, lab, target, lab_target = data
-            # rgb, lab = data
-            # data2 = next(dataloader_iterator)
-            # inputs2, labels2 = data2
-            # train_single(net, inputs, flows, labels, optimizer, curr_iter, teacher)
-
-
             train_single2(net, None, rgb, lab, target, lab_target, None, optimizer, None, curr_iter)
             curr_iter += 1
 
@@ -238,6 +229,34 @@ def train(net, discriminator, optimizer, optimizer_d):
                 #            os.path.join(ckpt_path, exp_name, '%d_optim.pth' % curr_iter))
 
             if curr_iter == args['iter_num']:
+                torch.save(net.state_dict(), os.path.join(ckpt_path, exp_name, '%d.pth' % curr_iter))
+                # torch.save(optimizer.state_dict(),
+                #            os.path.join(ckpt_path, exp_name, '%d_optim.pth' % curr_iter))
+                return
+
+
+def train2(net, discriminator, optimizer, optimizer_d):
+    curr_iter = args['iter_num']
+    while True:
+        for i, data in enumerate(train_loader2):
+
+            optimizer.param_groups[0]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
+                                                            ) ** args['lr_decay']
+            # optimizer.param_groups[1]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
+            #                                                 ) ** args['lr_decay']
+            # optimizer.param_groups[2]['lr'] = args['lr'] * (1 - float(curr_iter) / args['iter_num']
+
+            rgb, hsv, lab, target, lab_target = data
+            train_single2(net, None, rgb, lab, target, lab_target, None, optimizer, None, curr_iter)
+            curr_iter += 1
+
+            if curr_iter % args['iter_save'] == 0:
+                print('taking snapshot ...')
+                torch.save(net.state_dict(), os.path.join(ckpt_path, exp_name, '%d.pth' % curr_iter))
+                # torch.save(optimizer.state_dict(),
+                #            os.path.join(ckpt_path, exp_name, '%d_optim.pth' % curr_iter))
+
+            if curr_iter == args['iter_num2']:
                 torch.save(net.state_dict(), os.path.join(ckpt_path, exp_name, '%d.pth' % curr_iter))
                 # torch.save(optimizer.state_dict(),
                 #            os.path.join(ckpt_path, exp_name, '%d_optim.pth' % curr_iter))

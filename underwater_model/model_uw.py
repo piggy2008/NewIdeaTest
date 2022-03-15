@@ -68,19 +68,19 @@ class Water(nn.Module):
         return final, mid_rgb, mid_lab
 
 if __name__ == '__main__':
-    a = torch.zeros(2, 3, 256, 256)
+    a = torch.zeros(2, 3, 128, 128)
     b = torch.zeros(2, 128, 1, 1)
 
-    model = Water(48)
-    # r = model(a, a, [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5])
+    model = Water(64)
+    r = model(a, a, [5])
     # print(r1.shape, '--', r2.shape, '--', r3.shape)
     # c = torch.zeros(2, 128, 16, 16)
     # global_rct = GlobalRCT(128, 128, 8)
-    from torchstat import stat
+    # from torchstat import stat
+    #
+    # stat(model, (3, 256, 256))
 
-    stat(model, (3, 256, 256))
-
-    # print(r.shape)
+    print(r[0].shape)
 
 
 

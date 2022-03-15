@@ -238,6 +238,12 @@ if __name__ == '__main__':
         joint_transforms.RandomHorizontallyFlip(),
     ])
 
+    joint_transform2 = joint_transforms.Compose([
+        # joint_transforms.ImageResize(256),
+        joint_transforms.RandomCrop(128),
+        joint_transforms.RandomHorizontallyFlip(),
+    ])
+
     img_transform = transforms.Compose([
         transforms.ToTensor(),
     ])
@@ -247,7 +253,11 @@ if __name__ == '__main__':
     train_set2 = WaterImage2Folder('/Users/tangyi/mycode/5k/eval',
                                   joint_transform, img_transform, target_transform)
 
-    train_loader = DataLoader(train_set2, batch_size=6, num_workers=1, shuffle=False)
+    train_loader = DataLoader(train_set2, batch_size=2, num_workers=1, shuffle=False)
+    train_set3 = WaterImage2Folder('/Users/tangyi/mycode/5k/eval',
+                                   joint_transform2, img_transform, target_transform)
+
+    train_loader2 = DataLoader(train_set3, batch_size=4, num_workers=1, shuffle=False)
     # train_loader2 = DataLoader(train_set2, batch_size=6, num_workers=4, shuffle=True)
     # dataloader_iterator = iter(train_loader2)
     # vgg = models.vgg19(pretrained=True).features
@@ -292,3 +302,8 @@ if __name__ == '__main__':
         # plt.show()
         # print(lab.size())
         # print(depth.size())
+
+    # for j, data in enumerate(train_loader2):
+    #     print('j=', j)
+    #     rgb, hsv, lab, target, lab_target = data
+    #     print(rgb.shape)
