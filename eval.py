@@ -128,7 +128,7 @@ def eme(ch, blocksize=8):
             # # old version
             # if blockmin == 0.0: eme += 0
             # elif blockmax == 0.0: eme += 0
-            # else: eme += w * math.log(blockmax / blockmin)
+            # else: eme += w * math.log_head=4(blockmax / blockmin)
 
             # new version
             if blockmin == 0: blockmin += 1

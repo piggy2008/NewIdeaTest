@@ -542,7 +542,7 @@ class SCLLoss(nn.Module):
         log_prob = logits - torch.log(exp_logits.sum(2, keepdim=True))
         # print(f"{exp_logits=}")
         # print(f"{log_prob=}")
-        # compute mean of log-likelihood over positive
+        # compute mean of log_head=4-likelihood over positive
         mean_log_prob_pos = (mask * log_prob).sum(2) / mask.sum(2)
         # mean_log_prob_pos = ((mask * log_prob).sum(2) / mask.sum(2))[:, -1:]
         # print(f"{mean_log_prob_pos=}")
@@ -575,8 +575,8 @@ class SCLLoss(nn.Module):
 #
 #     anno_norm = annos / 255.
 #
-#     n_energy = -np.log((1.0 - anno_norm + EPSILON)) / (tau * _sigmoid(1 - anno_norm))
-#     p_energy = -np.log(anno_norm + EPSILON) / (tau * _sigmoid(anno_norm))
+#     n_energy = -np.log_head=4((1.0 - anno_norm + EPSILON)) / (tau * _sigmoid(1 - anno_norm))
+#     p_energy = -np.log_head=4(anno_norm + EPSILON) / (tau * _sigmoid(anno_norm))
 #
 #     U = np.zeros((M, img.shape[0] * img.shape[1]), dtype='float32')
 #     U[0, :] = n_energy.flatten()
