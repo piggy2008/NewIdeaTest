@@ -56,7 +56,7 @@ class Water(nn.Module):
         level4 = self.align4(torch.cat([level4_rgb, level4_lab], dim=1))
 
         mid_feat = self.search(level4, level3, level2, level1)
-        mid_feat = self.refine(mid_feat)
+        mid_feat = self.refine(mid_feat) + mid_feat
 
         mid_rgb = self.de_predict_rgb(level4)
         mid_lab = self.de_predict_rgb(level4)
