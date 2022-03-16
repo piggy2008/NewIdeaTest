@@ -57,11 +57,11 @@ args = {
     'L2': False,
     'KL': True,
     'structure': True,
-    'iter_num': 100000,
-    'iter_num2': 200000,
+    'iter_num': 80000,
+    'iter_num2': 12000,
     'iter_save': 4000,
     'iter_start_seq': 0,
-    'train_batch_size': 2,
+    'train_batch_size': 3,
     'last_iter': 0,
     'lr': 1e-4,
     'lr_decay': 0.9,
@@ -203,7 +203,7 @@ def main():
     check_mkdir(os.path.join(ckpt_path, exp_name))
     open(log_path, 'w').write(str(args) + '\n\n')
     train(net, None, optimizer, None)
-    train2(net, None, optimizer, None)
+    # train2(net, None, optimizer, None)
 
 
 def train(net, discriminator, optimizer, optimizer_d):
