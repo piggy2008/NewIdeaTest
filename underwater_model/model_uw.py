@@ -6,6 +6,7 @@ from underwater_model.base_uw import Base
 # from underwater_model.base_dark import Base
 from underwater_model.search_net_uw import Search
 from underwater_model.trans_block_dual import TransformerBlock_dual
+from underwater_model.op import *
 
 class Water(nn.Module):
     def __init__(self, dim):
@@ -27,9 +28,7 @@ class Water(nn.Module):
 
         self.search = Search(dim)
 
-        self.refine = nn.Sequential(
-            *[TransformerBlock_dual(dim=int(dim * 2 ** 1), num_heads=2, ffn_expansion_factor=2.66,
-                               bias=False, LayerNorm_type='WithBias') for i in range(1)])
+        self.refine = DilConv(dim * 2 ** 1, dim * 2 ** 1, 3, 1, 4, 4, affine=True, upsample=False)
 
         self.de_predict = nn.Sequential(nn.Conv2d(dim * 2 ** 1, 3, kernel_size=1, stride=1))
 
