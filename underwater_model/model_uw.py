@@ -6,6 +6,7 @@ from underwater_model.base_uw import Base
 # from underwater_model.base_dark import Base
 from underwater_model.search_net_uw import Search
 from underwater_model.trans_block_dual import TransformerBlock_dual
+from underwater_model.op import *
 
 class Water(nn.Module):
     def __init__(self, dim):
@@ -27,9 +28,7 @@ class Water(nn.Module):
 
         self.search = Search(dim)
 
-        self.refine = nn.Sequential(
-            *[TransformerBlock_dual(dim=int(dim * 2 ** 1), num_heads=2, ffn_expansion_factor=2.66,
-                               bias=False, LayerNorm_type='WithBias') for i in range(1)])
+        self.refine = DilConv(dim * 2 ** 1, dim * 2 ** 1, 3, 1, 4, 4, affine=True, upsample=False)
 
         self.de_predict = nn.Sequential(nn.Conv2d(dim * 2 ** 1, 3, kernel_size=1, stride=1))
 
@@ -68,19 +67,19 @@ class Water(nn.Module):
         return final, mid_rgb, mid_lab
 
 if __name__ == '__main__':
-    a = torch.zeros(2, 3, 256, 256)
+    a = torch.zeros(2, 3, 128, 128)
     b = torch.zeros(2, 128, 1, 1)
 
-    model = Water(48)
-    # r = model(a, a, [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5])
+    model = Water(64)
+    r = model(a, a, [5])
     # print(r1.shape, '--', r2.shape, '--', r3.shape)
     # c = torch.zeros(2, 128, 16, 16)
     # global_rct = GlobalRCT(128, 128, 8)
-    from torchstat import stat
+    # from torchstat import stat
+    #
+    # stat(model, (3, 256, 256))
 
-    stat(model, (3, 256, 256))
-
-    # print(r.shape)
+    print(r[0].shape)
 
 
 

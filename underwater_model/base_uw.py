@@ -39,20 +39,24 @@ class Base(nn.Module):
 
 
 
-        self.block1_rgb = Identity(False)
+        self.block1_rgb = DoubleAttentionLayer(dim, dim, dim)
         self.block2_rgb = nn.Sequential(
             *[TransformerBlock_dual(dim=int(dim*2**1), num_heads=2, ffn_expansion_factor=2.66,
                                bias=False, LayerNorm_type='WithBias') for i in range(1)])
-        self.block3_rgb = Conv(dim*2**2, dim*2**2, 3, 1, 1, affine=True, upsample=False)
+        self.block3_rgb = nn.Sequential(
+            *[TransformerBlock_dual(dim=int(dim*2**2), num_heads=2, ffn_expansion_factor=2.66,
+                               bias=False, LayerNorm_type='WithBias') for i in range(1)])
         self.block4_rgb = nn.Sequential(*[TransformerBlock(dim=int(dim*2**3), num_heads=2, ffn_expansion_factor=2.66,
                          bias=False, LayerNorm_type='WithBias') for i in range(1)])
 
-        self.block1_lab = Conv(dim, dim, 3, 1, 1, affine=True, upsample=False)
-        self.block2_lab = SELayer(dim * 2 ** 1)
-        self.block3_lab = nn.Sequential(
-            *[TransformerBlock_sa(dim=int(dim * 2 ** 2), num_heads=2, ffn_expansion_factor=2.66,
+        self.block1_lab = SELayer(dim)
+        self.block2_lab = nn.Sequential(
+            *[TransformerBlock_sge(dim=int(dim * 2 ** 1), num_heads=2, ffn_expansion_factor=2.66,
                                     bias=False, LayerNorm_type='WithBias') for i in range(1)])
-        self.block4_lab = DoubleAttentionLayer(dim * 2 ** 3, dim * 2 ** 3, dim * 2 ** 3)
+        self.block3_lab = nn.Sequential(
+            *[TransformerBlock_sge(dim=int(dim * 2 ** 2), num_heads=2, ffn_expansion_factor=2.66,
+                                    bias=False, LayerNorm_type='WithBias') for i in range(1)])
+        self.block4_lab = DilConv(dim * 2 ** 3, dim * 2 ** 3, 3, 1, 4, 4, affine=True, upsample=False)
     def forward(self, rgb, lab):
         x_rgb = self.conv1_rgb(rgb)
         x_rgb = self.block1_rgb(x_rgb) + x_rgb
