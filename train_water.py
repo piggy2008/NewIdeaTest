@@ -15,7 +15,7 @@ import contextual_loss as cl
 import joint_transforms
 from config import msra10k_path, video_train_path, datasets_root, video_seq_gt_path, video_seq_path, saving_path
 from water_dataset import WaterImageFolder, WaterImage2Folder, WaterImage3Folder, WaterImage4Folder
-from underwater_model.model_uw import Water
+from underwater_model.model_SPOS import Water
 from underwater_model.discriminator import Discriminator, PatchDiscriminator
 
 from misc import AvgMeter, check_mkdir, VGGPerceptualLoss, Lab_Loss, GANLoss, VGG19_PercepLoss
@@ -57,8 +57,8 @@ args = {
     'L2': False,
     'KL': True,
     'structure': True,
-    'iter_num': 80000,
-    'iter_num2': 12000,
+    'iter_num': 200000,
+    # 'iter_num2': 200000,
     'iter_save': 4000,
     'iter_start_seq': 0,
     'train_batch_size': 3,
@@ -71,7 +71,7 @@ args = {
     'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
     # 'imgs_file': '/mnt/hdd/data/ty2',
-    'imgs_file': '/home/ty/data/uw',
+    'imgs_file': '/home/ty/data/LSUI',
     # 'imgs_file': 'Pre-train/pretrain_all_seq_DAFB2_DAVSOD_flow.txt',
     # 'imgs_file2': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB2_DAVSOD_5f.txt',
@@ -285,7 +285,8 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     optimizer.zero_grad()
 
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
-    final, mid_rgb, mid_lab = net(rgb, lab, get_random_cand())
+    # final, mid_rgb, mid_lab = net(rgb, lab, get_random_cand())
+    final, mid_rgb, mid_lab = net(rgb, lab, [3, 6, 6, 5, 0, 9, 9, 1, 3, 6, 6, 1])
     # fake_image = torch.cat([lab, final], dim=1)
     # pred_fake = discriminator(fake_image)
     # loss_GAN = criterion_gan(pred_fake, True)
