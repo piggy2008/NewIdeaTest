@@ -59,6 +59,7 @@ class Base(nn.Module):
         self.block4_lab = DilConv(dim * 2 ** 3, dim * 2 ** 3, 3, 1, 4, 4, affine=True, upsample=False)
     def forward(self, rgb, lab):
         x_rgb = self.conv1_rgb(rgb)
+        x_rgb_in = x_rgb
         x_rgb = self.block1_rgb(x_rgb) + x_rgb
         # x_rgb = self.block1_2(x_rgb, select[1])
 
@@ -76,6 +77,7 @@ class Base(nn.Module):
         # x_rgb3 = F.max_pool2d(x_rgb3, kernel_size=3, stride=2, padding=1)
 
         x_lab = self.conv1_lab(lab)
+        x_lab_in = x_lab
         x_lab = self.block1_lab(x_lab) + x_lab
         # x_lab = self.block1_2(x_lab, select[8])
 
@@ -92,4 +94,4 @@ class Base(nn.Module):
 
         # return x_rgb, x_lab, x_rgb2, x_lab2, \
         #        x_rgb3, x_lab3
-        return x_rgb, x_rgb2, x_rgb3, x_rgb4, x_lab, x_lab2, x_lab3, x_lab4
+        return x_rgb, x_rgb2, x_rgb3, x_rgb4, x_lab, x_lab2, x_lab3, x_lab4, x_rgb_in, x_lab_in
