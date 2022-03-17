@@ -78,7 +78,7 @@ class WaterImage2Folder(data.Dataset):
         self.root = root
         self.imgs = os.listdir(os.path.join(root, 'input'))
         self.imgs.sort()
-        self.labels = os.listdir(os.path.join(root, 'expectC_gt'))
+        self.labels = os.listdir(os.path.join(root, 'expertC_gt'))
         self.labels.sort()
         self.joint_transform = joint_transform
         self.transform = transform
@@ -86,7 +86,7 @@ class WaterImage2Folder(data.Dataset):
 
     def __getitem__(self, index):
         img = Image.open(os.path.join(self.root, 'input', self.imgs[index])).convert('RGB')
-        target = Image.open(os.path.join(self.root, 'expectC_gt', self.labels[index])).convert('RGB')
+        target = Image.open(os.path.join(self.root, 'expertC_gt', self.labels[index])).convert('RGB')
         # print(self.imgs[index], '--', self.labels[index])
         img_list = []
         gt_list = []
