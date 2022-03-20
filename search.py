@@ -43,7 +43,7 @@ exp_name = 'WaterEnhance_2022-03-14 03:19:44'
 
 args = {
     'gnn': True,
-    'snapshot': '140000',  # your snapshot filename (exclude extension name)
+    'snapshot': '200000',  # your snapshot filename (exclude extension name)
     'choice': 10,
     'layers': 12,
     'en_channels': [64, 128, 256],

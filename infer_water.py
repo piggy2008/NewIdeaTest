@@ -32,11 +32,11 @@ torch.cuda.set_device(device_id)
 ckpt_path = saving_path
 
 
-exp_name = 'WaterEnhance_2022-03-14 03:19:44'
+exp_name = 'WaterEnhance_2022-03-17 14:53:21'
 
 args = {
     'gnn': True,
-    'snapshot': '144000',  # your snapshot filename (exclude extension name)
+    'snapshot': '140000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
     'en_channels': [64, 128, 256],
@@ -48,12 +48,12 @@ args = {
     # 'gt_path': '/mnt/hdd/data/ty2/gt_test',
     'image_path': '/home/ty/data/5k/eval/input',
     'depth_path': '/home/ty/data/LSUI/depth_test',
-    'gt_path': '/home/ty/data/5k/eval/expertC_gt',
+    'gt_path': '/home/ty/data/5k/eval/gt',
     'segment_path': '/home/ty/data/uw/segment_input_test',
     'dataset': '5k',
     'start': 0
 }
-
+# 3, 6, 6, 5, 0, 9, 9, 1, 3, 6, 6, 1 underwater
 img_transform = transforms.Compose([
     transforms.ToTensor()
 ])
@@ -109,7 +109,7 @@ def main(snapshot):
             # precision_record, recall_record, = [AvgMeter() for _ in range(256)], [AvgMeter() for _ in range(256)]
 
             # img_list = [i_id.strip() for i_id in open(imgs_path)]
-
+            # print(args['image_path'], name + '.jpg')
             img = Image.open(os.path.join(args['image_path'], name + '.jpg')).convert('RGB')
             img = np.array(img)
 
