@@ -14,8 +14,8 @@ class Water(nn.Module):
 
         self.base = Base(dim)
 
-        self.align1_in = nn.Sequential(nn.Conv2d(dim * 2, dim, kernel_size=3, stride=1, padding=1),
-                                    nn.ReLU(inplace=True))
+        # self.align1_in = nn.Sequential(nn.Conv2d(dim * 2, dim, kernel_size=3, stride=1, padding=1),
+        #                             nn.ReLU(inplace=True))
 
         self.align1 = nn.Sequential(nn.Conv2d(dim * 2, dim, kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
@@ -33,7 +33,7 @@ class Water(nn.Module):
 
         self.refine = DilConv(dim * 2 ** 1, dim * 2 ** 1, 3, 1, 4, 4, affine=True, upsample=False)
 
-        self.skip = nn.Sequential(nn.Conv2d(dim, dim * 2 ** 1, kernel_size=1, stride=1))
+        # self.skip = nn.Sequential(nn.Conv2d(dim, dim * 2 ** 1, kernel_size=1, stride=1))
 
         self.de_predict = nn.Sequential(nn.Conv2d(dim * 2 ** 1, 3, kernel_size=1, stride=1))
 
@@ -51,7 +51,7 @@ class Water(nn.Module):
 
         # inter_rgb = F.interpolate(self.de_predict_rgb(third_rgb), rgb.size()[2:], mode='bilinear')
         # inter_lab = F.interpolate(self.de_predict_lab(third_lab), lab.size()[2:], mode='bilinear')
-        level1_in = self.align1(torch.cat([x_rgb_in, x_lab_in], dim=1))
+        # level1_in = self.align1(torch.cat([x_rgb_in, x_lab_in], dim=1))
 
         level1 = self.align1(torch.cat([level1_rgb, level1_lab], dim=1))
         # first = self.align1(first_lab)
@@ -64,12 +64,12 @@ class Water(nn.Module):
         mid_feat = self.search(level4, level3, level2, level1)
         mid_feat = self.refine(mid_feat) + mid_feat
 
-        output_feat = self.skip(level1_in) + mid_feat
+        # output_feat = self.skip(level1_in) + mid_feat
 
         mid_rgb = self.de_predict_rgb(level4)
         mid_lab = self.de_predict_rgb(level4)
 
-        final = self.de_predict(output_feat)
+        final = self.de_predict(mid_feat)
 
 
         return final, mid_rgb, mid_lab

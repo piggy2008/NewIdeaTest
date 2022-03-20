@@ -15,7 +15,7 @@ import contextual_loss as cl
 import joint_transforms
 from config import msra10k_path, video_train_path, datasets_root, video_seq_gt_path, video_seq_path, saving_path
 from water_dataset import WaterImageFolder, WaterImage2Folder, WaterImage3Folder, WaterImage4Folder
-from underwater_model.model_SPOS import Water
+from underwater_model.model_uw import Water
 from underwater_model.discriminator import Discriminator, PatchDiscriminator
 
 from misc import AvgMeter, check_mkdir, VGGPerceptualLoss, Lab_Loss, GANLoss, VGG19_PercepLoss
