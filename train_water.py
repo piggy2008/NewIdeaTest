@@ -47,7 +47,7 @@ exp_name = 'WaterEnhance' + '_' + time_str
 
 args = {
     'gnn': True,
-    'choice': 10,
+    'choice': 5,
     # 'choice2': 4,
     'layers': 12,
     # 'layers2': 3,
@@ -285,8 +285,8 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     optimizer.zero_grad()
 
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
-    # final, mid_rgb, mid_lab = net(rgb, lab, get_random_cand())
-    final, mid_rgb, mid_lab = net(rgb, lab, [3, 6, 6, 5, 0, 9, 9, 1, 3, 6, 6, 1])
+    final, mid_rgb, mid_lab = net(rgb, lab, get_random_cand())
+    # final, mid_rgb, mid_lab = net(rgb, lab, [9, 5, 5, 1, 5, 3, 9, 6, 3, 5, 4, 6])
     # fake_image = torch.cat([lab, final], dim=1)
     # pred_fake = discriminator(fake_image)
     # loss_GAN = criterion_gan(pred_fake, True)
@@ -334,10 +334,10 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # loss1_second = criterion(second, labels_64)
     # loss2_second = criterion_l1(second, labels_64)
     # total_loss = 1 * loss0 + 0.25 * loss1
-    total_loss = 1 * loss0 + 0.25 * loss1  \
+    total_loss = 0.1 * loss0 + 1 * loss1  \
                  + 0.2 * loss7 \
-                 + 1 * loss0_2 + 0.25 * loss1_2 + 0.2 * loss7_2 \
-                 + 1 * loss0_lab + 0.25 * loss1_lab # lab
+                 + 0.1 * loss0_2 + 1 * loss1_2 + 0.2 * loss7_2 \
+                 + 0.1 * loss0_lab + 1 * loss1_lab # lab
                  # + loss1_third + 0.25 * loss2_third + loss1_second + 0.25 * loss2_second \
                  # + 0.5 * loss_GAN
     # total_loss = 1 * loss0 + 0.25 * loss1  \
