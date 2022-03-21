@@ -333,10 +333,10 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # loss1_second = criterion(second, labels_64)
     # loss2_second = criterion_l1(second, labels_64)
     # total_loss = 1 * loss0 + 0.25 * loss1
-    total_loss = 0.1 * loss0 + 1 * loss1  \
+    total_loss = 1 * loss0 + 0.25 * loss1  \
                  + 0.2 * loss7 \
-                 + 0.1 * loss0_2 + 1 * loss1_2 + 0.2 * loss7_2 \
-                 + 0.1 * loss0_lab + 1 * loss1_lab # lab
+                 + 1 * loss0_2 + 0.25 * loss1_2 + 0.2 * loss7_2 \
+                 + 1 * loss0_lab + 0.25 * loss1_lab # lab
                  # + loss1_third + 0.25 * loss2_third + loss1_second + 0.25 * loss2_second \
                  # + 0.5 * loss_GAN
     # total_loss = 1 * loss0 + 0.25 * loss1  \
