@@ -54,18 +54,18 @@ if __name__ == '__main__':
     #
     #     image = Image.open(os.path.join(depth_path, img + '.png'))
     #     image.save(os.path.join(save_depth_root, img + '.png'))
-    path = '/Users/tangyi/Downloads/segment_train_uw'
-    image_name = '3_img_.bmp'
-
-    fv = cv2.imread(os.path.join(path, 'FV', image_name), 0)
-    hd = cv2.imread(os.path.join(path, 'HD', image_name), 0)
-    ri = cv2.imread(os.path.join(path, 'RI', image_name), 0)
-    ro = cv2.imread(os.path.join(path, 'RO', image_name), 0)
-    wr = cv2.imread(os.path.join(path, 'WR', image_name), 0)
-    con = np.stack((fv, hd, ri ,ro, wr), axis=0)
-    con2 = cv2.resize(fv[:, :, np.newaxis], (112, 112))
-
-    print(con2.shape, '--', con2.ndim)
+    # path = '/Users/tangyi/Downloads/segment_train_uw'
+    # image_name = '3_img_.bmp'
+    #
+    # fv = cv2.imread(os.path.join(path, 'FV', image_name), 0)
+    # hd = cv2.imread(os.path.join(path, 'HD', image_name), 0)
+    # ri = cv2.imread(os.path.join(path, 'RI', image_name), 0)
+    # ro = cv2.imread(os.path.join(path, 'RO', image_name), 0)
+    # wr = cv2.imread(os.path.join(path, 'WR', image_name), 0)
+    # con = np.stack((fv, hd, ri ,ro, wr), axis=0)
+    # con2 = cv2.resize(fv[:, :, np.newaxis], (112, 112))
+    #
+    # print(con2.shape, '--', con2.ndim)
     # con2 = np.flip(con, -1)
     # plt.subplot(1, 2, 1)
     # plt.imshow(con2[0, :, :])
@@ -110,4 +110,38 @@ if __name__ == '__main__':
     # plt.subplot(1, 3, 3)
     # plt.imshow(b)
     # plt.show()
+
+    path1 = '/Users/tangyi/Downloads/Ucolor_final_model_corrected/input_test2'
+    path2 = '/Users/tangyi/Downloads/Ucolor_final_model_corrected/real_90_input'
+    img1 = os.listdir(path1)
+    img1.sort()
+    img2 = os.listdir(path2)
+    img2.sort()
+    test_list = []
+    for img in img1:
+        image = cv2.imread(os.path.join(path1, img))
+        img_dict = {}
+        img_dict['name'] = img
+        img_dict['shape'] = image.shape
+        img_dict['image'] = image[:25, :25, 0]
+        test_list.append(img_dict)
+
+    total_list = []
+    for img in img2:
+        image = cv2.imread(os.path.join(path2, img))
+        img_dict = {}
+        img_dict['name'] = img
+        img_dict['shape'] = image.shape
+        img_dict['image'] = image[:25, :25, 0]
+        total_list.append(img_dict)
+
+    for dict in test_list:
+        shape = dict['shape']
+        for dict_total in total_list:
+            total_shape = dict_total['shape']
+            if shape == total_shape:
+                image = dict['image']
+                image_total = dict_total['image']
+                if (image_total - image) == 0:
+                    print(dict['name'], '-----', dict_total['name'])
 
