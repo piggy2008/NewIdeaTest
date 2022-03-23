@@ -71,4 +71,4 @@ class block_choice(nn.Module):
         elif select == 9:
             out = self.resblock_trans_sge(x)
         # out = self.conv3(out)
-        return out
+        return out + x
