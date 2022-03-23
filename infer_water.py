@@ -15,7 +15,7 @@ from utils.utils_mine import load_part_of_model2, MaxMinNormalization, calculate
 
 import time
 from matplotlib import pyplot as plt
-from underwater_model.model_SPOS import Water
+from underwater_model.model_uw import Water
 from skimage import img_as_ubyte
 import cv2
 import random
@@ -32,11 +32,11 @@ torch.cuda.set_device(device_id)
 ckpt_path = saving_path
 
 
-exp_name = 'WaterEnhance_2022-03-17 14:53:21'
+exp_name = 'WaterEnhance_2022-03-21 02:33:56'
 
 args = {
     'gnn': True,
-    'snapshot': '140000',  # your snapshot filename (exclude extension name)
+    'snapshot': '200000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
     'en_channels': [64, 128, 256],
@@ -46,11 +46,11 @@ args = {
     # 'image_path': '/mnt/hdd/data/ty2/input_test',
     # 'depth_path': '/mnt/hdd/data/ty2/depth_test',
     # 'gt_path': '/mnt/hdd/data/ty2/gt_test',
-    'image_path': '/home/ty/data/5k/eval/input',
+    'image_path': '/home/ty/data/LSUI/test_input',
     'depth_path': '/home/ty/data/LSUI/depth_test',
-    'gt_path': '/home/ty/data/5k/eval/gt',
+    'gt_path': '/home/ty/data/LSUI/test_gt',
     'segment_path': '/home/ty/data/uw/segment_input_test',
-    'dataset': '5k',
+    'dataset': 'LSUI',
     'start': 0
 }
 # 3, 6, 6, 5, 0, 9, 9, 1, 3, 6, 6, 1 underwater
@@ -132,7 +132,7 @@ def main(snapshot):
             img_var = F.pad(img_var, (0, padw, 0, padh), 'reflect')
             lab_var = F.pad(lab_var, (0, padw, 0, padh), 'reflect')
 
-            prediction, _, _ = net(img_var, lab_var, [9, 5, 5, 1, 5, 3, 9, 6, 3, 5, 4, 6])
+            prediction, _, _ = net(img_var, lab_var, [3, 6, 6, 5, 0, 9, 9, 1, 3, 6, 6, 1])
             prediction = prediction[:, :, :h, :w]
 
             # prediction = torch.unsqueeze(prediction, 0)
