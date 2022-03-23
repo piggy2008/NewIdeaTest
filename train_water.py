@@ -369,7 +369,7 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # loss_D.backward(retain_graph=True)
     # optimizer_d.step()
 
-    print_log(total_loss, loss0, loss1, loss7, args['train_batch_size'], curr_iter, optimizer)
+    print_log(total_loss, loss0, loss0_2, loss7, args['train_batch_size'], curr_iter, optimizer)
 
     return
 
