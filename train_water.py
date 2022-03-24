@@ -47,12 +47,12 @@ exp_name = 'WaterEnhance' + '_' + time_str
 
 args = {
     'gnn': True,
-    'choice': 5,
+    'choice': 10,
     # 'choice2': 4,
     'layers': 12,
     # 'layers2': 3,
     'en_channels': [64, 128, 256],
-    'dim': 48,
+    'dim': 64,
     'distillation': False,
     'L2': False,
     'KL': True,
@@ -291,19 +291,19 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # loss_GAN = criterion_gan(pred_fake, True)
 
     loss0 = criterion(final, labels)
-    # loss1 = criterion_l1(final, labels)
+    loss1 = criterion_l1(final, labels)
 
     labels_rgb = F.interpolate(labels, size=mid_rgb.shape[2:], mode='bilinear')
     labels_lab = F.interpolate(labels_lab, size=mid_rgb.shape[2:], mode='bilinear')
 
     loss0_2 = criterion(mid_rgb, labels_rgb)
-    # loss1_2 = criterion_l1(mid_rgb, labels_rgb)
+    loss1_2 = criterion_l1(mid_rgb, labels_rgb)
 
     # loss_mid_ab = criterion(mid_ab, labels_lab)
     # loss_mid_ab = criterion_l1(mid_ab, labels_lab)
 
     loss0_lab = criterion(mid_lab, labels_lab)
-    # loss1_lab = criterion_l1(mid_lab, labels_lab)
+    loss1_lab = criterion_l1(mid_lab, labels_lab)
     #
     # loss0_lab3 = criterion(final_lab3, labels_lab3)
     # loss1_lab3 = criterion_l1(final_lab3, labels_lab3)
@@ -333,10 +333,10 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # loss1_second = criterion(second, labels_64)
     # loss2_second = criterion_l1(second, labels_64)
     # total_loss = 1 * loss0 + 0.25 * loss1
-    total_loss = 1 * loss0   \
+    total_loss = 1 * loss0 + 0.25 * loss1  \
                  + 0.2 * loss7 \
-                 + 1 * loss0_2  + 0.2 * loss7_2 \
-                 + 1 * loss0_lab  # lab
+                 + 1 * loss0_2 + 0.25 * loss1_2 + 0.2 * loss7_2 \
+                 + 1 * loss0_lab + 0.25 * loss1_lab # lab
                  # + loss1_third + 0.25 * loss2_third + loss1_second + 0.25 * loss2_second \
                  # + 0.5 * loss_GAN
     # total_loss = 1 * loss0 + 0.25 * loss1  \
@@ -369,7 +369,7 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # loss_D.backward(retain_graph=True)
     # optimizer_d.step()
 
-    print_log(total_loss, loss0, loss0_2, loss7, args['train_batch_size'], curr_iter, optimizer)
+    print_log(total_loss, loss0, loss1, loss7, args['train_batch_size'], curr_iter, optimizer)
 
     return
 
