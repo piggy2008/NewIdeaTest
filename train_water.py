@@ -68,7 +68,7 @@ args = {
     'weight_decay': 5e-4,
     'momentum': 0.925,
     'snapshot': '',
-    'pretrain': os.path.join(ckpt_path, 'WaterEnhance_2022-03-24 08:50:29', '96000.pth'),
+    'pretrain': os.path.join(ckpt_path, 'WaterEnhance_2022-03-24 08:50:29', '92000.pth'),
     # 'pretrain': '',
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
     # 'imgs_file': '/mnt/hdd/data/ty2',
