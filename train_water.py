@@ -52,7 +52,7 @@ args = {
     'layers': 12,
     # 'layers2': 3,
     'en_channels': [64, 128, 256],
-    'dim': 64,
+    'dim': 80,
     'distillation': False,
     'L2': False,
     'KL': True,
