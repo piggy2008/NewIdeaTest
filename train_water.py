@@ -56,7 +56,6 @@ args = {
     'distillation': False,
     'L2': False,
     'KL': True,
-    'structure': True,
     'iter_num': 200000,
     # 'iter_num2': 200000,
     'iter_save': 4000,
