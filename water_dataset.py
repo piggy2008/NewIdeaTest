@@ -76,17 +76,17 @@ class WaterImage2Folder(data.Dataset):
     # image and gt should be in the same folder and have same filename except extended name (jpg and png respectively)
     def __init__(self, root, joint_transform=None, transform=None, target_transform=None):
         self.root = root
-        self.imgs = os.listdir(os.path.join(root, 'train_input'))
+        self.imgs = os.listdir(os.path.join(root, 'low'))
         self.imgs.sort()
-        self.labels = os.listdir(os.path.join(root, 'train_gt'))
+        self.labels = os.listdir(os.path.join(root, 'high'))
         self.labels.sort()
         self.joint_transform = joint_transform
         self.transform = transform
         self.target_transform = target_transform
 
     def __getitem__(self, index):
-        img = Image.open(os.path.join(self.root, 'train_input', self.imgs[index])).convert('RGB')
-        target = Image.open(os.path.join(self.root, 'train_gt', self.labels[index])).convert('RGB')
+        img = Image.open(os.path.join(self.root, 'low', self.imgs[index])).convert('RGB')
+        target = Image.open(os.path.join(self.root, 'high', self.labels[index])).convert('RGB')
         # print(self.imgs[index], '--', self.labels[index])
         img_list = []
         gt_list = []
