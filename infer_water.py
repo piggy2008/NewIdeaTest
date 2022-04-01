@@ -15,7 +15,7 @@ from utils.utils_mine import load_part_of_model2, MaxMinNormalization, calculate
 
 import time
 from matplotlib import pyplot as plt
-from underwater_model.model_uw import Water
+from underwater_model.model_SPOS import Water
 from skimage import img_as_ubyte
 import cv2
 import random
@@ -32,11 +32,11 @@ torch.cuda.set_device(device_id)
 ckpt_path = saving_path
 
 
-exp_name = 'WaterEnhance_2022-03-21 02:33:56'
+exp_name = 'WaterEnhance_2022-03-31 05:48:05'
 
 args = {
     'gnn': True,
-    'snapshot': '200000',  # your snapshot filename (exclude extension name)
+    'snapshot': '120000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
     'en_channels': [64, 128, 256],
@@ -46,12 +46,12 @@ args = {
     # 'image_path': '/mnt/hdd/data/ty2/input_test',
     # 'depth_path': '/mnt/hdd/data/ty2/depth_test',
     # 'gt_path': '/mnt/hdd/data/ty2/gt_test',
-    'image_path': '/home/ty/data/LSUI/test_input',
+    'image_path': '/home/ty/data/LOL/eval15/low',
     'depth_path': '/home/ty/data/LSUI/depth_test',
-    'gt_path': '/home/ty/data/LSUI/test_gt',
+    'gt_path': '/home/ty/data/LOL/eval15/high',
     'segment_path': '/home/ty/data/uw/segment_input_test',
-    'dataset': 'LSUI',
-    'start': 0
+    'dataset': 'LOL',
+    'start': 8000
 }
 # 3, 6, 6, 5, 0, 9, 9, 1, 3, 6, 6, 1 underwater
 img_transform = transforms.Compose([
@@ -110,10 +110,10 @@ def main(snapshot):
 
             # img_list = [i_id.strip() for i_id in open(imgs_path)]
             # print(args['image_path'], name + '.jpg')
-            img = Image.open(os.path.join(args['image_path'], name + '.jpg')).convert('RGB')
+            img = Image.open(os.path.join(args['image_path'], name + '.png')).convert('RGB')
             img = np.array(img)
 
-
+            print(img.shape)
             w = img.shape[0]
             h = img.shape[1]
             # img = cv2.resize(img, (256, 256))
@@ -154,10 +154,10 @@ def main(snapshot):
             # prediction = MaxMinNormalization(prediction, prediction.max(), prediction.min()) * 255.0
             # prediction = prediction.astype('uint8')
             # prediction = cv2.resize(prediction, (h, w))
-            gt = Image.open(os.path.join(args['gt_path'], name + '.jpg')).convert('RGB')
+            gt = Image.open(os.path.join(args['gt_path'], name + '.png')).convert('RGB')
             gt = np.asarray(gt)
             # gt = cv2.resize(gt, (256, 256))
-            print(gt.shape, '-----', prediction.shape)
+
             # prediction = cv2.cvtColor(prediction * 255.0, cv2.COLOR_LAB2RGB)
             # print(np.unique(prediction))
             psnr = calculate_psnr(prediction * 255.0, gt)

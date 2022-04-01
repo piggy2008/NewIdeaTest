@@ -54,7 +54,9 @@ class Water(nn.Module):
 
         # inter_rgb = F.interpolate(self.de_predict_rgb(third_rgb), rgb.size()[2:], mode='bilinear')
         # inter_lab = F.interpolate(self.de_predict_lab(third_lab), lab.size()[2:], mode='bilinear')
+
         level1_in = self.align1(torch.cat([x_rgb_in], dim=1))
+
 
         level1 = self.align1(torch.cat([level1_rgb], dim=1))
         # first = self.align1(first_lab)

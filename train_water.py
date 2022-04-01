@@ -69,6 +69,7 @@ args = {
     'momentum': 0.925,
     'snapshot': '',
     'pretrain': '',
+    # 'pretrain': os.path.join(ckpt_path, 'WaterEnhance_2022-03-24 11:36:51', '92000.pth'),
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
     # 'imgs_file': '/mnt/hdd/data/ty2',
     'imgs_file': '/home/ty/data/LSUI',
@@ -287,7 +288,7 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
 
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
     # final, mid_rgb, mid_lab = net(rgb, lab, get_random_cand())
-
+    # final, mid_rgb, mid_lab = net(rgb, lab, [3, 3, 0, 3, 0, 0, 1, 2, 0, 3, 2, 4])
     final, mid_rgb, mid_lab = net(rgb, lab, [3, 6, 6, 5, 0, 9, 9, 1, 3, 6, 6, 1])
     # fake_image = torch.cat([lab, final], dim=1)
     # pred_fake = discriminator(fake_image)
@@ -336,10 +337,10 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     # loss1_second = criterion(second, labels_64)
     # loss2_second = criterion_l1(second, labels_64)
     # total_loss = 1 * loss0 + 0.25 * loss1
-    total_loss = 1 * loss0 + 0.25 * loss1  \
-                 + 0.2 * loss7 \
-                 + 1 * loss0_2 + 0.25 * loss1_2 + 0.2 * loss7_2 \
-                 + 1 * loss0_lab + 0.25 * loss1_lab # lab
+    total_loss = 1 * loss0 + 0.25 * loss1 \
+                 + 0.0 * loss7 \
+                 + 1 * loss0_2 + 0.25 * loss1_2 + 0 * loss7_2 \
+                 + 1 * loss0_lab + 0.25 * loss1_lab  # lab
                  # + loss1_third + 0.25 * loss2_third + loss1_second + 0.25 * loss2_second \
                  # + 0.5 * loss_GAN
     # total_loss = 1 * loss0 + 0.25 * loss1  \

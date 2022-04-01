@@ -73,10 +73,11 @@ if __name__ == '__main__':
 
     imgs = os.listdir(path)
     for img in imgs:
+        # print(img)
         image = Image.open(os.path.join(path, img)).convert('RGB')
         gt = Image.open(os.path.join(gt_path, img)).convert('RGB')
         w, h = image.size
-        if w > 900 or h > 900:
+        if w > 800 or h > 800:
             print(img)
             image = image.resize((int(w/2), int(h/2)), Image.BILINEAR)
             gt = gt.resize((int(w / 2), int(h / 2)), Image.BILINEAR)
@@ -84,62 +85,35 @@ if __name__ == '__main__':
         image.save(os.path.join(path, img))
         gt.save(os.path.join(gt_path, img))
 
-    #     image = Image.open(os.path.join(depth_path, img + '.png'))
-    #     image.save(os.path.join(save_depth_root, img + '.png'))
-    # path = '/Users/tangyi/Downloads/segment_train_uw'
-    # image_name = '3_img_.bmp'
+    # path = '/home/ty/data/test'
+    # images = os.listdir(path)
+    # images.sort()
     #
-    # fv = cv2.imread(os.path.join(path, 'FV', image_name), 0)
-    # hd = cv2.imread(os.path.join(path, 'HD', image_name), 0)
-    # ri = cv2.imread(os.path.join(path, 'RI', image_name), 0)
-    # ro = cv2.imread(os.path.join(path, 'RO', image_name), 0)
-    # wr = cv2.imread(os.path.join(path, 'WR', image_name), 0)
-    # con = np.stack((fv, hd, ri ,ro, wr), axis=0)
-    # con2 = cv2.resize(fv[:, :, np.newaxis], (112, 112))
+    # path2 = '/home/ty/data/LSUI/backup/input'
+    # path2_gt = '/home/ty/data/LSUI/backup/GT'
     #
-    # print(con2.shape, '--', con2.ndim)
-    # # con2 = np.flip(con, -1)
-    # plt.subplot(1, 2, 1)
-    # plt.imshow(con2[0, :, :])
-    # plt.subplot(1, 2, 2)
-    # plt.imshow(fv)
-    # plt.show()
-    # plt.style.use('classic')
-    # img = Image.open('/Users/tangyi/Downloads/Ucolor_final_model_corrected/input_test/15704.png')
-    # img_gt = Image.open('/Users/tangyi/Downloads/Ucolor_final_model_corrected/gt_test/15704.png')
-    # srgb_profile = ImageCms.createProfile("sRGB")
-    # lab_profile = ImageCms.createProfile("LAB")
-    # rgb2lab_transform = ImageCms.buildTransformFromOpenProfiles(srgb_profile, lab_profile, "RGB", "LAB")
-    # lab2rgb_transform = ImageCms.buildTransformFromOpenProfiles(lab_profile, srgb_profile, "LAB", "RGB")
-    # lab = ImageCms.applyTransform(img, rgb2lab_transform)
-    # lab = np.array(lab)
-    # gt = ImageCms.applyTransform(img_gt, rgb2lab_transform)
+    # save_test2 = '/home/ty/data/LSUI/test_input'
+    # save_test2_gt = '/home/ty/data/LSUI/test_gt'
     #
-    # gt = np.asarray(gt)
-    # gt[:, :, 0] = lab[:, :, 0]
-    # print(gt.shape, '---', np.unique(gt))
-    # Image.fromarray()
-    # print(gt)
-    # gt_img = Image.fromarray(gt).convert('RGB')
-    # gt_save = ImageCms.applyTransform(gt_img, lab2rgb_transform)
-    # gt_save.save('ckpt/15704.png')
-    # gt_img_rgb = cv2.imread('/Users/tangyi/Downloads/Ucolor_final_model_corrected/gt_test/603_img_.png')
-    # input_img_rgb = cv2.imread('/Users/tangyi/Downloads/Ucolor_final_model_corrected/input_test/603_img_.png')
-    # l, a, b = cv2.split(img_lab)
+    # save_train2 = '/home/ty/data/LSUI/train_input'
+    # save_train2_gt = '/home/ty/data/LSUI/train_gt'
     #
-    # img_lab2 = cv2.cvtColor(gt_img_rgb, cv2.COLOR_BGR2LAB)
-    # l2, a2, b2 = cv2.split(img_lab2)
-    # # print(np.unique(l))
-    # l2 = np.full_like(l2, 50)
-    # ab = cv2.merge((l2, a2, b2))
-    # img_rgb = cv2.cvtColor(ab, cv2.COLOR_LAB2BGR)
+    # all_images = os.listdir(path2)
+    # all_images.sort()
+    #
+    # for img in all_images:
+    #     if img in images:
+    #         test_img = Image.open(os.path.join(path2, img)).convert('RGB')
+    #         test_gt_img = Image.open(os.path.join(path2_gt, img)).convert('RGB')
+    #         test_img.save(os.path.join(save_test2, img))
+    #         test_gt_img.save(os.path.join(save_test2_gt, img))
+    #
+    #     else:
+    #         train_img = Image.open(os.path.join(path2, img)).convert('RGB')
+    #         train_gt_img = Image.open(os.path.join(path2_gt, img)).convert('RGB')
+    #         train_img.save(os.path.join(save_train2, img))
+    #         train_gt_img.save(os.path.join(save_train2_gt, img))
 
-    # cv2.imwrite('ckpt/603_img_.png', img_rgb)
-    # plt.subplot(1, 3, 1)
-    # plt.imshow(lab[:, :, 0])
-    # plt.subplot(1, 3, 2)
-    # plt.imshow(l)
-    # plt.subplot(1, 3, 3)
-    # plt.imshow(b)
-    # plt.show()
+
+
 
