@@ -20,23 +20,23 @@ class Water(nn.Module):
         # self.align1_in = nn.Sequential(nn.Conv2d(dim * 2, dim, kernel_size=3, stride=1, padding=1),
         #                                nn.ReLU(inplace=True))
 
-        self.align1 = nn.Sequential(nn.Conv2d(dim * 1, dim, kernel_size=3, stride=1, padding=1),
+        self.align1 = nn.Sequential(nn.Conv2d(dim * 2, dim, kernel_size=3, stride=1, padding=1),
                                        nn.ReLU(inplace=True))
 
-        self.align2 = nn.Sequential(nn.Conv2d((dim * 2 ** 1) * 1, (dim * 2 ** 1), kernel_size=3, stride=1, padding=1),
+        self.align2 = nn.Sequential(nn.Conv2d((dim * 2 ** 1) * 2, (dim * 2 ** 1), kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(inplace=True))
 
-        self.align3 = nn.Sequential(nn.Conv2d((dim * 2 ** 2) * 1, (dim * 2 ** 2), kernel_size=3, stride=1, padding=1),
+        self.align3 = nn.Sequential(nn.Conv2d((dim * 2 ** 2) * 2, (dim * 2 ** 2), kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(inplace=True))
 
-        self.align4 = nn.Sequential(nn.Conv2d((dim * 2 ** 3) * 1, (dim * 2 ** 3), kernel_size=3, stride=1, padding=1),
+        self.align4 = nn.Sequential(nn.Conv2d((dim * 2 ** 3) * 2, (dim * 2 ** 3), kernel_size=3, stride=1, padding=1),
                                     nn.ReLU(inplace=True))
 
         self.search = Search(dim)
 
         self.refine = block_choice(dim * 2 ** 1)
 
-        self.skip = nn.Sequential(nn.Conv2d(dim, dim * 2 ** 1, kernel_size=1, stride=1))
+        # self.skip = nn.Sequential(nn.Conv2d(dim, dim * 2 ** 1, kernel_size=1, stride=1))
 
         self.de_predict = nn.Sequential(nn.Conv2d(dim * 2 ** 1, 3, kernel_size=1, stride=1))
 
@@ -56,13 +56,13 @@ class Water(nn.Module):
         # inter_lab = F.interpolate(self.de_predict_lab(third_lab), lab.size()[2:], mode='bilinear')
         # level1_in = self.align1(torch.cat([x_rgb_in], dim=1))
 
-        level1 = self.align1(torch.cat([level1_rgb], dim=1))
+        level1 = self.align1(torch.cat([level1_rgb, level1_lab], dim=1))
         # first = self.align1(first_lab)
-        level2 = self.align2(torch.cat([level2_rgb], dim=1))
+        level2 = self.align2(torch.cat([level2_rgb, level2_lab], dim=1))
         # second = self.align2(second_lab)
-        level3 = self.align3(torch.cat([level3_rgb], dim=1))
+        level3 = self.align3(torch.cat([level3_rgb, level3_lab], dim=1))
         # third = self.align3(third_lab)
-        level4 = self.align4(torch.cat([level4_rgb], dim=1))
+        level4 = self.align4(torch.cat([level4_rgb, level4_lab], dim=1))
 
         mid_feat = self.search(level4, level3, level2, level1, select[8:11])
         mid_feat = self.refine(mid_feat, select[11])
