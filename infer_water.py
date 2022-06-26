@@ -32,11 +32,11 @@ torch.cuda.set_device(device_id)
 ckpt_path = saving_path
 
 
-exp_name = 'WaterEnhance_2022-03-31 05:48:05'
+exp_name = 'WaterEnhance_2022-06-07 08:37:34'
 
 args = {
     'gnn': True,
-    'snapshot': '120000',  # your snapshot filename (exclude extension name)
+    'snapshot': '200000',  # your snapshot filename (exclude extension name)
     'crf_refine': False,  # whether to use crf to refine results
     'save_results': True,  # whether to save the resulting masks
     'en_channels': [64, 128, 256],
@@ -46,12 +46,12 @@ args = {
     # 'image_path': '/mnt/hdd/data/ty2/input_test',
     # 'depth_path': '/mnt/hdd/data/ty2/depth_test',
     # 'gt_path': '/mnt/hdd/data/ty2/gt_test',
-    'image_path': '/home/ty/data/LOL/eval15/low',
+    'image_path': '/home/ty/data/EUVP/test_samples/Inp',
     'depth_path': '/home/ty/data/LSUI/depth_test',
-    'gt_path': '/home/ty/data/LOL/eval15/high',
+    'gt_path': '/home/ty/data/EUVP/test_samples/GTr',
     'segment_path': '/home/ty/data/uw/segment_input_test',
-    'dataset': 'LOL',
-    'start': 8000
+    'dataset': 'EUVP',
+    'start': 0
 }
 # 3, 6, 6, 5, 0, 9, 9, 1, 3, 6, 6, 1 underwater
 img_transform = transforms.Compose([
@@ -110,7 +110,8 @@ def main(snapshot):
 
             # img_list = [i_id.strip() for i_id in open(imgs_path)]
             # print(args['image_path'], name + '.jpg')
-            img = Image.open(os.path.join(args['image_path'], name + '.png')).convert('RGB')
+            start = time.time()
+            img = Image.open(os.path.join(args['image_path'], name + '.jpg')).convert('RGB')
             img = np.array(img)
 
             print(img.shape)
@@ -132,7 +133,7 @@ def main(snapshot):
             img_var = F.pad(img_var, (0, padw, 0, padh), 'reflect')
             lab_var = F.pad(lab_var, (0, padw, 0, padh), 'reflect')
 
-            prediction, _, _ = net(img_var, lab_var, [3, 6, 6, 5, 0, 9, 9, 1, 3, 6, 6, 1])
+            prediction, _, _ = net(img_var, lab_var, [2, 6, 6, 5, 0, 9, 9, 1, 2, 6, 6, 1])
             prediction = prediction[:, :, :h, :w]
 
             # prediction = torch.unsqueeze(prediction, 0)
@@ -154,7 +155,7 @@ def main(snapshot):
             # prediction = MaxMinNormalization(prediction, prediction.max(), prediction.min()) * 255.0
             # prediction = prediction.astype('uint8')
             # prediction = cv2.resize(prediction, (h, w))
-            gt = Image.open(os.path.join(args['gt_path'], name + '.png')).convert('RGB')
+            gt = Image.open(os.path.join(args['gt_path'], name + '.jpg')).convert('RGB')
             gt = np.asarray(gt)
             # gt = cv2.resize(gt, (256, 256))
 
@@ -171,7 +172,8 @@ def main(snapshot):
                 # print(np.unique(prediction))
                 cv2.imwrite(os.path.join(save_path, name + '.png'), cv2.cvtColor(prediction, cv2.COLOR_RGB2BGR))
                 # Image.fromarray(prediction).save(os.path.join(save_path, name + '.png'))
-
+            # end = time.time()
+            # print('running time:', (end - start))
             psnr_record.update(psnr)
             ssim_record.update(ssim)
 

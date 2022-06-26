@@ -257,10 +257,10 @@ if __name__ == '__main__':
                                   joint_transform, img_transform, target_transform)
 
     train_loader = DataLoader(train_set2, batch_size=2, num_workers=1, shuffle=False)
-    train_set3 = WaterImage2Folder('/Users/tangyi/mycode/5k/eval',
-                                   joint_transform2, img_transform, target_transform)
-
-    train_loader2 = DataLoader(train_set3, batch_size=4, num_workers=1, shuffle=False)
+    # train_set3 = WaterImage2Folder('/Users/tangyi/mycode/5k/eval',
+    #                                joint_transform2, img_transform, target_transform)
+    #
+    # train_loader2 = DataLoader(train_set3, batch_size=4, num_workers=1, shuffle=False)
     # train_loader2 = DataLoader(train_set2, batch_size=6, num_workers=4, shuffle=True)
     # dataloader_iterator = iter(train_loader2)
     # vgg = models.vgg19(pretrained=True).features
