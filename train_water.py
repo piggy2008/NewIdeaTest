@@ -283,7 +283,8 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     optimizer.zero_grad()
 
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
-    final, mid_rgb, mid_lab = net(rgb, lab, get_random_cand())
+    # final, mid_rgb, mid_lab = net(rgb, lab, get_random_cand())
+    final, mid_rgb, mid_lab = net(rgb, lab, [3, 5, 8, 2, 8, 7, 5, 5, 5, 2, 0, 5])
     # final, mid_rgb, mid_lab = net(rgb, lab, [3, 6, 6, 5, 0, 9, 9, 1, 3, 6, 6, 1])
     # final, mid_rgb, mid_lab = net(rgb, lab, [2, 6, 6, 5, 0, 9, 9, 1, 2, 6, 6, 1])
     # fake_image = torch.cat([lab, final], dim=1)
