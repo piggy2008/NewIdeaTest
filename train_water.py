@@ -47,7 +47,7 @@ exp_name = 'WaterEnhance' + '_' + time_str
 
 args = {
     'gnn': True,
-    'choice': 10,
+    'choice': 9,
     # 'choice2': 4,
     'layers': 12,
     # 'layers2': 3,
@@ -71,8 +71,9 @@ args = {
     # 'pretrain': os.path.join(ckpt_path, 'WaterEnhance_2022-03-24 11:36:51', '92000.pth'),
     # 'mga_model_path': 'pre-trained/MGA_trained.pth',
     # 'imgs_file': '/mnt/hdd/data/ty2',
-    'imgs_file': '/home/ty/data/LSUI',
+    # 'imgs_file': '/home/ty/data/LSUI',
     # 'imgs_file': '/home/user/ubuntu/data/LOLdataset/our485',
+    'imgs_file': '/home/user/ubuntu/data/LSUI',
     # 'imgs_file': 'Pre-train/pretrain_all_seq_DAFB2_DAVSOD_flow.txt',
     # 'imgs_file2': 'Pre-train/pretrain_all_seq_DUT_TR_DAFB2.txt',
     # 'imgs_file': 'video_saliency/train_all_DAFB2_DAVSOD_5f.txt',
@@ -286,10 +287,11 @@ def train_single2(net, discriminator, rgb, lab, target, lab_target, depth, optim
     optimizer.zero_grad()
 
     # final, mid_ab, final2, inter_rgb, inter_lab = net(rgb, hsv, lab, depth, get_random_cand())
-    # final, mid_rgb, mid_lab = net(rgb, lab, get_random_cand())
-    # final, mid_rgb, mid_lab = net(rgb, lab, [3, 3, 0, 3, 0, 0, 1, 2, 0, 3, 2, 4])
+
+    final, mid_rgb, mid_lab = net(rgb, lab, get_random_cand())
     # final, mid_rgb, mid_lab = net(rgb, lab, [3, 6, 6, 5, 0, 9, 9, 1, 3, 6, 6, 1])
-    final, mid_rgb, mid_lab = net(rgb, lab, [2, 6, 6, 5, 0, 9, 9, 1, 2, 6, 6, 1])
+    # final, mid_rgb, mid_lab = net(rgb, lab, [2, 6, 6, 5, 0, 9, 9, 1, 2, 6, 6, 1])
+
     # fake_image = torch.cat([lab, final], dim=1)
     # pred_fake = discriminator(fake_image)
     # loss_GAN = criterion_gan(pred_fake, True)

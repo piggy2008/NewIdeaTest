@@ -47,9 +47,7 @@ args = {
     # 'depth_path': '/mnt/hdd/data/ty2/depth_test',
     # 'gt_path': '/mnt/hdd/data/ty2/gt_test',
     'image_path': '/home/ty/data/EUVP/test_samples/Inp',
-    'depth_path': '/home/ty/data/LSUI/depth_test',
     'gt_path': '/home/ty/data/EUVP/test_samples/GTr',
-    'segment_path': '/home/ty/data/uw/segment_input_test',
     'dataset': 'EUVP',
     'start': 0
 }
@@ -106,10 +104,7 @@ def main(snapshot):
         psnr_record = AvgMeter()
         ssim_record = AvgMeter()
         for name in image_names:
-            # precision_record, recall_record, = [AvgMeter() for _ in range(256)], [AvgMeter() for _ in range(256)]
 
-            # img_list = [i_id.strip() for i_id in open(imgs_path)]
-            # print(args['image_path'], name + '.jpg')
             start = time.time()
             img = Image.open(os.path.join(args['image_path'], name + '.jpg')).convert('RGB')
             img = np.array(img)
@@ -122,9 +117,7 @@ def main(snapshot):
 
             lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
             img_var = Variable(img_transform(img).unsqueeze(0), volatile=True).cuda()
-            # hsv_var = Variable(img_transform(hsv).unsqueeze(0), volatile=True).cuda()
             lab_var = Variable(img_transform(lab).unsqueeze(0), volatile=True).cuda()
-            # segmentation = Variable(img_transform(segmentation).unsqueeze(0), volatile=True).cuda()
 
             h, w = img_var.shape[2], img_var.shape[3]
             H, W = ((h + factor) // factor) * factor, ((w + factor) // factor) * factor
@@ -133,34 +126,16 @@ def main(snapshot):
             img_var = F.pad(img_var, (0, padw, 0, padh), 'reflect')
             lab_var = F.pad(lab_var, (0, padw, 0, padh), 'reflect')
 
-            prediction, _, _ = net(img_var, lab_var, [2, 6, 6, 5, 0, 9, 9, 1, 2, 6, 6, 1])
+            prediction, _, _ = net(img_var, lab_var, [2, 5, 5, 4, 0, 8, 8, 1, 2, 5, 5, 1])
             prediction = prediction[:, :, :h, :w]
 
-            # prediction = torch.unsqueeze(prediction, 0)
-            # print(torch.unique(prediction))
-            # precision = to_pil(prediction.data.squeeze(0).cpu())
-            # prediction = np.array(precision)
-            # prediction = prediction.astype('float')
             prediction = torch.clamp(prediction, 0, 1)
             prediction = prediction.permute(0, 2, 3, 1).cpu().detach().numpy()
             prediction = np.squeeze(prediction)
-            # prediction = prediction[:, :, ::-1]
-            # plt.style.use('classic')
-            # plt.subplot(1, 2, 1)
-            # plt.imshow(prediction)
-            # plt.subplot(1, 2, 2)
-            # plt.imshow(precision2[0])
-            # plt.show()
 
-            # prediction = MaxMinNormalization(prediction, prediction.max(), prediction.min()) * 255.0
-            # prediction = prediction.astype('uint8')
-            # prediction = cv2.resize(prediction, (h, w))
             gt = Image.open(os.path.join(args['gt_path'], name + '.jpg')).convert('RGB')
             gt = np.asarray(gt)
-            # gt = cv2.resize(gt, (256, 256))
 
-            # prediction = cv2.cvtColor(prediction * 255.0, cv2.COLOR_LAB2RGB)
-            # print(np.unique(prediction))
             psnr = calculate_psnr(prediction * 255.0, gt)
             ssim = calculate_ssim(prediction * 255.0, gt)
 
@@ -169,11 +144,8 @@ def main(snapshot):
                 if not os.path.exists(save_path):
                     os.makedirs(save_path)
                 prediction = img_as_ubyte(prediction)
-                # print(np.unique(prediction))
                 cv2.imwrite(os.path.join(save_path, name + '.png'), cv2.cvtColor(prediction, cv2.COLOR_RGB2BGR))
-                # Image.fromarray(prediction).save(os.path.join(save_path, name + '.png'))
-            # end = time.time()
-            # print('running time:', (end - start))
+
             psnr_record.update(psnr)
             ssim_record.update(ssim)
 

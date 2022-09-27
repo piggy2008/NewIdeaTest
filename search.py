@@ -42,14 +42,13 @@ ckpt_path = saving_path
 exp_name = 'WaterEnhance_2022-06-24 10:46:22'
 
 args = {
-    'gnn': True,
     'snapshot': '200000',  # your snapshot filename (exclude extension name)
-    'choice': 5,
+    'choice': 9,
     'layers': 12,
     'en_channels': [64, 128, 256],
     'dim': 48,
     'log_dir': 'log',
-    'max_epochs': 30,
+    'max_epochs': 40,
     'select_num': 10,
     'population_num': 40,
     'top_k': 20,
@@ -59,17 +58,14 @@ args = {
     'flops_limit': 330 * 1e6,
     'max_train_iters': 20,
     'train_batch_size': 5,
-    'imgs_file': 'Pre-train/pretrain_all_seq_DAFB2_DAVSOD_flow.txt',
     'image_size': 430,
     'crop_size': 380,
     # 'image_path': '/mnt/hdd/data/ty2/input_test',
     # 'depth_path': '/mnt/hdd/data/ty2/depth_test',
     # 'gt_path': '/mnt/hdd/data/ty2/gt_test',
-    'image_path': '/home/ty/data/uw/input_test_uw',
-    'depth_path': '/home/ty/data/uw/depth_test',
-    'gt_path': '/home/ty/data/uw/gt_test_uw',
-    'segment_path': '/home/ty/data/uw/segment_input_test',
-    'dataset': 'UIEB',
+    'image_path': 'dataset image path',
+    'gt_path': 'dataset gt path',
+    'dataset': 'dataset name',
 }
 
 

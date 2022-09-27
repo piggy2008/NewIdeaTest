@@ -77,7 +77,10 @@ class WaterImage2Folder(data.Dataset):
     def __init__(self, root, joint_transform=None, transform=None, target_transform=None):
         self.root = root
         self.imgs = os.listdir(os.path.join(root, 'train_input'))
+<<<<<<< HEAD
 
+=======
+>>>>>>> d3fc2adc52e8ba976d708d5986aa8ce3961b4c67
         self.imgs.sort()
         self.labels = os.listdir(os.path.join(root, 'train_gt'))
         self.labels.sort()
